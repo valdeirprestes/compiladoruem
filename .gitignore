@@ -50,3 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+src/bison.tab.c
+src/bison.tab.h
+src/lex.yy.c
+teste

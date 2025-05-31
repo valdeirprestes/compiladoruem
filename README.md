@@ -26,7 +26,7 @@ string;
    
 
 
-Linguagem projetada pela equipe:
+### Linguagem projetada pela equipe:
 
 Tipos:
 ```
@@ -75,18 +75,14 @@ Função principal
 int main (){}
 ```
 
-Comando para compilação.
-```
-comando1
-comando2
-comando3
-[...]
-```
+### Para compilar e executar
    
 Para compilar :
 ```
 bison -H bison.y && flex lexico.lex && gcc -g -o teste bison.tab.c lex.yy.c
 ```
 Para executar use:
+```
 ./teste -e arquivo.teste -s saida.teste
+```
 

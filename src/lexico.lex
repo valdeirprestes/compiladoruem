@@ -9,6 +9,8 @@
 texto [a-zA-Z]
 numero [0-9]
 decimal [0-9]*.[0-9]
+espaco [" "\t\n]
+variavel [a-zA-Z][a-zA-Z0-9]*
 
 %% /* definições de toke para o flex procurar*/
 "=" { return t_igual;}
@@ -17,17 +19,20 @@ decimal [0-9]*.[0-9]
 "*" { return t_asteristico;}
 "/" {return t_barra;}
 
-"int" {return t_int;}
-"float" {return t_float;}
-"char" {return t_char;}
+int {return t_int;}
+float {return t_float;}
+char {return t_char;}
 "["  {return t_vetorabri;}
 "]" { return t_vetorfecha;}
 
+for {return t_for;}
 
 {numero}+ { yylval= atoi(yytext);  return t_num;}
 {decimal} { yylval= atoi(yytext);  return t_decimal;}
-{texto}+ {} { yylval= atoi(yytext);  return t_palavra;}
-\n { linha= linha +1; return t_novalinha;}
+{texto}+ { yylval= atoi(yytext);  return t_palavra;}
+{variavel} {return t_variavel;} 
+{espaco} { return t_espaco;}
+
 . { printf("\'%c\' (linha %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha); }
 %%
 
