@@ -75,14 +75,22 @@ Função principal
 int main (){}
 ```
 
-### Para compilar e executar
+### Para compilar e executar existem duas  maneiroas
+## Calcular
    
-Para compilar :
+Para compilar o teste do analisador léxico são 3 comandos manuais:
 ```
-bison -H bison.y && flex lexico.lex && gcc -g -o teste bison.tab.c lex.yy.c
+bison -H bison.y
+flex lexico.lex
+gcc -g -o testelexico bison.tab.c lex.yy.c
 ```
-Para executar use:
+Ou pelo uso de GNU Make, que faz estes três comandos.  
 ```
-./teste -e arquivo.teste -s saida.teste
+make
 ```
 
+
+Para executar use:
+```
+./testelexico -e arquivo.teste -s saida.teste
+```

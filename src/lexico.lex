@@ -2,17 +2,36 @@
 %{
 	#include <string.h>
     #include "bison.tab.h"
-	long linha=1;
+	extern long linha;
 %}
 
 
 texto [a-zA-Z]
 numero [0-9]
 decimal [0-9]*.[0-9]
-espaco [" "\t\n]
+espaco [" "\t]
+novalinha [\n]
 variavel [a-zA-Z][a-zA-Z0-9]*
+aberturacomentario [/][*]
+fechamentocomentario [*][/]
 
+/*subscanner*/
+%x comentario 
+%x texto
 %% /* definições de toke para o flex procurar*/
+{aberturacomentario} {BEGIN(comentario);}
+<comentario>{fechamentocomentario} {BEGIN(INITIAL); /*É um escape do sub scanner 'comentario' - fim de comentário*/}
+<comentario>[^*\n]+ 
+<comentario>"*"
+<comentario>{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
+
+\" {BEGIN(texto);}
+<texto>\" {BEGIN(INITIAL);}
+<texto>. {;}
+
+
+
+
 "=" { return t_igual;}
 "+" { return t_mais;}
 "-" { return t_menos;}
@@ -31,7 +50,9 @@ for {return t_for;}
 {decimal} { yylval= atoi(yytext);  return t_decimal;}
 {texto}+ { yylval= atoi(yytext);  return t_palavra;}
 {variavel} {return t_variavel;} 
-{espaco} { return t_espaco;}
+{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
+{espaco} /* Não faz nada, apenas consome*/
+
 
 . { printf("\'%c\' (linha %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha); }
 %%
