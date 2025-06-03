@@ -6,6 +6,8 @@
 
   long linha=1;
 %}
+
+%define api.value.type { char* }
 /* operadores lógicos */
 %token t_igual t_mais t_menos t_asteristico t_barra
 
@@ -33,11 +35,11 @@
 inicio:
   %empty| inicio programa 
 programa:
-  operadores   {fprintf(yyout, "[%d] Achou um operador\n", linha);} |
-  tipos   {fprintf(yyout, "[%d] Achou um tipo\n", linha);} | 
-  valorespermitidos   {fprintf(yyout, "[%d] Achou um valorespermitidos\n", linha);}| 
-  controle  {fprintf(yyout, "[%d] Achou um controle\n", linha);} | 
-  classefuncao  {fprintf(yyout, "[%d] Achou um classefuncao_outras\n", linha);}
+  operadores   {fprintf(yyout, "[%d] Achou um operador (%s)\n", linha, $1);} |
+  tipos   {fprintf(yyout, "[%d] Achou um tipo (%s)\n", linha, $1);} | 
+  valorespermitidos   {fprintf(yyout, "[%d] Achou um valorespermitidos (%s)\n", linha, $1);}| 
+  controle  {fprintf(yyout, "[%d] Achou um controle (%s)\n", linha, $1);} | 
+  classefuncao  {fprintf(yyout, "[%d] Achou um classefuncao_outras (%s)\n", linha, $1);}
 operadores:
   t_igual | t_mais | t_menos | t_asteristico | t_barra 
 tipos:

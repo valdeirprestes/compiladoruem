@@ -46,10 +46,10 @@ char {return t_char;}
 
 for {return t_for;}
 
-{numero}+ { yylval= atoi(yytext);  return t_num;}
-{decimal} { yylval= atoi(yytext);  return t_decimal;}
-{texto}+ { yylval= atoi(yytext);  return t_palavra;}
-{variavel} {return t_variavel;} 
+{numero}+ { yylval= strdup(yytext);  return t_num;}
+{decimal} { yylval= strdup(yytext);  return t_decimal;}
+{texto}+ { yylval= strdup(yytext);  return t_palavra;}
+{variavel} {yylval=strdup(yytext);;return t_variavel;} 
 {novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 {espaco} /* Não faz nada, apenas consome*/
 

@@ -41,13 +41,21 @@ char var3[];
 string var4[]; /* classe */
 ```
 
+Teste de comparação:
+```
+> maior
+>= maior ou igual
+< menor
+<= menor ou igual
+!= diferente
+```
 Estrutura de repetição
 ```
-for (int i; teste ; i++){
+for (int i; expressao ; i++){
 	commnad;
 }
 
-while( teste ){
+while( expressao ){
 }
 ```
 Estrutura condicionais
