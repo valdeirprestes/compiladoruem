@@ -32,17 +32,17 @@ fechamentocomentario [*][/]
 
 
 
-"=" { return t_igual;}
-"+" { return t_mais;}
-"-" { return t_menos;}
-"*" { return t_asteristico;}
-"/" {return t_barra;}
+"=" { yylval= strdup(yytext); return t_igual;}
+"+" { yylval= strdup(yytext); return t_mais;}
+"-" { yylval= strdup(yytext); return t_menos;}
+"*" { yylval= strdup(yytext); return t_asteristico;}
+"/" { yylval= strdup(yytext); return t_barra;}
 
-int {return t_int;}
-float {return t_float;}
-char {return t_char;}
-"["  {return t_vetorabri;}
-"]" { return t_vetorfecha;}
+int { yylval= strdup(yytext); return t_int;}
+float { yylval= strdup(yytext); return t_float;}
+char { yylval= strdup(yytext); return t_char;}
+"["  {yylval= strdup(yytext); return t_vetorabri;}
+"]" { yylval= strdup(yytext); return t_vetorfecha;}
 
 for {return t_for;}
 
