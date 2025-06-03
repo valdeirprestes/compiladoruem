@@ -1,7 +1,7 @@
 CC = gcc -g  
 BIN= testelexico
 FONTELEXICO = lex.yy.c
-FONTETESTELEXICO = bison.tab.c
+FONTETESTELEXICO = bison.tab.c bison.tab.h
 all: $(BIN)
 	@echo "Arquivos compilados!"
 bison.tab.c: bison.y
@@ -11,5 +11,5 @@ lex.yy.c: lexico.lex $(FONTETESTELEXICO)
 testelexico: $(FONTELEXICO) 
 	$(CC) -o testelexico $(FONTELEXICO) $(FONTETESTELEXICO)
 clean:
-	rm -vf $(BIN)
+	rm -vf $(BIN) $(FONTELEXICO) $(FONTETESTELEXICO)
 
