@@ -54,3 +54,5 @@ src/bison.tab.c
 src/bison.tab.h
 src/lex.yy.c
 teste
+saida.teste
+testelexico
