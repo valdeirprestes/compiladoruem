@@ -1,0 +1,30 @@
+int var1;
+float var2;
+char var3; 
+string var4[];   /* classe */
+/* vetor */
+int var1[];
+float var2[];
+char var3[]; 
+string var4[]; /* classe */
+> maior
+>= maior ou igual
+< menor
+<= menor ou igual
+!= diferente
+for (int i; expressao ; i++){
+	commnad;
+}
+
+while( expressao ){
+}
+expressao ? var1 : var2; 
+if{} else if  {} else {}
+switch(){ case default}
+class  var1 {
+ 	init(){ return;}
+destructor() {}
+(tipo) funcsome(){}
+}
+(tipo) func(){ return;}
+int main (){}

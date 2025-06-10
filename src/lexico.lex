@@ -7,8 +7,8 @@
 
 
 texto [a-zA-Z]
-numero [0-9]
-decimal [0-9]*.[0-9]
+numero [0-9]+
+decimal [0-9]*.[0-9]+
 espaco [" "\t]
 novalinha [\n]
 variavel [a-zA-Z][a-zA-Z0-9]*
@@ -17,7 +17,7 @@ fechamentocomentario [*][/]
 
 /*subscanner*/
 %x comentario 
-%x texto
+%x textoscanner
 %% /* definições de toke para o flex procurar*/
 {aberturacomentario} {BEGIN(comentario);}
 <comentario>{fechamentocomentario} {BEGIN(INITIAL); /*É um escape do sub scanner 'comentario' - fim de comentário*/}
@@ -25,29 +25,38 @@ fechamentocomentario [*][/]
 <comentario>"*"
 <comentario>{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 
-\" {BEGIN(texto);}
-<texto>\" {BEGIN(INITIAL);}
-<texto>. {;}
+\" {BEGIN(textoscanner);}
+<textoscanner>\" {BEGIN(INITIAL);}
+<textoscanner>. {;}
+<textoscanner>{novalinha} {linha=linha+1; }
 
 
-
-
+";" {yylval.texto= strdup(yytext); return t_pontovirgula;}
 "=" { yylval.texto= strdup(yytext); return t_igual;}
+">" { yylval.texto= strdup(yytext); return t_maior;}
+"<" { yylval.texto= strdup(yytext); return t_menor;}
 "+" { yylval.texto= strdup(yytext); return t_mais;}
 "-" { yylval.texto= strdup(yytext); return t_menos;}
 "*" { yylval.texto= strdup(yytext); return t_asteristico;}
 "/" { yylval.texto= strdup(yytext); return t_barra;}
+"["  {yylval.texto= strdup(yytext); return t_abrivetor;}
+"]" { yylval.texto= strdup(yytext); return t_fechavetor;}
+"(" { yylval.texto= strdup(yytext); return t_abriparentes;}
+")" { yylval.texto= strdup(yytext); return t_fechaparentes;}
+"{" { yylval.texto= strdup(yytext); return t_abrichave;}
+"}" { yylval.texto= strdup(yytext); return t_fechachave;}
+"!" { yylval.texto= strdup(yytext); return t_exclamacao;}
+"?" { yylval.texto= strdup(yytext); return t_interrogacao;}
+":" { yylval.texto= strdup(yytext); return t_doispontos;}
+int { yylval.texto= strdup(yytext); return t_int;}
+float { yylval.texto= strdup(yytext); return t_float;}
+char { yylval.texto= strdup(yytext); return t_char;}
 
-int { yylval.numero_inteiro= atoi(yytext); return t_int;}
-float { yylval.numero_decimal= atof(yytext); return t_float;}
-char { yylval.textp= strdup(yytext); return t_char;}
-"["  {yylval.texto= strdup(yytext); return t_vetorabri;}
-"]" { yylval.texto= strdup(yytext); return t_vetorfecha;}
 
 for {return t_for;}
 
-{numero}+ { yylval.numero_inteiro= strdup(yytext);  return t_num;}
-{decimal} { yylval.numero_decimal= strdup(yytext);  return t_decimal;}
+{numero} { yylval.numero_inteiro= atoi(yytext);  return t_num;}
+{decimal} { yylval.numero_decimal= atof(yytext);  return t_decimal;}
 {texto}+ { yylval.texto = strdup(yytext);  return t_palavra;}
 {variavel} {yylval.texto=strdup(yytext);;return t_variavel;} 
 {novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}

@@ -14,14 +14,12 @@
 }
 
 /* operadores lógicos */
-%token <texto> t_igual t_mais t_menos t_asteristico t_barra
+%token <texto> t_mais t_menos t_asteristico t_barra
+
+%token <texto> t_maior t_menor t_igual t_exclamacao
 
 /* tipos */
-%token <texto> t_vetorabri t_vetorfecha
-
-%token <numero_inteiro> t_int 
-%token <numero_decimal> t_float 
-%token <texto> t_char 
+%token <texto> t_abrivetor t_fechavetor t_int t_float t_char
 
 
 /* valores de atribuição para tipos*/
@@ -31,7 +29,8 @@
 %token <texto> t_varname 
 
 /* Tokens de repetição e condicionais */
-%token <texto> t_for t_while t_if t_else t_chaveabri t_chavefecha t_parentesabri t_parentesfecha t_pontvirgula 
+%token <texto> t_for t_while t_if t_else t_abrichave t_fechachave t_abriparentes t_fechaparentes
+%token <texto> t_pontovirgula t_doispontos t_interrogacao  
 
 /* Tokens classe e função */
 %token <texto> t_class t_func t_variavel
@@ -40,7 +39,7 @@
 %token t_espaco t_novalinha
 
 %start inicio
-%type <texto> programa  operadores tipos controle classefuncao valorespermitidos
+%type <texto> programa  operadores tipos controle classefuncao valorespermitidos comparacao
 
 
 
@@ -49,24 +48,26 @@
 inicio:
   %empty| inicio programa 
 programa:
+  comparacao {fprintf(yyout, "[%d] Achou um operador (%s)\n", linha, $1);} |
   operadores   {fprintf(yyout, "[%d] Achou um operador (%s)\n", linha, $1);} |
-  tipos   {fprintf(yyout, "[%d] Achou um tipo (%g)\n", linha, $1);} | 
-  t_int  {fprintf(yyout, "[%d] Achou um t_int (%s)\n", linha, $1);}|
-  t_float {fprintf(yyout, "[%d] Achou um t_float (%s)\n", linha, $1);} |
-  t_num {fprintf(yyout, "[%d] Achou um t_float (%s)\n", linha, $1);}|
-  t_decimal {fprintf(yyout, "[%d] Achou um t_float (%s)\n", linha, $1);}|
+  tipos   {fprintf(yyout, "[%d] Achou um tipo (%s)\n", linha, $1);} | 
+  t_num {fprintf(yyout, "[%d] Achou um t_float (%d)\n", linha, $1);}|
+  t_decimal {fprintf(yyout, "[%d] Achou um t_float (%f)\n", linha, $1);}|
   valorespermitidos   {fprintf(yyout, "[%d] Achou um valorespermitidos (%s)\n", linha, $1);}| 
   controle  {fprintf(yyout, "[%d] Achou um controle (%s)\n", linha, $1);} | 
-  classefuncao  {fprintf(yyout, "[%d] Achou um classefuncao_outras (%s)\n", linha, $1);}
+  classefuncao  {fprintf(yyout, "[%d] Achou um classe_funcao_variavel (%s)\n", linha, $1);}
 operadores:
-  t_igual | t_mais | t_menos | t_asteristico | t_barra 
+  t_mais | t_menos | t_asteristico | t_barra
+comparacao:
+  t_igual | t_maior | t_menor | t_exclamacao
 tipos:
-  t_char | t_vetorabri | t_vetorfecha 
+  t_char | t_int | t_float  | t_abrivetor | t_fechavetor 
 valorespermitidos:
-  t_palavra | t_palavranum |  t_varname 
+  t_palavra | t_palavranum |  t_varname | t_variavel
 controle:
-  t_for | t_while | t_if | t_else | t_chaveabri | t_chavefecha | t_parentesabri | t_parentesfecha | t_pontvirgula 
+  t_for | t_while | t_if | t_else | t_abrichave | t_fechachave | 
+  t_abriparentes | t_fechaparentes | t_pontovirgula | t_interrogacao | t_doispontos
 classefuncao:
-  t_class | t_func | t_variavel
+  t_class | t_func 
 %%
 
