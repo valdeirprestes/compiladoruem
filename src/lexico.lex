@@ -32,24 +32,24 @@ fechamentocomentario [*][/]
 
 
 
-"=" { yylval= strdup(yytext); return t_igual;}
-"+" { yylval= strdup(yytext); return t_mais;}
-"-" { yylval= strdup(yytext); return t_menos;}
-"*" { yylval= strdup(yytext); return t_asteristico;}
-"/" { yylval= strdup(yytext); return t_barra;}
+"=" { yylval.texto= strdup(yytext); return t_igual;}
+"+" { yylval.texto= strdup(yytext); return t_mais;}
+"-" { yylval.texto= strdup(yytext); return t_menos;}
+"*" { yylval.texto= strdup(yytext); return t_asteristico;}
+"/" { yylval.texto= strdup(yytext); return t_barra;}
 
-int { yylval= strdup(yytext); return t_int;}
-float { yylval= strdup(yytext); return t_float;}
-char { yylval= strdup(yytext); return t_char;}
-"["  {yylval= strdup(yytext); return t_vetorabri;}
-"]" { yylval= strdup(yytext); return t_vetorfecha;}
+int { yylval.numero_inteiro= atoi(yytext); return t_int;}
+float { yylval.numero_decimal= atof(yytext); return t_float;}
+char { yylval.textp= strdup(yytext); return t_char;}
+"["  {yylval.texto= strdup(yytext); return t_vetorabri;}
+"]" { yylval.texto= strdup(yytext); return t_vetorfecha;}
 
 for {return t_for;}
 
-{numero}+ { yylval= strdup(yytext);  return t_num;}
-{decimal} { yylval= strdup(yytext);  return t_decimal;}
-{texto}+ { yylval= strdup(yytext);  return t_palavra;}
-{variavel} {yylval=strdup(yytext);;return t_variavel;} 
+{numero}+ { yylval.numero_inteiro= strdup(yytext);  return t_num;}
+{decimal} { yylval.numero_decimal= strdup(yytext);  return t_decimal;}
+{texto}+ { yylval.texto = strdup(yytext);  return t_palavra;}
+{variavel} {yylval.texto=strdup(yytext);;return t_variavel;} 
 {novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 {espaco} /* Não faz nada, apenas consome*/
 
