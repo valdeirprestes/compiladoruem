@@ -4,6 +4,7 @@ FONTELEXICO = lex.yy.c
 FONTETESTELEXICO = testelexico.tab.c 
 FONTETESTESINTATICO = testesintatico.tab.c 
 FONTEPARSER= parser.tab.c 
+FONTEHEADERS = testelexico.tab.h testesintatico.tab.h parser.tab.h
 all: $(BIN)
 	@echo "Arquivos compilados!"
 testelexico.tab.c: testelexico.y
@@ -21,5 +22,5 @@ testesintatico: $(FONTELEXICO) $(FONTETESTESINTATICO)
 compiler: $(FONTELEXICO) $(FONTEPARSER)
 	$(CC) -o compiler $(FONTELEXICO) $(FONTEPARSER)
 clean:
-	rm -vf $(BIN) $(FONTELEXICO) $(FONTETESTELEXICO) $(FONTEPARSER)
+	rm -vf $(BIN) $(FONTELEXICO) $(FONTETESTESINTATICO) $(FONTETESTELEXICO) $(FONTEPARSER) $(FONTEHEADERS)
 
