@@ -16,6 +16,7 @@ novalinha [\n]
 variavel [a-zA-Z][a-zA-Z0-9]*
 aberturacomentario [/][*]
 fechamentocomentario [*][/]
+varincorreta [0-9]+[\.]*[a-zA-z]
 
 /*subscanner*/
 %x comentario 
@@ -25,12 +26,12 @@ fechamentocomentario [*][/]
 <comentario>{fechamentocomentario} {BEGIN(INITIAL); /*É um escape do sub scanner 'comentario' - fim de comentário*/}
 <comentario>[^*\n]+ 
 <comentario>"*"
-<comentario><<EOF>> { fprintf(stderr, "Comentario não fechado da linha %d ate a linha %d \n", linhacomentario , linha); exit(-1); }
+<comentario><<EOF>> { fprintf(stderr, "<< Comentario não fechado da linha %d ate a linha %d >>\n", linhacomentario , linha); exit(-1); }
 <comentario>{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 
 \" {BEGIN(textoscanner);}
 <textoscanner>\" {BEGIN(INITIAL);}
-<textoscanner>{novalinha} { fprintf(stderr, "String quebrada na linha %d \n", linha); exit(-1); }
+<textoscanner>{novalinha} { fprintf(stderr, "<< String quebrada na linha %d >>\n", linha); exit(-1); }
 <textoscanner>[^"\n]* {yylval.texto= strdup(yytext); return t_string;}
 
 
@@ -73,6 +74,7 @@ break {yylval.texto= strdup(yytext); return t_break;}
 {numero} { yylval.numero_inteiro= atoi(yytext);  return t_num;}
 {decimal} { yylval.numero_decimal= atof(yytext);  return t_decimal;}
 {texto}+ { yylval.texto = strdup(yytext);  return t_palavra;}
+{varincorreta} { fprintf(stderr, "<< Linha %d: variavel incorreta ou separe numero e string >>\n", linha); exit(-1); }
 {variavel} {yylval.texto=strdup(yytext);;return t_variavel;} 
 {novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 {espaco} /* Não faz nada, apenas consome*/
