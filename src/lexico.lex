@@ -1,8 +1,10 @@
 %option noyywrap
 %{
 	#include <string.h>
-    #include "bison.tab.h"
+    #include "testelexico.tab.h"
 	extern long linha;
+	long linhacomentario = 0;
+	char *meustring = NULL;
 %}
 
 
@@ -19,16 +21,18 @@ fechamentocomentario [*][/]
 %x comentario 
 %x textoscanner
 %% /* definições de toke para o flex procurar*/
-{aberturacomentario} {BEGIN(comentario);}
+{aberturacomentario} {BEGIN(comentario); linhacomentario = linha;}
 <comentario>{fechamentocomentario} {BEGIN(INITIAL); /*É um escape do sub scanner 'comentario' - fim de comentário*/}
 <comentario>[^*\n]+ 
 <comentario>"*"
+<comentario><<EOF>> { fprintf(stderr, "Comentario não fechado da linha %d ate a linha %d \n", linhacomentario , linha); exit(-1); }
 <comentario>{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 
 \" {BEGIN(textoscanner);}
 <textoscanner>\" {BEGIN(INITIAL);}
-<textoscanner>. {;}
-<textoscanner>{novalinha} {linha=linha+1; }
+<textoscanner>{novalinha} { fprintf(stderr, "String quebrada na linha %d \n", linha); exit(-1); }
+<textoscanner>[^"\n]* {yylval.texto= strdup(yytext); return t_string;}
+
 
 
 ";" {yylval.texto= strdup(yytext); return t_pontovirgula;}
@@ -51,9 +55,20 @@ fechamentocomentario [*][/]
 int { yylval.texto= strdup(yytext); return t_int;}
 float { yylval.texto= strdup(yytext); return t_float;}
 char { yylval.texto= strdup(yytext); return t_char;}
+if { yylval.texto= strdup(yytext); return t_if;}
+else { yylval.texto= strdup(yytext); return t_else;}
+return { yylval.texto= strdup(yytext); return t_char;}
+class { yylval.texto= strdup(yytext); return t_class;}
+construtor { yylval.texto= strdup(yytext); return t_construtor;}
+destrutor { yylval.texto= strdup(yytext); return t_destrutor;}
+for {yylval.texto= strdup(yytext); return t_for;}
+while {yylval.texto= strdup(yytext); return t_while;}
+switch {yylval.texto= strdup(yytext); return t_switch;}
+case {yylval.texto= strdup(yytext); return t_case;}
+default {yylval.texto= strdup(yytext); return t_default;}
+break {yylval.texto= strdup(yytext); return t_break;}
 
 
-for {return t_for;}
 
 {numero} { yylval.numero_inteiro= atoi(yytext);  return t_num;}
 {decimal} { yylval.numero_decimal= atof(yytext);  return t_decimal;}

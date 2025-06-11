@@ -1,3 +1,7 @@
+"string"
+"minha string "
+123
+123.00
 int var1;
 float var2;
 char var3; 
@@ -22,9 +26,9 @@ expressao ? var1 : var2;
 if{} else if  {} else {}
 switch(){ case default}
 class  var1 {
- 	init(){ return;}
-destructor() {}
-(tipo) funcsome(){}
+ 	construtor(){ return;}
+	destrutor() {}
+	(tipo) funcsome(){}
 }
 (tipo) func(){ return;}
 int main (){}

@@ -27,6 +27,12 @@ string;
 
 
 ### Linguagem projetada pela equipe:
+Valores aceitos:  
+```
+"string"
+123
+123.00
+```
 
 Tipos:
 ```
@@ -68,8 +74,8 @@ switch(){ case default}
 Suporte a classe (sem herança, polimorfismo e encapsulamento)
 ```
 class  var1 {
- 	init(){ return;}
-destructor() {}
+ 	construtor(){ return;}
+	destrutor() {}
 (tipo) funcsome(){}
 }
 ```
