@@ -36,6 +36,7 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 
 
 
+"," {yylval.texto= strdup(yytext); return t_virgula;}
 ";" {yylval.texto= strdup(yytext); return t_pontovirgula;}
 "=" { yylval.texto= strdup(yytext); return t_igual;}
 ">" { yylval.texto= strdup(yytext); return t_maior;}
@@ -68,14 +69,14 @@ switch {yylval.texto= strdup(yytext); return t_switch;}
 case {yylval.texto= strdup(yytext); return t_case;}
 default {yylval.texto= strdup(yytext); return t_default;}
 break {yylval.texto= strdup(yytext); return t_break;}
-
+main {yylval.texto= strdup(yytext); return t_main;}
 
 
 {numero} { yylval.numero_inteiro= atoi(yytext);  return t_num;}
 {decimal} { yylval.numero_decimal= atof(yytext);  return t_decimal;}
 {texto}+ { yylval.texto = strdup(yytext);  return t_palavra;}
 {varincorreta} { fprintf(stderr, "<< Linha %d: variavel incorreta ou separe numero e string >>\n", linha); exit(-1); }
-{variavel} {yylval.texto=strdup(yytext);;return t_variavel;} 
+{variavel} {yylval.texto=strdup(yytext);;return t_nomevariavel;} 
 {novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 {espaco} /* Não faz nada, apenas consome*/
 

@@ -26,14 +26,14 @@
 %token <numero_inteiro> t_num 
 %token <texto> t_palavra t_palavranum 
 %token <numero_decimal> t_decimal 
-%token <texto> t_varname t_string
+%token <texto> t_nomevariavel t_string
 
 /* Tokens de repetição e condicionais */
 %token <texto> t_for t_while t_if t_else t_switch t_case t_default t_break t_abrichave t_fechachave t_abriparentes t_fechaparentes
-%token <texto> t_pontovirgula t_doispontos t_interrogacao  
+%token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao  
 
 /* Tokens classe e função */
-%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel
+%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_main
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha
@@ -63,7 +63,7 @@ comparacao:
 tipos:
   t_char | t_int | t_float  | t_abrivetor | t_fechavetor 
 valorespermitidos:
-  t_palavra | t_palavranum |  t_varname | t_variavel | t_string
+  t_palavra | t_palavranum |  t_nomevariavel | t_variavel | t_string
 controle:
   t_for | t_while | t_if | t_else | t_switch | t_case | t_default | t_break | t_abrichave | t_fechachave | 
   t_abriparentes | t_fechaparentes | t_pontovirgula | t_interrogacao | t_doispontos
