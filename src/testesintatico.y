@@ -44,16 +44,16 @@
 /* Generate the parser description file. */
 %verbose
 /* Enable run-time traces (yydebug). */
-%define parse.trace
-%printer { fprintf (yyo, "%s", $$); } t_main;
-%printer { fprintf (yyo, "%s", $$); } t_abriparentes;
+/*%define parse.trace*/
+/*%printer { fprintf (yyo, "%s", $$); } t_main;
+%printer { fprintf (yyo, "%s", $$); } t_abriparentes;*/
 
 
 
 
 %% /* Gramática deste ponto para baixo*/
 programa:
-	mainfuncao 
+	mainfuncao | mainfuncao error {printf("Ocorreu um erro\n");}
 mainfuncao:
 	tipo t_main t_abriparentes parametros t_fechaparentes corpofuncao { printf("função main ok\n");}
 parametros:
@@ -66,3 +66,6 @@ codigo:
 	%empty
 %%
 
+#ifdef YYDEBUG
+  yydebug = 1;
+#endif
