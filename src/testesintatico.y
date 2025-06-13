@@ -1,9 +1,12 @@
 %{
   #include <stdio.h>
+  #include <stdlib.h>
   int yylex (void);
   void yyerror (char const *);
   extern FILE *yyout;
-
+  #ifdef YYDEBUG
+    yydebug = 1;
+  #endif
   long linha=1;
 %}
 
@@ -36,7 +39,8 @@
 %token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_main
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
-%token t_espaco t_novalinha
+%token t_espaco t_novalinha 
+%token <texto> t_eof  
 
 %start programa
 %type <texto> programa  mainfuncao 
@@ -53,7 +57,9 @@
 
 %% /* Gramática deste ponto para baixo*/
 programa:
-	mainfuncao | mainfuncao error {printf("Ocorreu um erro\n");}
+	mainfuncao | 
+  t_eof error  {printf("Ocorreu um erro inesperado\n"); exit(-1);} |
+  error  {printf("Ocorreu um erro inesperado\n"); exit(-1);} 
 mainfuncao:
 	tipo t_main t_abriparentes parametros t_fechaparentes corpofuncao { printf("função main ok\n");}
 parametros:
@@ -66,6 +72,3 @@ codigo:
 	%empty
 %%
 
-#ifdef YYDEBUG
-  yydebug = 1;
-#endif

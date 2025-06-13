@@ -1,5 +1,6 @@
 %{
   #include <stdio.h>
+  #include <stdlib.h>
   int yylex (void);
   void yyerror (char const *);
   extern FILE *yyout;
@@ -36,7 +37,7 @@
 %token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_main
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
-%token t_espaco t_novalinha
+%token t_espaco t_novalinha t_eof
 
 %start inicio
 %type <texto> programa  operadores tipos controle classefuncao valorespermitidos comparacao
@@ -56,6 +57,7 @@ programa:
   valorespermitidos   {fprintf(yyout, "[%d] Achou um valorespermitidos (%s)\n", linha, $1);}| 
   controle  {fprintf(yyout, "[%d] Achou um controle (%s)\n", linha, $1);} | 
   classefuncao  {fprintf(yyout, "[%d] Achou um classe_funcao_variavel (%s)\n", linha, $1);}
+  t_eof {exit(0);}
 operadores:
   t_mais | t_menos | t_asteristico | t_barra
 comparacao:

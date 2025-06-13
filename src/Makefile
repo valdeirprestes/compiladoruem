@@ -1,5 +1,5 @@
 CC = gcc -g  
-BIN= testelexico testesintatico compiler
+BIN= testelexico testesintatico #compiler
 FONTELEXICO = lex.yy.c
 FONTETESTELEXICO = testelexico.tab.c 
 FONTETESTESINTATICO = testesintatico.tab.c 
@@ -11,8 +11,8 @@ testelexico.tab.c: testelexico.y
 	bison -H testelexico.y --report=counterexamples -Wother
 testesintatico.tab.c: testesintatico.y
 	bison -H testesintatico.y --report=counterexamples -Wother --debug
-parser.tab.c: parser.y
-	bison -H parser.y --report=counterexamples -Wother
+#parser.tab.c: parser.y
+#	bison -H parser.y --report=counterexamples -Wother
 lex.yy.c: lexico.lex $(FONTETESTELEXICO)
 	flex lexico.lex 
 testelexico: $(FONTELEXICO) $(FONTETESTELEXICO)
