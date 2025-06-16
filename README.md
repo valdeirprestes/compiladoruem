@@ -4,8 +4,6 @@
 
 Equipe
 - Valdeir de Souza Prestes ra 88257
-- Victor Hugo Franciscon ra12077
-- William Massashi Ito Yoshida ra117497
 
 Na disciplina de compiladores vimos que um compilador é dividido entre o
 front-end e o back-end. O front-end realiza a analise léxica, sintática
