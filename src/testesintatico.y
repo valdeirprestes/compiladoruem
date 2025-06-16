@@ -27,7 +27,7 @@
 
 /* valores de atribuição para tipos*/
 %token <numero_inteiro> t_num 
-%token <texto> t_palavra t_palavranum 
+%token <texto> t_identificador
 %token <numero_decimal> t_decimal 
 %token <texto> t_nomevariavel t_string
 
@@ -58,17 +58,16 @@
 %% /* Gramática deste ponto para baixo*/
 programa:
 	mainfuncao | 
-  t_eof error  {printf("Ocorreu um erro inesperado\n"); exit(-1);} |
-  error  {printf("Ocorreu um erro inesperado\n"); exit(-1);} 
+  error  {printf("Ocorreu um erro inesperado\n"); exit(-1);} ;
 mainfuncao:
-	tipo t_main t_abriparentes parametros t_fechaparentes corpofuncao { printf("função main ok\n");}
+	tipo t_main t_abriparentes parametros t_fechaparentes corpofuncao { printf("função main ok\n");};
 parametros:
-	%empty
+	%empty;
 corpofuncao:
-	t_abrichave codigo t_fechachave
+	t_abrichave codigo t_fechachave;
 tipo:
-	t_int | t_float | t_char
+	t_int | t_float | t_char;
 codigo:
-	%empty
+	%empty;
 %%
 

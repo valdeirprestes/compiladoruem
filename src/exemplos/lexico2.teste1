@@ -31,4 +31,4 @@ class  var1 {
 	(tipo) funcsome(){}
 }
 (tipo) func(){ return;}
-int main (){}
+int main(){}

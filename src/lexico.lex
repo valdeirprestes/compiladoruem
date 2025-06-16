@@ -35,11 +35,6 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 <textoscanner>[^"\n]* {yylval.texto= strdup(yytext); return t_string;}
 
 
-<<EOF>> {
-			fprintf(stdout,"\n\nlexyerro acabou o arquivo\n\n");
-			yylval.texto= strdup(yytext);
-			return t_eof;
-		} 
 "," {yylval.texto= strdup(yytext); return t_virgula;}
 ";" {yylval.texto= strdup(yytext); return t_pontovirgula;}
 "=" { yylval.texto= strdup(yytext); return t_igual;}
@@ -78,9 +73,8 @@ main {yylval.texto= strdup(yytext); return t_main;}
 
 {numero} { yylval.numero_inteiro= atoi(yytext);  return t_num;}
 {decimal} { yylval.numero_decimal= atof(yytext);  return t_decimal;}
-{texto}+ { yylval.texto = strdup(yytext);  return t_palavra;}
 {varincorreta} { fprintf(stderr, "<< Linha %d: variavel incorreta ou separe numero e string >>\n", linha); exit(-1); }
-{variavel} {yylval.texto=strdup(yytext);;return t_nomevariavel;} 
+{variavel} {yylval.texto=strdup(yytext);;return t_identificador;} 
 {novalinha} {linha=linha+1;/* não retornar token, apenas incrementa a variável de controle*/}
 {espaco} /* Não faz nada, apenas consome*/
 

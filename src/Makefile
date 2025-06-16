@@ -8,7 +8,7 @@ FONTEHEADERS = testelexico.tab.h testesintatico.tab.h parser.tab.h
 all: $(BIN)
 	@echo "Arquivos compilados!"
 testelexico.tab.c: testelexico.y
-	bison -H testelexico.y --report=counterexamples -Wother
+	bison -H testelexico.y --report=counterexamples -Wother -Wconflicts-sr
 testesintatico.tab.c: testesintatico.y
 	bison -H testesintatico.y --report=counterexamples -Wother --debug
 #parser.tab.c: parser.y
@@ -16,7 +16,7 @@ testesintatico.tab.c: testesintatico.y
 lex.yy.c: lexico.lex $(FONTETESTELEXICO)
 	flex lexico.lex 
 testelexico: $(FONTELEXICO) $(FONTETESTELEXICO)
-	$(CC) -o testelexico $(FONTELEXICO) $(FONTETESTELEXICO)
+	$(CC) -o testelexico $(FONTELEXICO) $(FONTETESTELEXICO) 
 testesintatico: $(FONTELEXICO) $(FONTETESTESINTATICO)
 	$(CC) -o testesintatico $(FONTELEXICO) $(FONTETESTESINTATICO) 
 compiler: $(FONTELEXICO) $(FONTEPARSER)

@@ -1,6 +1,7 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
+  #include <string.h> 
   int yylex (void);
   void yyerror (char const *);
   extern FILE *yyout;
@@ -25,9 +26,9 @@
 
 /* valores de atribuição para tipos*/
 %token <numero_inteiro> t_num 
-%token <texto> t_palavra t_palavranum 
+%token <texto> t_identificador
 %token <numero_decimal> t_decimal 
-%token <texto> t_nomevariavel t_string
+%token <texto> t_string t_eof
 
 /* Tokens de repetição e condicionais */
 %token <texto> t_for t_while t_if t_else t_switch t_case t_default t_break t_abrichave t_fechachave t_abriparentes t_fechaparentes
@@ -37,39 +38,33 @@
 %token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_main
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
-%token t_espaco t_novalinha t_eof
+%token t_espaco t_novalinha 
 
 %start inicio
-%type <texto> programa  operadores tipos controle classefuncao valorespermitidos comparacao
+%type <texto> programa  palavra_reservada atributos atributos-numeros atributos-texto
 
 
 
 
 %% /* Gramática deste ponto para baixo*/
 inicio:
-  %empty| inicio programa 
+  %empty| programa inicio
 programa:
-  comparacao {fprintf(yyout, "[%d] Achou um operador (%s)\n", linha, $1);} |
-  operadores   {fprintf(yyout, "[%d] Achou um operador (%s)\n", linha, $1);} |
-  tipos   {fprintf(yyout, "[%d] Achou um tipo (%s)\n", linha, $1);} | 
-  t_num {fprintf(yyout, "[%d] Achou um t_float (%d)\n", linha, $1);}|
-  t_decimal {fprintf(yyout, "[%d] Achou um t_float (%f)\n", linha, $1);}|
-  valorespermitidos   {fprintf(yyout, "[%d] Achou um valorespermitidos (%s)\n", linha, $1);}| 
-  controle  {fprintf(yyout, "[%d] Achou um controle (%s)\n", linha, $1);} | 
-  classefuncao  {fprintf(yyout, "[%d] Achou um classe_funcao_variavel (%s)\n", linha, $1);}
-  t_eof {exit(0);}
-operadores:
-  t_mais | t_menos | t_asteristico | t_barra
-comparacao:
-  t_igual | t_maior | t_menor | t_exclamacao
-tipos:
-  t_char | t_int | t_float  | t_abrivetor | t_fechavetor 
-valorespermitidos:
-  t_palavra | t_palavranum |  t_nomevariavel | t_variavel | t_string
-controle:
+  palavra_reservada {fprintf(yyout, "[Linha %d] Achou uma palavra_reservada (%s)\n", linha, $1);} |
+  atributos 
+palavra_reservada:
+  t_mais | t_menos | t_asteristico | t_barra |
+  t_igual | t_maior | t_menor | t_exclamacao |
+  t_char | t_int | t_float  | t_abrivetor | t_fechavetor |
   t_for | t_while | t_if | t_else | t_switch | t_case | t_default | t_break | t_abrichave | t_fechachave | 
-  t_abriparentes | t_fechaparentes | t_pontovirgula | t_interrogacao | t_doispontos
-classefuncao:
-  t_class | t_func | t_construtor| t_destrutor | t_return
+  t_abriparentes | t_fechaparentes | t_pontovirgula | t_interrogacao | t_doispontos |
+  t_class | t_func | t_construtor| t_destrutor | t_return | t_virgula | t_main
+atributos:
+  atributos-numeros | atributos-texto
+atributos-numeros:
+  t_num {fprintf(yyout, "[Linha %d] Achou um t_num (%f)\n", linha, $1);} |  
+  t_decimal {fprintf(yyout, "[Linha %d] Achou um t_float (%f)\n", linha, $1);}
+atributos-texto:
+  t_identificador  | t_variavel | t_string 
 %%
 
