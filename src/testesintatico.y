@@ -8,6 +8,8 @@
     yydebug = 1;
   #endif
   long linha=1;
+  long coluna=1;
+  long coluna_tmp = 0;
 %}
 
 %union{
@@ -33,7 +35,7 @@
 
 /* Tokens de repetição e condicionais */
 %token <texto> t_for t_while t_if t_else t_switch t_case t_default t_break t_abrichave t_fechachave t_abriparentes t_fechaparentes
-%token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao  
+%token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao
 
 /* Tokens classe e função */
 %token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_main
@@ -43,7 +45,8 @@
 %token <texto> t_eof  
 
 %start programa
-%type <texto> programa  mainfuncao 
+%type programa codigo 
+%type funcao parametrosfunc parametro  
 
 /* Generate the parser description file. */
 %verbose
@@ -57,17 +60,38 @@
 
 %% /* Gramática deste ponto para baixo*/
 programa:
-	mainfuncao | 
-  error  {printf("Ocorreu um erro inesperado\n"); exit(-1);} ;
-mainfuncao:
-	tipo t_main t_abriparentes parametros t_fechaparentes corpofuncao { printf("função main ok\n");};
-parametros:
-	%empty;
-corpofuncao:
-	t_abrichave codigo t_fechachave;
-tipo:
-	t_int | t_float | t_char;
+  codigos 
+codigos:
+  %empty |
+  codigo codigos |   
+  codigo error { yyerror; printf("erro de sintaxe\n");} 
 codigo:
-	%empty;
-%%
-
+  funcao | classe
+funcao:
+	tipofunc t_identificador t_abriparentes parametrosfunc t_fechaparentes corpofuncao 
+tipofunc:
+  tipo | 
+  tipo t_abrivetor t_fechavetor
+parametrosfunc:
+	parametro  | parametro t_virgula parametros 
+parametros:
+	parametro  | parametro t_virgula parametros 
+parametro:
+  %empty |
+	tipo t_identificador
+tipo:
+  t_int | t_float | t_char
+corpofuncao:
+  %empty | 
+	t_abrichave declaracoes comandos t_fechachave
+declaracoes:
+  %empty |
+  declaracao t_pontovirgula | declaracao  t_virgula declaracoes
+declaracao:
+  tipo t_identificador | tipo  t_abrivetor t_fechavetor t_identificador
+comandos:
+  %empty
+classe:
+  t_class t_identificador t_abrichave corpoclasse t_fechachave
+corpoclasse:
+  %empty

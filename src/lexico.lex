@@ -3,8 +3,12 @@
 	#include <string.h>
     #include "testelexico.tab.h"
 	extern long linha;
+	extern long coluna;
+	extern long coluna_tmp;
 	long linhacomentario = 0;
 	char *meustring = NULL;
+
+	int tam(char *s);
 %}
 
 
@@ -22,69 +26,81 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 %x comentario 
 %x textoscanner
 %% /* definições de toke para o flex procurar*/
-{aberturacomentario} {BEGIN(comentario); linhacomentario = linha;}
+{aberturacomentario} { coluna +=tam(yytext); linhacomentario = linha; BEGIN(comentario); }
 <comentario>{fechamentocomentario} {BEGIN(INITIAL); /*É um escape do sub scanner 'comentario' - fim de comentário*/}
-<comentario>[^*\n]+ 
-<comentario>"*"
-<comentario><<EOF>> { fprintf(stderr, "<< Comentario não fechado da linha %d ate a linha %d >>\n", linhacomentario , linha); exit(-1); }
-<comentario>{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
+<comentario>[^*\n]+ {coluna +=tam(yytext);}
+<comentario>"*" {coluna +=tam(yytext);}
+<comentario><<EOF>> { coluna +=tam(yytext); fprintf(stderr, "<< Comentario não fechado da linha %d ate a linha %d >>\n", linhacomentario , linha); exit(-1); }
+<comentario>{novalinha} {coluna =1; linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 
 \" {BEGIN(textoscanner);}
-<textoscanner>\" {BEGIN(INITIAL);}
-<textoscanner>{novalinha} { fprintf(stderr, "<< String quebrada na linha %d >>\n", linha); exit(-1); }
-<textoscanner>[^"\n]* {yylval.texto= strdup(yytext); return t_string;}
+<textoscanner>\" {BEGIN(INITIAL); coluna +=coluna_tmp; coluna_tmp=tam(yytext);}
+<textoscanner>{novalinha} { 
+	coluna +=coluna_tmp ; 
+	coluna_tmp=tam(yytext); 
+	fprintf(stderr, "<< String quebrada na linha %d >>\n", linha); exit(-1);
+}
+<textoscanner>[^"\n]* {coluna +=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_string;}
 
 
-"," {yylval.texto= strdup(yytext); return t_virgula;}
-";" {yylval.texto= strdup(yytext); return t_pontovirgula;}
-"=" { yylval.texto= strdup(yytext); return t_igual;}
-">" { yylval.texto= strdup(yytext); return t_maior;}
-"<" { yylval.texto= strdup(yytext); return t_menor;}
-"+" { yylval.texto= strdup(yytext); return t_mais;}
-"-" { yylval.texto= strdup(yytext); return t_menos;}
-"*" { yylval.texto= strdup(yytext); return t_asteristico;}
-"/" { yylval.texto= strdup(yytext); return t_barra;}
-"["  {yylval.texto= strdup(yytext); return t_abrivetor;}
-"]" { yylval.texto= strdup(yytext); return t_fechavetor;}
-"(" { yylval.texto= strdup(yytext); return t_abriparentes;}
-")" { yylval.texto= strdup(yytext); return t_fechaparentes;}
-"{" { yylval.texto= strdup(yytext); return t_abrichave;}
-"}" { yylval.texto= strdup(yytext); return t_fechachave;}
-"!" { yylval.texto= strdup(yytext); return t_exclamacao;}
-"?" { yylval.texto= strdup(yytext); return t_interrogacao;}
-":" { yylval.texto= strdup(yytext); return t_doispontos;}
-int { yylval.texto= strdup(yytext); return t_int;}
-float { yylval.texto= strdup(yytext); return t_float;}
-char { yylval.texto= strdup(yytext); return t_char;}
-if { yylval.texto= strdup(yytext); return t_if;}
-else { yylval.texto= strdup(yytext); return t_else;}
-return { yylval.texto= strdup(yytext); return t_char;}
-class { yylval.texto= strdup(yytext); return t_class;}
-construtor { yylval.texto= strdup(yytext); return t_construtor;}
-destrutor { yylval.texto= strdup(yytext); return t_destrutor;}
-for {yylval.texto= strdup(yytext); return t_for;}
-while {yylval.texto= strdup(yytext); return t_while;}
-switch {yylval.texto= strdup(yytext); return t_switch;}
-case {yylval.texto= strdup(yytext); return t_case;}
-default {yylval.texto= strdup(yytext); return t_default;}
-break {yylval.texto= strdup(yytext); return t_break;}
-main {yylval.texto= strdup(yytext); return t_main;}
+"," {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_virgula;}
+";" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_pontovirgula; }
+"=" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_igual; }
+">" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_maior; }
+"<" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_menor; }
+"+" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_mais;}
+"-" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_menos;}
+"*" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_asteristico;}
+"/" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_barra;}
+"[" {coluna+= coluna_tmp ; coluna_tmp =1;yylval.texto= strdup(yytext); return t_abrivetor;}
+"]" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_fechavetor;}
+"(" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_abriparentes;}
+")" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_fechaparentes;}
+"{" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_abrichave;}
+"}" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_fechachave;}
+"!" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_exclamacao;}
+"?" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_interrogacao;}
+":" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_doispontos;}
+int {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_int;}
+float {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_float;}
+char {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_char;}
+if {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_if;}
+else {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_else;}
+return {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_char;}
+class {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_class;}
+construtor {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_construtor;}
+destrutor {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_destrutor;}
+for {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_for;}
+while {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_while;}
+switch {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_switch;}
+case {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_case;}
+default {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_default;}
+break {coluna+=coluna_tmp; coluna_tmp=tam(yytext);yylval.texto= strdup(yytext); return t_break;}
 
 
-{numero} { yylval.numero_inteiro= atoi(yytext);  return t_num;}
-{decimal} { yylval.numero_decimal= atof(yytext);  return t_decimal;}
-{varincorreta} { fprintf(stderr, "<< Linha %d: variavel incorreta ou separe numero e string >>\n", linha); exit(-1); }
-{variavel} {yylval.texto=strdup(yytext);;return t_identificador;} 
-{novalinha} {linha=linha+1;/* não retornar token, apenas incrementa a variável de controle*/}
-{espaco} /* Não faz nada, apenas consome*/
+
+{numero} { coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.numero_inteiro= atoi(yytext);  return t_num;}
+{decimal} { coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.numero_decimal= atof(yytext);  return t_decimal;}
+{varincorreta} {coluna+=coluna_tmp; coluna_tmp=tam(yytext); fprintf(stderr, "<< Linha %d: variavel incorreta ou separe numero e string >>\n", linha); exit(-1); }
+{variavel} {coluna+=coluna_tmp; coluna_tmp=tam(yytext);yylval.texto=strdup(yytext);;return t_identificador;} 
+{novalinha} {coluna =1; linha=linha+1;/* não retornar token, apenas incrementa a variável de controle*/}
+{espaco} {coluna+=1;} /* Não faz nada, apenas consome*/
 
 
-. { printf("\'%c\' (linha %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha); }
+. {  printf("\'%c\' (linha %d coluna %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha, coluna); exit(-1);}
 %%
 
 
-void yyerror (char const s){
-	fprintf(stderr, "yyerror %s\n\n",s);
+int tam(char *s)
+{
+	int i = 0;
+	while (s[i] !='\0') i++;
+	return i;
+}
+
+void yyerror (char const *s){
+	extern long linha;
+	fprintf(stderr, "Ultimo lexema aceito [%s], linha [%d], coluna[%d],  %s\n",yytext, linha, coluna, s );
 }
 
 

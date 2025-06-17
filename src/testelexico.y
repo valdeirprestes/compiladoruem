@@ -7,6 +7,8 @@
   extern FILE *yyout;
 
   long linha=1;
+  long coluna=1;
+  long coluna_tmp = 0;
 %}
 
 %union{
@@ -60,9 +62,9 @@ palavra_reservada:
   t_abriparentes | t_fechaparentes | t_pontovirgula | t_interrogacao | t_doispontos |
   t_class | t_func | t_construtor| t_destrutor | t_return | t_virgula | t_main
 atributos:
-  atributos-numeros | atributos-texto
+  atributos-numeros | atributos-texto {fprintf(yyout, "[Linha %d] Achou uma atributos-texto (%s)\n", linha, $1);} 
 atributos-numeros:
-  t_num {fprintf(yyout, "[Linha %d] Achou um t_num (%f)\n", linha, $1);} |  
+  t_num {fprintf(yyout, "[Linha %d] [Coluna:%d]  Achou um t_num (%f)\n", linha, coluna, $1);} |  
   t_decimal {fprintf(yyout, "[Linha %d] Achou um t_float (%f)\n", linha, $1);}
 atributos-texto:
   t_identificador  | t_variavel | t_string 
