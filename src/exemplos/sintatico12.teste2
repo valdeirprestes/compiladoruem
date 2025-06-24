@@ -1,0 +1,4 @@
+class MinhaClasse{
+    int atributo;
+    int metodo1(){}
+}

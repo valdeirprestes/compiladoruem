@@ -1,3 +1,18 @@
-class MinhaClasse{
+int main(){
+    int valor;
+    for(int i = 1; i< 10 ; i = i + 1)
+        valor = i;
+}
+int valor(){
+    int[] valor;
+    while(valor != 1)
+    {
+        valor = 1;
+    }
+}
+int[] valores(){
+    int i = 1;
+    if (i)
+        i = valor();
     
 }

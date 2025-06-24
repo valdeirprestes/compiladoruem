@@ -21,6 +21,7 @@
 %token <texto> t_mais t_menos t_asteristico t_barra
 
 %token <texto> t_maior t_menor t_igual t_exclamacao
+%token <texto> t_igual_a t_diferente_de t_menor_ou_igual t_maior_ou_igual
 
 /* tipos */
 %token <texto> t_abrivetor t_fechavetor t_int t_float t_char
@@ -37,7 +38,7 @@
 %token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao  
 
 /* Tokens classe e função */
-%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_main
+%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_this
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha 
@@ -60,7 +61,7 @@ palavra_reservada:
   t_char | t_int | t_float  | t_abrivetor | t_fechavetor |
   t_for | t_while | t_if | t_else | t_switch | t_case | t_default | t_break | t_abrichave | t_fechachave | 
   t_abriparentes | t_fechaparentes | t_pontovirgula | t_interrogacao | t_doispontos |
-  t_class | t_func | t_construtor| t_destrutor | t_return | t_virgula | t_main
+  t_class | t_func | t_construtor| t_destrutor | t_return | t_virgula | t_this
 atributos:
   atributos-numeros | atributos-texto {fprintf(yyout, "[Linha %d] Achou uma atributos-texto (%s)\n", linha, $1);} 
 atributos-numeros:

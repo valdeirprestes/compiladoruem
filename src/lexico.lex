@@ -42,7 +42,10 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 }
 <textoscanner>[^"\n]* {coluna +=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_string;}
 
-
+"==" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_igual_a;}
+"!=" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_diferente_de;}
+"<=" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_menor_ou_igual;}
+">=" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_maior_ou_igual;}
 "," {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_virgula;}
 ";" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_pontovirgula; }
 "=" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_igual; }
@@ -68,6 +71,7 @@ if {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); re
 else {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_else;}
 return {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_char;}
 class {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_class;}
+this {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_this;}
 construtor {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_construtor;}
 destrutor {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_destrutor;}
 for {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_for;}
