@@ -57,6 +57,16 @@
 /*%printer { fprintf (yyo, "%s", $$); } t_main;
 %printer { fprintf (yyo, "%s", $$); } t_abriparentes;*/
 
+%left t_igual_a
+%left t_maior
+%left t_maior_ou_igual
+%left t_menor
+%left t_menor_ou_igual
+%left t_diferente_de
+%left t_mais
+%left t_menos
+%left t_asteristico
+%left t_barra
 
 
 
@@ -88,9 +98,11 @@ corpofuncao:
 	t_abrichave declaracoes comandos t_fechachave
 declaracoes:
   %empty |
-  declaracao t_pontovirgula | declaracao  t_virgula declaracoes
+  declaracao t_pontovirgula | declaracao  t_virgula declaracoes t_pontovirgula
 declaracao:
-  tipo t_identificador | tipo  t_abrivetor t_fechavetor t_identificador
+  tipo t_identificador
+  |tipo t_identificador t_igual expressoes t_pontovirgula
+  | tipo  t_abrivetor t_fechavetor t_identificador t_pontovirgula
 comandos:
   %empty
   | comando 
@@ -118,8 +130,7 @@ testeboleano:
   | atributo t_menor atributo
   | t_exclamacao atributo
   | t_abriparentes atributo t_fechaparentes
-  | t_identificador
-  | t_num
+  | atributo
 parte3for:
   t_identificador t_igual atributo t_mais atributo
   | t_identificador t_igual atributo t_menos atributo
@@ -134,9 +145,26 @@ corpofor:
 whilecomando:
   t_while t_abriparentes testeboleano t_fechaparentes corpowhile
 corpowhile:
-  comandos
+  comando t_pontovirgula
   | t_abrichave comandos t_fechachave
   | error { yyerror; printf("corpo do while incorreto\n");}
+expressoes:
+  %empty
+  |expressao t_pontovirgula expressoes
+expressao:
+  expressao t_mais expressao
+  | expressao t_menos expressao
+  | expressao t_asteristico expressao
+  | expressao t_barra expressao
+  | expressao t_igual_a expressao
+  | expressao t_diferente_de expressao
+  | expressao t_maior expressao
+  | expressao t_maior_ou_igual expressao
+  | expressao t_menor
+  | expressao t_menor_ou_igual
+  | t_abriparentes expressao t_fechaparentes
+  | atributo
+
 
 
 
