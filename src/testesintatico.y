@@ -94,18 +94,28 @@ parametro:
 tipo:
   t_int | t_float | t_char
 corpofuncao:
-  %empty | 
-	t_abrichave declaracoes comandos t_fechachave
+  comando t_pontovirgula 
+  |declaracao t_pontovirgula 
+	|t_abrichave declaracoes_comandos t_fechachave
+declaracoes_comandos:
+  declaracao t_pontovirgula
+  | declaracao t_pontovirgula declaracoes
+  | declaracao t_pontovirgula comandos
+  | comando
+  | comando declaracoes
+  | comando comandos
 declaracoes:
-  %empty |
-  declaracao t_pontovirgula | declaracao  t_virgula declaracoes t_pontovirgula
+  declaracao t_pontovirgula
+  | declaracao t_pontovirgula  comandos
+  | declaracao t_pontovirgula declaracoes
 declaracao:
   tipo t_identificador
-  |tipo t_identificador t_igual expressoes t_pontovirgula
-  | tipo  t_abrivetor t_fechavetor t_identificador t_pontovirgula
+  |tipo t_identificador t_igual expressao
+  | tipo  t_abrivetor t_fechavetor t_identificador 
 comandos:
-  %empty
-  | comando 
+  comando
+  | comando comandos
+  | comando declaracoes
 comando:
   forcomando | whilecomando | atribuicao
 forcomando:
@@ -143,7 +153,7 @@ corpofor:
   |atributo t_asteristico atributo t_pontovirgula
   | t_abrichave comandos t_fechachave
 whilecomando:
-  t_while t_abriparentes testeboleano t_fechaparentes corpowhile
+  t_while t_abriparentes expressoes t_fechaparentes corpowhile
 corpowhile:
   comando t_pontovirgula
   | t_abrichave comandos t_fechachave
