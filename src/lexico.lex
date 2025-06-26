@@ -83,7 +83,7 @@ break {coluna+=coluna_tmp; coluna_tmp=tam(yytext);yylval.texto= strdup(yytext); 
 
 
 
-{numero} { coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.numero_inteiro= atoi(yytext);  return t_num;}
+[0-9]+ { printf("acho numero %s", yytext);coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.numero_inteiro= atoi(yytext);  return t_num;}
 {decimal} { coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.numero_decimal= atof(yytext);  return t_decimal;}
 {varincorreta} {coluna+=coluna_tmp; coluna_tmp=tam(yytext); fprintf(stderr, "<< Linha %d: variavel incorreta ou separe numero e string >>\n", linha); exit(-1); }
 {variavel} {coluna+=coluna_tmp; coluna_tmp=tam(yytext);yylval.texto=strdup(yytext);;return t_identificador;} 
