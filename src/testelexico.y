@@ -65,8 +65,8 @@ palavra_reservada:
 atributos:
   atributos-numeros | atributos-texto {fprintf(yyout, "[Linha %d] Achou uma atributos-texto (%s)\n", linha, $1);} 
 atributos-numeros:
-  t_num {fprintf(yyout, "[Linha %d] [Coluna:%d]  Achou um t_num (%f)\n", linha, coluna, $1);} |  
-  t_decimal {fprintf(yyout, "[Linha %d] Achou um t_float (%f)\n", linha, $1);}
+  t_num {fprintf(yyout, "[Linha %d] [Coluna:%d]  Achou um t_num (%d)\n", linha, coluna, $1);} |  
+  t_decimal {fprintf(yyout, "[Linha %d] Achou um t_decimal (%f)\n", linha, $1);}
 atributos-texto:
   t_identificador  | t_variavel | t_string 
 %%

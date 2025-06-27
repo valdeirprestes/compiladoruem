@@ -94,39 +94,31 @@ parametro:
 tipo:
   t_int | t_float | t_char
 corpofuncao:
-  comando t_pontovirgula 
-  |declaracao t_pontovirgula 
-	|t_abrichave declaracoes_comandos t_fechachave
-declaracoes_comandos:
-  declaracao t_pontovirgula
-  | declaracao t_pontovirgula declaracoes
-  | declaracao t_pontovirgula comandos
-  | comando
-  | comando declaracoes
-  | comando comandos
+  %empty | 
+	t_abrichave declaracoes comandos t_fechachave
 declaracoes:
-  declaracao t_pontovirgula
-  | declaracao t_pontovirgula  comandos
-  | declaracao t_pontovirgula declaracoes
+  %empty |
+  declaracao t_pontovirgula | declaracao  t_virgula declaracoes t_pontovirgula
 declaracao:
   tipo t_identificador
-  |tipo t_identificador t_igual expressao
-  |tipo  t_abrivetor t_fechavetor t_identificador
+  |tipo t_identificador t_igual expressoes t_pontovirgula
+  | tipo  t_abrivetor t_fechavetor t_identificador t_pontovirgula
 comandos:
-  comando
-  | comando comandos
+  %empty
+  | comando 
 comando:
   forcomando | whilecomando | atribuicao
+
+
 forcomando:
   t_for t_abriparentes parte1for t_pontovirgula parte2for t_pontovirgula parte3for t_fechaparentes corpofor
 parte1for:
   %empty
-  | tipo t_identificador t_igual atributo
-  | t_identificador t_igual atributo
+  | atribuicao
 atribuicao:
-  t_identificador t_igual expressao  
+  tipo t_identificador t_igual atributo 
 atributo:
-  t_identificador | t_decimal | t_num 
+  t_identificador | t_decimal | t_num | t_float
 parte2for:
   %empty
   | testeboleano
@@ -150,15 +142,19 @@ corpofor:
   |atributo t_menos atributo t_pontovirgula
   |atributo t_barra atributo t_pontovirgula
   |atributo t_asteristico atributo t_pontovirgula
-  | t_abrichave comandos t_fechachave
+  |t_abrichave comandos t_fechachave
+
 
 
 whilecomando:
-  t_while t_abriparentes expressao t_fechaparentes corpowhile
+  t_while t_abriparentes testeboleano t_fechaparentes corpowhile
 corpowhile:
   comando t_pontovirgula
-  | t_abrichave declaracoes_comandos t_fechachave
+  | t_abrichave comandos t_fechachave
   | error { yyerror; printf("corpo do while incorreto\n");}
+expressoes:
+  %empty
+  |expressao t_pontovirgula expressoes
 expressao:
   expressao t_mais expressao
   | expressao t_menos expressao

@@ -1,0 +1,8 @@
+
+int valor(){
+    int[] valor;
+    while(1)
+    {
+        valor = 1;
+    }
+}

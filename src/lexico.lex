@@ -14,7 +14,7 @@
 
 texto [a-zA-Z]
 numero [0-9]+
-decimal [0-9]*.[0-9]+
+decimal [0-9]+.[0-9]+
 espaco [" "\t]
 novalinha [\n]
 variavel [a-zA-Z][a-zA-Z0-9]*
