@@ -10,6 +10,7 @@
   long linha=1;
   long coluna=1;
   long coluna_tmp = 0;
+  long errossintatico = 0;
 %}
 
 %union{
@@ -76,7 +77,10 @@ programa:
 codigos:
   %empty |
   codigo codigos |   
-  codigo error { yyerror; printf("erro de sintaxe\n");} 
+  codigo error { 
+      yyerror; 
+      printf("Foi encontrado %d erro(s) de sintaxe no codigo\n", errossintatico);
+    } 
 codigo:
   funcao
 funcao:
@@ -104,22 +108,30 @@ declaracoes_comandos:
   | comando declaracoes
   | comando comandos
 declaracoes:
-  tipo declaracao t_pontovirgula comandos
-  |tipo declaracao t_pontovirgula declaracoes
-  |declaracao t_pontovirgula
+  declaracao t_pontovirgula
   |declaracao t_pontovirgula  comandos
   |declaracao t_pontovirgula declaracoes
 declaracao:
   tipo t_identificador
   |tipo t_identificador t_igual expressao
   |tipo  t_abrivetor t_fechavetor t_identificador
-  |t_identificador t_igual expressao
+  | t_identificador t_igual expressao
+  | t_identificador t_abriparentes argumentos t_fechaparentes 
 comandos:
   comando
   | comando comandos
   | comando declaracoes
 comando:
-  forcomando | whilecomando | atribuicao
+  forcomando 
+  | whilecomando 
+  | atribuicao 
+argumentos:
+  %empty
+  | argumento
+  | argumento t_virgula argumentos
+argumento:
+  atributo
+  | tipo atributo
 forcomando:
   t_for t_abriparentes parte1for t_pontovirgula parte2for t_pontovirgula parte3for t_fechaparentes corpofor
 parte1for:
@@ -127,7 +139,8 @@ parte1for:
   | tipo t_identificador t_igual atributo
   | t_identificador t_igual atributo
 atribuicao:
-  t_identificador t_igual expressao  
+  t_identificador t_igual expressao
+  |t_identificador t_igual t_identificador t_abriparentes argumentos t_fechaparentes 
 atributo:
   t_identificador | t_decimal | t_num 
 parte2for:
@@ -149,19 +162,25 @@ parte3for:
   | t_identificador t_igual atributo t_barra atributo
   | t_identificador t_igual atributo t_asteristico atributo
 corpofor:
+  corpoloop
+corpoloop:
   atributo t_igual atributo t_pontovirgula
   |atributo t_menos atributo t_pontovirgula
   |atributo t_barra atributo t_pontovirgula
   |atributo t_asteristico atributo t_pontovirgula
+  | forcomando
+  | whilecomando
   | t_abrichave comandos t_fechachave
 
 
 whilecomando:
   t_while t_abriparentes expressao t_fechaparentes corpowhile
 corpowhile:
-  comando t_pontovirgula
-  | t_abrichave declaracoes_comandos t_fechachave
-  | error { yyerror; printf("corpo do while incorreto\n");}
+  corpoloop
+  | error {
+      errossintatico += 1; 
+      yyerror; printf("corpo do while incorreto\n");
+    }
 expressao:
   expressao t_mais expressao
   | expressao t_menos expressao

@@ -12,7 +12,8 @@ int valor(){
 }
 int[] valores(){
     int i = 1;
-    if (i)
-        i = valor();
+    while(i)
+        i = get(  );
+    put();
     
 }
