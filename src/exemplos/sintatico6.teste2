@@ -2,20 +2,4 @@ int main(){
     int valor;
     for( int i = 1 ; i < 10 ; i = i + 1)
         valor = i;
-<<<<<<< HEAD
-}
-int valor(){
-    int[] valor;
-    while( 1    )
-    {
-        valor = 1;
-    }
-}
-int[] valores(){
-    int i = 1;
-    if (i)
-        i = valor();
-    
-=======
->>>>>>> 5ae7fab8280ca15f6a27f5c2b0c762c5c73a420b
 }
