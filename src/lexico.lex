@@ -64,12 +64,13 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 "!" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_exclamacao;}
 "?" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_interrogacao;}
 ":" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_doispontos;}
+"." {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_ponto;}
 int {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_int;}
 float {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_float;}
 char {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_char;}
 if {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_if;}
 else {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_else;}
-return {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_char;}
+return {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_return;}
 class {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_class;}
 this {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_this;}
 construtor {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_construtor;}

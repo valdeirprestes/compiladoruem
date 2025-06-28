@@ -1,4 +1,27 @@
+int main(){
+    int valor;
+    for(int i = 1; i< 10 ; i = i + 1)
+        valor = i;
+}
+int valor(){
+    int[] valor;
+    while(1)
+    {
+        valor = 1;
+    }
+}
+
 class MinhaClasse{
-    int atributo;
-    int metodo1(){}
+    char[] get(){
+        return "nothing";
+    }
+}
+
+int[] valores(){
+    int i = 1;
+    while(i)
+        i = get(  );
+    put();
+    MinhaClasse m;
+    m.get();
 }

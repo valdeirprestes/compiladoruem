@@ -38,7 +38,7 @@
 
 /* Tokens de repetição e condicionais */
 %token <texto> t_for t_while t_if t_else t_switch t_case t_default t_break t_abrichave t_fechachave t_abriparentes t_fechaparentes
-%token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao
+%token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao t_ponto
 
 /* Tokens classe e função */
 %token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_this
@@ -47,8 +47,8 @@
 %token t_espaco t_novalinha 
 %token <texto> t_eof  
 
-%start programa
-%type programa codigo 
+%start inicio
+%type inicio codigo 
 %type funcao parametrosfunc parametro  
 
 /* Generate the parser description file. */
@@ -72,17 +72,17 @@
 
 
 %% /* Gramática deste ponto para baixo*/
-programa:
+inicio:
   codigos 
 codigos:
-  %empty |
-  codigo codigos |   
-  codigo error { 
+  %empty 
+  | codigo codigos 
+  | codigo error { 
       yyerror; 
       printf("Foi encontrado %d erro(s) de sintaxe no codigo\n", errossintatico);
     } 
 codigo:
-  funcao
+  funcao | classe
 funcao:
 	tipofunc t_identificador t_abriparentes parametrosfunc t_fechaparentes corpofuncao 
 tipofunc:
@@ -95,6 +95,7 @@ parametros:
 parametro:
   %empty |
 	tipo t_identificador
+  |tipo t_abrivetor t_fechavetor t_identificador
 tipo:
   t_int | t_float | t_char
 corpofuncao:
@@ -115,16 +116,17 @@ declaracao:
   tipo t_identificador
   |tipo t_identificador t_igual expressao
   |tipo  t_abrivetor t_fechavetor t_identificador
-  | t_identificador t_igual expressao
-  | t_identificador t_abriparentes argumentos t_fechaparentes 
 comandos:
   comando
+  | chamada_funcao t_pontovirgula 
+  | chamada_metodo t_pontovirgula
   | comando comandos
   | comando declaracoes
 comando:
   forcomando 
   | whilecomando 
-  | atribuicao 
+  | atribuicao t_pontovirgula
+  | t_return atributo t_pontovirgula
 argumentos:
   %empty
   | argumento
@@ -139,10 +141,12 @@ parte1for:
   | tipo t_identificador t_igual atributo
   | t_identificador t_igual atributo
 atribuicao:
-  t_identificador t_igual expressao
-  |t_identificador t_igual t_identificador t_abriparentes argumentos t_fechaparentes 
+  t_identificador t_igual expressao 
+   
 atributo:
-  t_identificador | t_decimal | t_num 
+  t_identificador | t_decimal | t_num | t_string
+  | chamada_funcao
+  | chamada_metodo
 parte2for:
   %empty
   | testeboleano
@@ -171,7 +175,10 @@ corpoloop:
   | forcomando
   | whilecomando
   | t_abrichave comandos t_fechachave
-
+chamada_funcao:
+  t_identificador t_abriparentes argumentos t_fechaparentes
+chamada_metodo:
+  t_identificador t_ponto t_identificador t_abriparentes argumentos t_fechaparentes
 
 whilecomando:
   t_while t_abriparentes expressao t_fechaparentes corpowhile
@@ -195,7 +202,12 @@ expressao:
   | t_abriparentes expressao t_fechaparentes
   | atributo
 
-
-
-
+classe:
+  t_class t_identificador t_abrichave corpoclasse t_fechachave
+corpoclasse:
+  %empty
+  | tipo t_identificador t_pontovirgula corpoclasse
+  | tipo t_abrivetor t_fechavetor t_identificador  t_pontovirgula corpoclasse
+  | tipo t_identificador t_abriparentes parametros t_fechaparentes t_abrichave declaracoes_comandos t_fechachave corpoclasse
+  | tipo t_abrivetor t_fechavetor t_identificador t_abriparentes parametros t_fechaparentes t_abrichave declaracoes_comandos t_fechachave corpoclasse
 
