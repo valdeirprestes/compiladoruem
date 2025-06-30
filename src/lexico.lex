@@ -13,8 +13,8 @@
 
 
 texto [a-zA-Z]
-numero [0-9]+
-decimal [0-9]+.[0-9]+
+numero [-]*[0-9]+
+decimal [-]*[0-9]+.[0-9]+
 espaco [" "\t]
 novalinha [\n]
 variavel [a-zA-Z][a-zA-Z0-9]*
@@ -65,6 +65,7 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 "?" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_interrogacao;}
 ":" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_doispontos;}
 "." {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_ponto;}
+{variavel}"."{variavel} {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_variavelclasse;}
 int {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_int;}
 float {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_float;}
 char {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_char;}

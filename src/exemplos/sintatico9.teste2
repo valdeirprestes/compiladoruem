@@ -9,6 +9,5 @@ int[] valores(){
     int i = 1;
     while(i)
         i = get(  );
-    put();
-    
+    return 1;
 }

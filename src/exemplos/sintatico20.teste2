@@ -1,0 +1,12 @@
+int main() {
+    int i = 1;
+    if( i )
+    {
+        if(i)
+            return i;
+        else
+            return -1;
+    }else{
+        main();
+    }
+}
