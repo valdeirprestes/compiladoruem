@@ -68,14 +68,14 @@
 %nonassoc t_else
 
 
-%type <nodo> inicio codigos codigo funcao classe tipofunc tipo parametro atributo
+%type <nodo> inicio codigos codigo funcao classe tipofunc tipo parametro atributo chamada_funcao chamada_metodo
 %start inicio
 %% /* Gramática deste ponto para baixo*/
 inicio:
   codigos 
 codigos:
-  %empty 
-  | codigo codigos 
+  %empty { ; }
+  | codigo codigos { $$ = $1; }
   | codigo error { 
       yyerror; 
       printf("Foi encontrado %d erro(s) de sintaxe no codigo\n", errossintatico);
@@ -92,11 +92,14 @@ parametrosfunc:
 parametros:
 	parametro  | parametro t_virgula parametros 
 parametro:
-  %empty |
-	tipo t_identificador
+  %empty {}
+  |tipo t_identificador
   |tipo t_abrivetor t_fechavetor t_identificador
 tipo:
-  t_int | t_float | t_char | t_identificador
+  t_int { ; }
+  | t_float { ; }
+  | t_char { ; }
+  | t_identificador { ; }
 corpofuncao:
   t_abrichave declaracoes_comandos t_fechachave
 declaracoes_comandos:
@@ -199,8 +202,8 @@ atributo:
     Nodo *n = $1;
     $$ = n;
   }
-  | t_identificador t_ponto t_identificador
-  | t_identificador t_ponto t_identificador t_abriparentes t_fechaparentes
+  | t_identificador t_ponto t_identificador { }
+  | t_identificador t_ponto t_identificador t_abriparentes t_fechaparentes {}
 parte2for:
   %empty
   | testeboleano
@@ -225,10 +228,10 @@ corpoloop:
   comando
   | t_abrichave comandos t_fechachave
 chamada_funcao:
-  t_identificador t_abriparentes argumentos t_fechaparentes
+  t_identificador t_abriparentes argumentos t_fechaparentes { ; }
   | t_identificador t_abriparentes argumentos t_fechaparentes error { printf("ERRO em chamada_funcao");}
 chamada_metodo:
-  t_variavelclasse t_abriparentes argumentos t_fechaparentes
+  t_variavelclasse t_abriparentes argumentos t_fechaparentes {}
 
 whilecomando:
   t_while t_abriparentes expressao t_fechaparentes corpowhile
@@ -253,7 +256,7 @@ expressao:
   | atributo
 
 classe:
-  t_class t_identificador t_abrichave corpoclasse t_fechachave
+  t_class t_identificador t_abrichave corpoclasse t_fechachave {  }
 corpoclasse:
   %empty
   | tipo t_identificador t_pontovirgula corpoclasse
