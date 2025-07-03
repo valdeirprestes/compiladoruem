@@ -37,10 +37,10 @@ Nodo *valorNodo(Tipo tipo, char *valor )
 	nodo->tipo = tipo;
 	switch(tipo){
 		case TIPO_VARIAVEL: /* ainda não sei como vou ajustar */
-			nodo->dado.sval = strdup(valor);
+			nodo->token.sval = strdup(valor);
 			break;
 		case TIPO_INTEIRO:
-			nodo->dado.ival = atoi(valor);
+			nodo->token.ival = atoi(valor);
 			break;
 		default:
 		;

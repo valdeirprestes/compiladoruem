@@ -27,16 +27,16 @@ typedef enum _Tipo{
 	TIPO_CHAMADA_METODO
 } Tipo;
 
-typedef union _tipo{
+typedef union token{
 	char *sval;
 	double dval;
 	long  ival;
 	char  cval;
-} Dados;
+} Token;
 
 typedef struct Nodo{
 	char *nome;
-	Dados dado;
+	Token token;
 	Tipo tipo;
 	int nfilhos;
 	struct Nodo *filhos[MAXNODOS];

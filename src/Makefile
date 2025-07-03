@@ -17,7 +17,7 @@ lex.yy.c: lexico.lex $(FONTETESTELEXICO)
 	flex lexico.lex 
 testelexico: $(FONTELEXICO) $(FONTETESTELEXICO)
 	$(CC) -o testelexico $(FONTELEXICO) $(FONTETESTELEXICO) 
-testesintatico: $(FONTELEXICO) $(FONTETESTESINTATICO)
+testesintatico: $(FONTELEXICO) $(FONTETESTESINTATICO) AST.c
 	$(CC) -o testesintatico $(FONTELEXICO) $(FONTETESTESINTATICO) AST.c
 compiler: $(FONTELEXICO) $(FONTEPARSER)
 	$(CC) -o compiler $(FONTELEXICO) $(FONTEPARSER)
