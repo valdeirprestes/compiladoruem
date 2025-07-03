@@ -18,7 +18,7 @@ lex.yy.c: lexico.lex $(FONTETESTELEXICO)
 testelexico: $(FONTELEXICO) $(FONTETESTELEXICO)
 	$(CC) -o testelexico $(FONTELEXICO) $(FONTETESTELEXICO) 
 testesintatico: $(FONTELEXICO) $(FONTETESTESINTATICO)
-	$(CC) -o testesintatico $(FONTELEXICO) $(FONTETESTESINTATICO) 
+	$(CC) -o testesintatico $(FONTELEXICO) $(FONTETESTESINTATICO) AST.c
 compiler: $(FONTELEXICO) $(FONTEPARSER)
 	$(CC) -o compiler $(FONTELEXICO) $(FONTEPARSER)
 clean:

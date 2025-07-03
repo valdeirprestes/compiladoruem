@@ -1,7 +1,7 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
-  #include <string.h> 
+  #include <string.h>
   int yylex (void);
   void yyerror (char const *);
   extern FILE *yyout;
@@ -14,8 +14,6 @@
 
 %union{
   char* texto;
-  long numero_inteiro;
-  double numero_decimal;
 }
 
 /* operadores lógicos */
@@ -29,9 +27,9 @@
 
 
 /* valores de atribuição para tipos*/
-%token <numero_inteiro> t_num 
+%token <texto> t_num 
 %token <texto> t_identificador
-%token <numero_decimal> t_decimal 
+%token <texto> t_decimal 
 %token <texto> t_string t_eof
 
 /* Tokens de repetição e condicionais */
@@ -66,8 +64,8 @@ palavra_reservada:
 atributos:
   atributos-numeros | atributos-texto {fprintf(yyout, "[Linha %d] Achou uma atributos-texto (%s)\n", linha, $1);} 
 atributos-numeros:
-  t_num {fprintf(yyout, "[Linha %d] [Coluna:%d]  Achou um t_num (%d)\n", linha, coluna, $1);} |  
-  t_decimal {fprintf(yyout, "[Linha %d] Achou um t_decimal (%f)\n", linha, $1);}
+  t_num {fprintf(yyout, "[Linha %d] [Coluna:%d]  Achou um t_num (%s)\n", linha, coluna, $1);} |  
+  t_decimal {fprintf(yyout, "[Linha %d] Achou um t_decimal (%s)\n", linha, $1);}
 atributos-texto:
   t_identificador  | t_variavel | t_variavelclasse | t_string {fprintf(yyout, "[Linha %d] [Coluna:%d]  Achou um t_string (%s)\n", linha, coluna, $1);}
 %%

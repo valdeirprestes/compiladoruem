@@ -1,7 +1,8 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
-  #include <string.h> 
+  #include <string.h>
+  #include "AST.h"
   int yylex (void);
   void yyerror (char const *);
   extern FILE *yyout;
@@ -14,8 +15,7 @@
 
 %union{
   char* texto;
-  long numero_inteiro;
-  double numero_decimal;
+  Nodo *nodo;
 }
 
 /* operadores lógicos */
@@ -29,9 +29,9 @@
 
 
 /* valores de atribuição para tipos*/
-%token <numero_inteiro> t_num 
+%token <texto> t_num 
 %token <texto> t_identificador
-%token <numero_decimal> t_decimal 
+%token <texto> t_decimal 
 %token <texto> t_string t_eof
 
 /* Tokens de repetição e condicionais */
@@ -44,9 +44,7 @@
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha 
 
-%start inicio
-%type inicio codigo 
-%type funcao parametrosfunc parametro  
+ 
 
 /* Generate the parser description file. */
 %verbose
@@ -68,6 +66,10 @@
 
 %nonassoc "then"
 %nonassoc t_else
+
+
+%type <nodo> inicio codigos codigo funcao classe tipofunc tipo parametro atributo
+%start inicio
 %% /* Gramática deste ponto para baixo*/
 inicio:
   codigos 
@@ -163,9 +165,40 @@ atribuicao:
   | expressao
    
 atributo:
-  t_identificador | t_decimal | t_num | t_string
-  | chamada_funcao
-  | chamada_metodo
+  t_identificador 
+  {
+    Tipo tipo = TIPO_VARIAVEL;
+    Nodo *n = valorNodo(tipo , $1 );
+    $$ = n;
+  }
+  | t_decimal
+  {
+    Tipo tipo = TIPO_DECIMAL;
+    Nodo *n = valorNodo(tipo , $1 );
+    $$ = n;
+  } 
+  | t_num 
+  {
+    Tipo tipo = TIPO_INTEIRO;
+    Nodo *n = valorNodo(tipo , $1 );
+    $$ = n;
+  }
+  | t_string
+  {
+    Tipo tipo = TIPO_STRING;
+    Nodo *n = valorNodo(tipo , $1 );
+    $$ = n;
+  }
+  | chamada_funcao {
+    Tipo tipo = TIPO_CHAMADA_FUNCAO;
+    Nodo *n = $1;
+    $$ = n;
+  }
+  | chamada_metodo {
+    Tipo tipo = TIPO_CHAMADA_METODO;
+    Nodo *n = $1;
+    $$ = n;
+  }
   | t_identificador t_ponto t_identificador
   | t_identificador t_ponto t_identificador t_abriparentes t_fechaparentes
 parte2for:
