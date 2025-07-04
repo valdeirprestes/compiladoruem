@@ -57,6 +57,7 @@ Nodo *criaNodoFuncao( char *identificador, Nodo *tipofunc, Nodo **parametros, No
 void printNodo(Nodo *nodo);
 void printNodoFilho(Nodo *n, int nivel,int niveis[NIVEIS][1]);
 Nodo** criaVetorNodo(Nodo *nodo);
-Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo *nodos);
+Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodos);
+Nodo *criarIF( Nodo *corpocomandos);
 char *stringNivel(int nivel, int niveis[NIVEIS][1]);
 #endif

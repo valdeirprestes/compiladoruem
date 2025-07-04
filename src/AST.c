@@ -130,6 +130,13 @@ Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodos){
     }
 	return n;
 }
+
+Nodo *criarIF( Nodo *corpocomandos){
+	Nodo *n = criarNodo;
+	n->nome = strdup("IF");
+	n[0]=corpocomandos;
+	return n;
+}
 char *stringNivel(int nivel, int niveis[NIVEIS][1])
 {
 	char espaco[1000];
@@ -148,3 +155,4 @@ char *stringNivel(int nivel, int niveis[NIVEIS][1])
 	espaco[i]='\0';
 	return strdup(espaco);
 }
+

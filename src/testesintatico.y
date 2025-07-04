@@ -71,8 +71,12 @@
 
 
 %type <nodo> inicio codigos codigo funcao classe tipofunc tipo  
-%type <nodo> atributo chamada_funcao chamada_metodo corpofuncao declaracoes_comandos
-%type <vetor_nodos> parametrosfunc parametro parametros declaracao declaracoes
+%type <nodo> atributo chamada_funcao chamada_metodo corpofuncao 
+%type <vetor_nodos> parametrosfunc parametro parametros 
+%type <vetor_nodos> declaracoes declaracoes_comandos
+%type <nodo> declaracao
+%type <vetor_nodos> comandos 
+%type <nodo> comando corpoloop testeboleano comandoif
 %start inicio
 %% /* Gramática deste ponto para baixo*/
 inicio:
@@ -143,42 +147,71 @@ tipo:
   | t_identificador { $$ =valorNodo( TIPO_IDENTIFICADOR , $1, NULL ); }
 corpofuncao:
   t_abrichave declaracoes_comandos t_fechachave {
-    $$ = $2;
+    Nodo *n = criarNodo();
+    n->filhos = $2;
+    $$ = n;
   }
 declaracoes_comandos:
   %empty { $$ = NULL;}
-  | declaracao t_pontovirgula { 
-    $$ = $1;
+  | declaracao t_pontovirgula {
+    Nodo *n[1] = {NULL};
+    n[0] = $1; 
+    $$ = n;
   }
   | declaracao t_pontovirgula declaracoes {
-    Nodo *n[MAXNODOS] = {NULL};
-      n[0] = $1[0];
-      int i = 1;
-      while($3[i-1]){
-        n[i] = $3[i-1];
-        i++;
-      }
-      $$ = n; 
+      $$ = criaVetorNodoRecursivo($1, $3 ); 
   }
-  | declaracao t_pontovirgula comandos 
-  | comando 
-  | comando declaracoes 
-  | comando comandos 
+  | declaracao t_pontovirgula comandos{
+      $$ = criaVetorNodoRecursivo($1, $3 ); 
+  }
+  | comando {
+    Nodo *n[1] = {NULL};
+    n[0] = $1; 
+    $$ = n;
+  } 
+  | comando declaracoes{
+      $$ = criaVetorNodoRecursivo($1, $2 );
+  }
+  | comando comandos {
+      $$ = criaVetorNodoRecursivo($1, $2 );
+  }
 declaracoes:
-  declaracao t_pontovirgula
-  |declaracao t_pontovirgula  comandos
-  |declaracao t_pontovirgula declaracoes
+  declaracao t_pontovirgula {
+    Nodo *n[1] = {NULL};
+    n[0] = $1; 
+    $$ = n;
+  }
+  |declaracao t_pontovirgula  comandos{
+      $$ = criaVetorNodoRecursivo($1, $3 );
+  }
+  |declaracao t_pontovirgula declaracoes{
+      $$ = criaVetorNodoRecursivo($1, $3 );
+  }
 declaracao:
   tipo t_identificador
   |tipo t_identificador t_igual expressao
   |tipo  t_abrivetor t_fechavetor t_identificador
 comandos:
-  comando 
-  | comando comandos 
-  | comando declaracoes
-  | comando error 
+  comando {
+    Nodo *n[1] = {NULL};
+    n[0] = $1; 
+    $$ = n;
+  }
+  | comando comandos {
+      $$ = criaVetorNodoRecursivo($1, $2 );
+  }
+  | comando declaracoes {
+      $$ = criaVetorNodoRecursivo($1, $2 );
+  }
+  | comando error {
+    Nodo *n[1] = {NULL};
+    n[0] = $1; 
+    $$ = n;
+  }
 comando:
-  comandoif
+  comandoif {
+    $$ = criarIF( $1);
+  }
   | comandoswitch
   | forcomando 
   | whilecomando 
@@ -201,8 +234,22 @@ defaultswitch:
   t_default  t_doispontos comandos
   |t_default  t_doispontos t_abrichave comandos t_fechachave
 comandoif:
-  t_if t_abriparentes testeboleano t_fechaparentes  corpoloop %prec "then"
-  | t_if t_abriparentes testeboleano t_fechaparentes  corpoloop t_else corpoloop
+  t_if t_abriparentes testeboleano t_fechaparentes  corpoloop %prec "then" {
+    Nodo *n[2]={NULL};
+    n[0] = $3;
+    n[0]->filhos[0] = $5;
+    $$ = n;
+  }
+  | t_if t_abriparentes testeboleano t_fechaparentes  corpoloop t_else corpoloop{
+    Nodo *n[2]={NULL};
+    n[0] = $3;
+    n[0]->filhos[0] = $5;
+    n[1] = criarNodo();
+    n[1]->nome="ELSE";
+    n[1]->tipo = TIPO_ELSE;
+    n[1]->filhos[0] = $5;
+    $$ = n;
+  }
 
 argumentos:
   %empty
