@@ -37,7 +37,7 @@
 %token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao  t_ponto
 
 /* Tokens classe e função */
-%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_this t_variavelclasse
+%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_this t_identificadorclasse
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha 
@@ -67,6 +67,6 @@ atributos-numeros:
   t_num {fprintf(yyout, "[Linha %d] [Coluna:%d]  Achou um t_num (%s)\n", linha, coluna, $1);} |  
   t_decimal {fprintf(yyout, "[Linha %d] Achou um t_decimal (%s)\n", linha, $1);}
 atributos-texto:
-  t_identificador  | t_variavel | t_variavelclasse | t_string {fprintf(yyout, "[Linha %d] [Coluna:%d]  Achou um t_string (%s)\n", linha, coluna, $1);}
+  t_identificador  | t_variavel | t_identificadorclasse | t_string {fprintf(yyout, "[Linha %d] [Coluna:%d]  Achou um t_string (%s)\n", linha, coluna, $1);}
 %%
 

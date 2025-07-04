@@ -13,7 +13,7 @@ testesintatico.tab.c: testesintatico.y
 	bison -H testesintatico.y --report=counterexamples -Wother -Wcounterexamples -v
 #parser.tab.c: parser.y
 #	bison -H parser.y --report=counterexamples -Wother
-lex.yy.c: lexico.lex $(FONTETESTELEXICO)
+lex.yy.c: lexico.lex $(FONTETESTESINTATICO)
 	flex lexico.lex 
 testelexico: $(FONTELEXICO) $(FONTETESTELEXICO)
 	$(CC) -o testelexico $(FONTELEXICO) $(FONTETESTELEXICO) 

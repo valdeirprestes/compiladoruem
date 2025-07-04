@@ -65,7 +65,7 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 "?" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_interrogacao;}
 ":" {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_doispontos;}
 "." {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_ponto;}
-{variavel}"."{variavel} {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_variavelclasse;}
+{variavel}"."{variavel} {coluna+= coluna_tmp ; coluna_tmp =1; yylval.texto= strdup(yytext); return t_identificadorclasse;}
 int {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_int;}
 float {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_float;}
 char {coluna+=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_char;}

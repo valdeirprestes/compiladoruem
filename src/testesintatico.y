@@ -11,11 +11,13 @@
   long coluna=1;
   long coluna_tmp = 0;
   int errossintatico = 0;
+  Nodo *raiz;
 %}
 
 %union{
   char* texto;
   Nodo *nodo;
+  Nodo **vetor_nodos;
 }
 
 /* operadores lógicos */
@@ -39,7 +41,7 @@
 %token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao  t_ponto
 
 /* Tokens classe e função */
-%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_this t_variavelclasse
+%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_this t_identificadorclasse
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha 
@@ -68,48 +70,100 @@
 %nonassoc t_else
 
 
-%type <nodo> inicio codigos codigo funcao classe tipofunc tipo parametro atributo chamada_funcao chamada_metodo
+%type <nodo> inicio codigos codigo funcao classe tipofunc tipo  
+%type <nodo> atributo chamada_funcao chamada_metodo corpofuncao declaracoes_comandos
+%type <vetor_nodos> parametrosfunc parametro parametros declaracao declaracoes
 %start inicio
 %% /* Gramática deste ponto para baixo*/
 inicio:
-  codigos 
+  codigos { 
+    Nodo *raiz = criarNodo();
+    raiz->nome = strdup("INICIO");
+    raiz->filhos[0] = $1;
+    printNodo(raiz);
+    $$ = raiz;
+  }
 codigos:
-  %empty { ; }
-  | codigo codigos { $$ = $1; }
-  | codigo error { 
+  %empty { $$ = NULL ; }
+  | codigo codigos{
+    Nodo *n = criarNodo();
+    n->nome = strdup("CODIGOS");
+    n->filhos[0] = $1;
+    n->filhos[1] = $2;
+    $$ = n;
+  }
+  | codigo error {
+      Nodo *n = criarNodo();
+      raiz->nome = strdup("CODIGO");
+      raiz->filhos[0] = $1;
       yyerror; 
       printf("Foi encontrado %d erro(s) de sintaxe no codigo\n", errossintatico);
+      $$ = n;
     } 
 codigo:
-  funcao | classe
+  funcao { $$ = $1;}
+  | classe
 funcao:
-	tipofunc t_identificador t_abriparentes parametrosfunc t_fechaparentes corpofuncao 
+	tipofunc t_identificador t_abriparentes parametrosfunc t_fechaparentes corpofuncao {
+    Nodo *n = criaNodoFuncao( $2, $1 , $4, $6 );
+    $$ = n;
+  }
 tipofunc:
-  tipo | 
-  tipo t_abrivetor t_fechavetor
+  tipo { $$ = $1; }
+  |tipo t_abrivetor t_fechavetor { $$ = $1;}
 parametrosfunc:
-	parametro  | parametro t_virgula parametros 
+	parametro { 
+      $$ = criaVetorNodo($1[0]); 
+  }  
+  | parametro t_virgula parametros { 
+      $$ = criaVetorNodoRecursivo($1[0], $3); 
+  }
 parametros:
-	parametro  | parametro t_virgula parametros 
+	parametro  { $$ = $1;}
+| parametro t_virgula parametros {
+    $$ = criaVetorNodoRecursivo($1[0], $3); 
+  }
 parametro:
-  %empty {}
-  |tipo t_identificador
+  %empty { $$ = NULL;}
+  |tipo t_identificador {
+    Nodo *n[1] = {NULL};
+    n[0] = valorNodo(TIPO_IDENTIFICADOR, $2 , $1);
+    $$ = n;
+  }
   |tipo t_abrivetor t_fechavetor t_identificador
+  {
+    Nodo *n[1] = {NULL};
+    n[0] = valorNodo(TIPO_VETOR, $2 , $1);
+    $$ = n;
+  }
 tipo:
-  t_int { ; }
-  | t_float { ; }
-  | t_char { ; }
-  | t_identificador { ; }
+  t_int { $$ =valorNodo(TIPO_INT , $1, NULL ); }
+  | t_float { $$ =valorNodo(TIPO_FLOAT , $1, NULL ); }
+  | t_char  { $$ =valorNodo(TIPO_CHAR , $1 , NULL); }
+  | t_identificador { $$ =valorNodo( TIPO_IDENTIFICADOR , $1, NULL ); }
 corpofuncao:
-  t_abrichave declaracoes_comandos t_fechachave
+  t_abrichave declaracoes_comandos t_fechachave {
+    $$ = $2;
+  }
 declaracoes_comandos:
-  %empty
-  | declaracao t_pontovirgula
-  | declaracao t_pontovirgula declaracoes { printf("declaracao t_pontovirgula declaracoes linha %d coluna %d\n", linha, coluna);}
-  | declaracao t_pontovirgula comandos { printf("declaracao t_pontovirgula comandos linha %d coluna %d\n", linha, coluna);}
-  | comando { printf("comando  linha %d coluna %d\n", linha, coluna);}
-  | comando declaracoes { printf("comando declaracoes linha %d coluna %d\n", linha, coluna);}
-  | comando comandos { printf("comando comandos linha %d coluna %d\n", linha, coluna);}
+  %empty { $$ = NULL;}
+  | declaracao t_pontovirgula { 
+    $$ = $1;
+  }
+  | declaracao t_pontovirgula declaracoes {
+    Nodo *n[MAXNODOS] = {NULL};
+      n[0] = $1[0];
+      int i = 1;
+      while($3[i-1]){
+        n[i] = $3[i-1];
+        i++;
+      }
+      $$ = n; 
+  }
+  | declaracao t_pontovirgula comandos 
+  | comando 
+  | comando declaracoes 
+  | comando comandos 
 declaracoes:
   declaracao t_pontovirgula
   |declaracao t_pontovirgula  comandos
@@ -119,10 +173,10 @@ declaracao:
   |tipo t_identificador t_igual expressao
   |tipo  t_abrivetor t_fechavetor t_identificador
 comandos:
-  comando { printf("{comando} comandos linha %d coluna %d\n", linha, coluna);}
-  | comando comandos { printf("{comando} comandos linha %d coluna %d\n", linha, coluna);}
+  comando 
+  | comando comandos 
   | comando declaracoes
-  | comando error { printf("ERROR {comando} chamada_funcao linha %d coluna %d\n", linha, coluna);}
+  | comando error 
 comando:
   comandoif
   | comandoswitch
@@ -170,40 +224,30 @@ atribuicao:
 atributo:
   t_identificador 
   {
-    Tipo tipo = TIPO_VARIAVEL;
-    Nodo *n = valorNodo(tipo , $1 );
+    Tipo tipo = TIPO_IDENTIFICADOR;
+    Nodo *n = valorNodo(tipo , $1, NULL );
     $$ = n;
   }
   | t_decimal
   {
     Tipo tipo = TIPO_DECIMAL;
-    Nodo *n = valorNodo(tipo , $1 );
+    Nodo *n = valorNodo(tipo , $1 , NULL);
     $$ = n;
   } 
   | t_num 
   {
     Tipo tipo = TIPO_INTEIRO;
-    Nodo *n = valorNodo(tipo , $1 );
+    Nodo *n = valorNodo(tipo , $1 , NULL);
     $$ = n;
   }
   | t_string
   {
     Tipo tipo = TIPO_STRING;
-    Nodo *n = valorNodo(tipo , $1 );
+    Nodo *n = valorNodo(tipo , $1 , NULL);
     $$ = n;
   }
-  | chamada_funcao {
-    Tipo tipo = TIPO_CHAMADA_FUNCAO;
-    Nodo *n = $1;
-    $$ = n;
-  }
-  | chamada_metodo {
-    Tipo tipo = TIPO_CHAMADA_METODO;
-    Nodo *n = $1;
-    $$ = n;
-  }
-  | t_identificador t_ponto t_identificador { }
-  | t_identificador t_ponto t_identificador t_abriparentes t_fechaparentes {}
+  | chamada_funcao 
+  | chamada_metodo
 parte2for:
   %empty
   | testeboleano
@@ -231,7 +275,7 @@ chamada_funcao:
   t_identificador t_abriparentes argumentos t_fechaparentes { ; }
   | t_identificador t_abriparentes argumentos t_fechaparentes error { printf("ERRO em chamada_funcao");}
 chamada_metodo:
-  t_variavelclasse t_abriparentes argumentos t_fechaparentes {}
+  t_identificadorclasse t_abriparentes argumentos t_fechaparentes {}
 
 whilecomando:
   t_while t_abriparentes expressao t_fechaparentes corpowhile

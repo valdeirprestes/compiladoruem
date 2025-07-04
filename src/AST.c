@@ -16,7 +16,8 @@ Nodo *criarNodo()
 {
 	Nodo *n = (Nodo*) malloc(sizeof(Nodo));
 	n->nfilhos = 0;
-	for (int i=0 ; i< MAXNODOS; i++) n->filhos[i] = NULL;
+	Nodo *f[MAXNODOS] = {NULL};
+	n->filhos = f;
 	return n;
 }
 
@@ -25,7 +26,7 @@ Nodo *operacaoNodo(char *regra, double num1,char op, double num2)
 	
 }
 
-Nodo *valorNodo(Tipo tipo, char *valor )
+Nodo *valorNodo(Tipo tipo, char *valor, Nodo *nodotipo )
 {
 	Nodo *nodo = criarNodo();
 	if(!nodo)
@@ -36,18 +37,55 @@ Nodo *valorNodo(Tipo tipo, char *valor )
 	}
 	nodo->tipo = tipo;
 	switch(tipo){
-		case TIPO_VARIAVEL: /* ainda não sei como vou ajustar */
+		case TIPO_IDENTIFICADOR: /* ainda não sei como vou ajustar */
 			nodo->token.sval = strdup(valor);
+			nodo->token.tval = nodotipo->tipo;
 			break;
 		case TIPO_INTEIRO:
 			nodo->token.ival = atoi(valor);
 			break;
+		case TIPO_STRING:
+			nodo->token.sval = strdup(valor);
+			break;
+		case TIPO_VETOR:
+			nodo->token.tval = nodotipo->tipo;
+			break;
 		default:
-		;
+		break;
 	}
 	
 	return nodo;
 }
+
+int numNodos( Nodo **nodo)
+{
+	int i = 1;
+	while (nodo[i-1])
+	{
+		i++;
+	}
+	return i-1;
+}
+Nodo *criaNodoFuncao( char *identificador, Nodo *tipofunc,  Nodo **parametros, Nodo *corpo ){
+	Nodo *nodofuncao = criarNodo();
+	nodofuncao->nome = strdup(identificador);
+	nodofuncao->tipo = TIPO_CHAMADA_FUNCAO;
+	nodofuncao->token.tval = tipofunc->tipo;
+	Nodo *filhos[MAXNODOS] = {NULL};
+	int nparametros = numNodos(parametros);
+	int i =0;
+	while(i < nparametros){
+		if(parametros[i]){
+			filhos[i] = parametros[i];
+		}
+		i++;
+	}
+	filhos[i] = corpo;
+	nodofuncao->filhos = filhos;
+	return nodofuncao;
+}
+
+
 
 void printNodo(Nodo *nodo)
 {
@@ -73,6 +111,24 @@ void printNodoFilho(Nodo *n, int nivel, int niveis[NIVEIS][1])
 	if(n->filhos[0])
 		printNodoFilho(n->filhos[0], nivel + 1, niveis);
 	
+}
+
+Nodo** criaVetorNodo(Nodo *nodo){
+	Nodo *n[1]={NULL};
+    n[0] = nodo;
+	return n;
+}
+Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodos){
+	Nodo *n[MAXNODOS] = {NULL};
+    n[0] = nodo;
+	int nn = 1;
+    int i = 1;
+    while(nodos[i-1] && nn < MAXNODOS){
+    	n[i] = nodos[i-1];
+        i++;
+		nn++;
+    }
+	return n;
 }
 char *stringNivel(int nivel, int niveis[NIVEIS][1])
 {

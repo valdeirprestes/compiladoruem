@@ -19,12 +19,14 @@ typedef enum _Tipo{
 	TIPO_RETURN,
 	TIPO_FUNC,
 	TIPO_CLASSE,
-	TIPO_VARIAVEL,
+	TIPO_IDENTIFICADOR,
+	TIPO_IDENTIFICADORCLASSE,
 	TIPO_INTEIRO,
 	TIPO_STRING,
 	TIPO_DECIMAL,
 	TIPO_CHAMADA_FUNCAO,
-	TIPO_CHAMADA_METODO
+	TIPO_CHAMADA_METODO,
+	TIPO_VETOR
 } Tipo;
 
 typedef union token{
@@ -32,6 +34,7 @@ typedef union token{
 	double dval;
 	long  ival;
 	char  cval;
+	Tipo tval;
 } Token;
 
 typedef struct Nodo{
@@ -39,7 +42,7 @@ typedef struct Nodo{
 	Token token;
 	Tipo tipo;
 	int nfilhos;
-	struct Nodo *filhos[MAXNODOS];
+	struct Nodo **filhos;
 } Nodo;
 typedef struct AST{
 	Nodo *raiz;
@@ -48,8 +51,12 @@ AST  *criarAST();
 Nodo *criarNodo();
 void vaziaAST(AST *arvore);
 Nodo *operacaoNodo(char *regra, double num1,char op, double num2);
-Nodo *valorNodo(Tipo tipo, char *valor );
+Nodo *valorNodo(Tipo tipo, char *valor, Nodo *nodotipo );
+int numNodos( Nodo **nodo);
+Nodo *criaNodoFuncao( char *identificador, Nodo *tipofunc, Nodo **parametros, Nodo *corpo );
 void printNodo(Nodo *nodo);
 void printNodoFilho(Nodo *n, int nivel,int niveis[NIVEIS][1]);
+Nodo** criaVetorNodo(Nodo *nodo);
+Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo *nodos);
 char *stringNivel(int nivel, int niveis[NIVEIS][1]);
 #endif
