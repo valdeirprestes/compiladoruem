@@ -235,19 +235,20 @@ defaultswitch:
   |t_default  t_doispontos t_abrichave comandos t_fechachave
 comandoif:
   t_if t_abriparentes testeboleano t_fechaparentes  corpoloop %prec "then" {
-    Nodo *n[2]={NULL};
-    n[0] = $3;
-    n[0]->filhos[0] = $5;
+    Nodo *n = criarNodo();
+    n->filhos[0] = $5;
     $$ = n;
   }
   | t_if t_abriparentes testeboleano t_fechaparentes  corpoloop t_else corpoloop{
-    Nodo *n[2]={NULL};
-    n[0] = $3;
-    n[0]->filhos[0] = $5;
-    n[1] = criarNodo();
-    n[1]->nome="ELSE";
-    n[1]->tipo = TIPO_ELSE;
-    n[1]->filhos[0] = $5;
+    Nodo *n = criarNodo();
+    Nodo *n2 = criarNodo();
+    n2->filhos[0] = $5;
+    n->filhos[0] = $3;
+    n->filhos[0] = n2;
+    n->filhos[1] = criarNodo();
+    n->filhos[1]->nome="ELSE";
+    n->filhos[1]->tipo = TIPO_ELSE;
+    n->filhos[1]->filhos[0] = $5;
     $$ = n;
   }
 

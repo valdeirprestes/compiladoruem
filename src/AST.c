@@ -134,7 +134,7 @@ Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodos){
 Nodo *criarIF( Nodo *corpocomandos){
 	Nodo *n = criarNodo;
 	n->nome = strdup("IF");
-	n[0]=corpocomandos;
+	n->filhos[0]=corpocomandos;
 	return n;
 }
 char *stringNivel(int nivel, int niveis[NIVEIS][1])
