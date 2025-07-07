@@ -71,7 +71,8 @@
 
 
 %type <nodo> inicio  funcao classe tipofunc tipo
-%type <vetor_nodos> codigos codigo  
+%type <vetor_nodos> codigos codigo
+%type <nodo> expressao  
 %type <nodo> atributo chamada_funcao chamada_metodo corpofuncao 
 %type <vetor_nodos> parametrosfunc parametro parametros 
 %type <vetor_nodos> declaracoes declaracoes_comandos
@@ -209,8 +210,7 @@ comando:
       Nodo *n = criarNodo();
       n->nome = strdup("RETURN");
       n->tipo = TIPO_RETURN;
-      n->filhos = criaVetorNodo(NULL);
-      n->filhos[0] = valorNodo(TIPO_RETURN, $1, NULL) ;
+      n->filhos = criaVetorNodo($2);
       $$ = n;
   }
   | t_break t_pontovirgula
@@ -341,7 +341,7 @@ expressao:
   | expressao t_menor
   | expressao t_menor_ou_igual
   | t_abriparentes expressao t_fechaparentes
-  | atributo
+  | atributo { $$ = $1;}
 
 classe:
   t_class t_identificador t_abrichave corpoclasse t_fechachave {  }

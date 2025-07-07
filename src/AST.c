@@ -70,9 +70,9 @@ int numNodos( Nodo **nodo)
 Nodo *criaNodoFuncao( char *identificador, Nodo *tipofunc,  Nodo **parametros, Nodo *corpo ){
 	Nodo *nodofuncao = criarNodo();
 	nodofuncao->nome = strdup(identificador);
-	nodofuncao->tipo = TIPO_CHAMADA_FUNCAO;
+	nodofuncao->tipo = TIPO_FUNCAO;
 	nodofuncao->token.tval = tipofunc->tipo;
-	Nodo *filhos[MAXNODOS] = {NULL};
+	Nodo **filhos= criaVetorNodo(NULL);
 	int nparametros = numNodos(parametros);
 	int i =0;
 	while(i < nparametros){
@@ -142,7 +142,7 @@ char *strTipo(Tipo tipo){
 		strncpy(nome,"TIPO_RETURN", TAM);
 		break;
 	case TIPO_FUNCAO:
-		strncpy(nome,"TIPO_FUNC", TAM);
+		strncpy(nome,"TIPO_FUNCAO", TAM);
 		break;
 	case TIPO_CLASSE:
 		strncpy(nome,"TIPO_CLASSE", TAM);
@@ -224,6 +224,8 @@ Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2)
 {
 	int tam = numNodos(n1) + numNodos(n2);
 	Nodo **n= malloc((tam+1) * sizeof(Nodo*));
+	printf("n ogual a %d\n", numNodos(n1));
+	printf("n ogual a %d\n", numNodos(n2));
 	if(!n){
 		printf("Não conseguiu alocar memoria em concacterFilhos\n");
 		exit(-1);
@@ -241,15 +243,14 @@ Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2)
 	int cont2=0;
 	if(n2)
 	{
-		while (n1[cont])
+		while (n2[cont2])
 		{
 			n[cont] = n2[cont2];
 			cont+= 1;
 			cont2+=1;
 		}
 	}
-
-
+	return n;
 }
 Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodo_direita){
 	Nodo **n = criaVetorNodo(nodo);
