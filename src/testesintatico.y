@@ -157,8 +157,7 @@ declaracoes_comandos:
       $$ = concactenaFilhosdeNodos($1, $3 ); 
   }
   | comando {
-    Nodo **n = criaVetorNodo(NULL);
-    n[0] = $1; 
+    Nodo **n = criaVetorNodo($1);
     $$ = n;
   } 
   | comando declaracoes{
@@ -183,7 +182,7 @@ declaracao:
   |tipo  t_abrivetor t_fechavetor t_identificador
 comandos:
   comando {
-    Nodo *n[1] = {NULL};
+    Nodo **n= criaVetorNodo(NULL);
     n[0] = $1; 
     $$ = n;
   }
@@ -206,7 +205,14 @@ comando:
   | forcomando 
   | whilecomando 
   | atribuicao t_pontovirgula
-  | t_return expressao t_pontovirgula
+  | t_return expressao t_pontovirgula {  
+      Nodo *n = criarNodo();
+      n->nome = strdup("RETURN");
+      n->tipo = TIPO_RETURN;
+      n->filhos = criaVetorNodo(NULL);
+      n->filhos[0] = valorNodo(TIPO_RETURN, $1, NULL) ;
+      $$ = n;
+  }
   | t_break t_pontovirgula
 comandoswitch:
   t_switch t_abriparentes atributo t_fechaparentes  t_abrichave corposwitch t_fechachave
