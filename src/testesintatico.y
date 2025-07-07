@@ -70,42 +70,36 @@
 %nonassoc t_else
 
 
-%type <nodo> inicio codigos codigo funcao classe tipofunc tipo  
+%type <nodo> inicio  funcao classe tipofunc tipo
+%type <vetor_nodos> codigos codigo  
 %type <nodo> atributo chamada_funcao chamada_metodo corpofuncao 
 %type <vetor_nodos> parametrosfunc parametro parametros 
 %type <vetor_nodos> declaracoes declaracoes_comandos
-%type <nodo> declaracao
+%type <vetor_nodos> declaracao
 %type <vetor_nodos> comandos 
 %type <nodo> comando corpoloop testeboleano comandoif
 %start inicio
 %% /* Gramática deste ponto para baixo*/
 inicio:
-  codigos { 
+codigos { 
     Nodo *raiz = criarNodo();
     raiz->nome = strdup("INICIO");
-    raiz->filhos[0] = $1;
+    raiz->filhos = criaVetorNodo(NULL);
+    raiz->filhos = $1;
     printNodo(raiz);
     $$ = raiz;
   }
 codigos:
   %empty { $$ = NULL ; }
   | codigo codigos{
-    Nodo *n = criarNodo();
-    n->nome = strdup("CODIGOS");
-    n->filhos[0] = $1;
-    n->filhos[1] = $2;
-    $$ = n;
+    $$ = concactenaFilhosdeNodos($1, $2);
   }
   | codigo error {
-      Nodo *n = criarNodo();
-      raiz->nome = strdup("CODIGO");
-      raiz->filhos[0] = $1;
       yyerror; 
       printf("Foi encontrado %d erro(s) de sintaxe no codigo\n", errossintatico);
-      $$ = n;
     } 
 codigo:
-  funcao { $$ = $1;}
+  funcao { $$ = criaVetorNodo($1);}
   | classe
 funcao:
 	tipofunc t_identificador t_abriparentes parametrosfunc t_fechaparentes corpofuncao {
@@ -117,20 +111,20 @@ tipofunc:
   |tipo t_abrivetor t_fechavetor { $$ = $1;}
 parametrosfunc:
 	parametro { 
-      $$ = criaVetorNodo($1[0]); 
+      $$ = $1; 
   }  
   | parametro t_virgula parametros { 
-      $$ = criaVetorNodoRecursivo($1[0], $3); 
+      $$ = concactenaFilhosdeNodos($1, $3); 
   }
 parametros:
 	parametro  { $$ = $1;}
 | parametro t_virgula parametros {
-    $$ = criaVetorNodoRecursivo($1[0], $3); 
+    $$ = concactenaFilhosdeNodos($1, $3); 
   }
 parametro:
   %empty { $$ = NULL;}
   |tipo t_identificador {
-    Nodo *n[1] = {NULL};
+    Nodo **n = criaVetorNodo(NULL);
     n[0] = valorNodo(TIPO_IDENTIFICADOR, $2 , $1);
     $$ = n;
   }
@@ -154,18 +148,16 @@ corpofuncao:
 declaracoes_comandos:
   %empty { $$ = NULL;}
   | declaracao t_pontovirgula {
-    Nodo *n[1] = {NULL};
-    n[0] = $1; 
-    $$ = n;
+    $$ = $1;
   }
   | declaracao t_pontovirgula declaracoes {
-      $$ = criaVetorNodoRecursivo($1, $3 ); 
+      $$ = concactenaFilhosdeNodos($1, $3 ); 
   }
   | declaracao t_pontovirgula comandos{
-      $$ = criaVetorNodoRecursivo($1, $3 ); 
+      $$ = concactenaFilhosdeNodos($1, $3 ); 
   }
   | comando {
-    Nodo *n[1] = {NULL};
+    Nodo **n = criaVetorNodo(NULL);
     n[0] = $1; 
     $$ = n;
   } 
@@ -177,15 +169,13 @@ declaracoes_comandos:
   }
 declaracoes:
   declaracao t_pontovirgula {
-    Nodo *n[1] = {NULL};
-    n[0] = $1; 
-    $$ = n;
+    $$ = $1;
   }
   |declaracao t_pontovirgula  comandos{
-      $$ = criaVetorNodoRecursivo($1, $3 );
+      $$ = concactenaFilhosdeNodos($1, $3 );
   }
   |declaracao t_pontovirgula declaracoes{
-      $$ = criaVetorNodoRecursivo($1, $3 );
+      $$ = concactenaFilhosdeNodos($1, $3 );
   }
 declaracao:
   tipo t_identificador
