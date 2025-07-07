@@ -57,6 +57,7 @@ Nodo *valorNodo(Tipo tipo, char *valor, Nodo *nodotipo );
 int numNodos( Nodo **nodo);
 Nodo *criaNodoFuncao( char *identificador, Nodo *tipofunc, Nodo **parametros, Nodo *corpo );
 void printNodo(Nodo *nodo);
+char *strTipo(Tipo tipo);
 void printNodoFilhos(Nodo *n, int nivel,int niveis[NIVEIS][1]);
 Nodo** criaVetorNodo(Nodo *nodo);
 Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2);

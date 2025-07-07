@@ -4,4 +4,8 @@ int main(){
 }
 int valor(){
     return "valor";
+    int valor;
+    int valor2;
+    int valor3;
+
 }

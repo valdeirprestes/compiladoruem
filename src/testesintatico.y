@@ -105,6 +105,7 @@ codigo:
 funcao:
 	tipofunc t_identificador t_abriparentes parametrosfunc t_fechaparentes corpofuncao {
     Nodo *n = criaNodoFuncao( $2, $1 , $4, $6 );
+    printf("linha 108 filhos %d\n", numNodos(n->filhos));
     $$ = n;
   }
 tipofunc:
@@ -112,19 +113,24 @@ tipofunc:
   |tipo t_abrivetor t_fechavetor { $$ = $1;}
 parametrosfunc:
 	parametro { 
+      printf("entrou aqui linha 115\n");
       $$ = $1; 
   }  
   | parametro t_virgula parametros { 
-      $$ = concactenaFilhosdeNodos($1, $3); 
+      printf("entrou aqui linha 119\n");
+      Nodo **n = concactenaFilhosdeNodos($1, $3); 
+      printf(" linha 121 filhos %d\n", numNodos(n));
+      $$ = n;
   }
 parametros:
-	parametro  { $$ = $1;}
+	parametro  { printf("entrou aqui linha 121\n"); $$ = $1; }
 | parametro t_virgula parametros {
     $$ = concactenaFilhosdeNodos($1, $3); 
   }
 parametro:
   %empty { $$ = NULL;}
   |tipo t_identificador {
+    printf("entrou aqui linha 128\n");
     Nodo **n = criaVetorNodo(NULL);
     n[0] = valorNodo(TIPO_IDENTIFICADOR, $2 , $1);
     $$ = n;
@@ -143,6 +149,7 @@ tipo:
 corpofuncao:
   t_abrichave declaracoes_comandos t_fechachave {
     Nodo *n = criarNodo();
+
     n->filhos = $2;
     $$ = n;
   }
@@ -178,7 +185,12 @@ declaracoes:
       $$ = concactenaFilhosdeNodos($1, $3 );
   }
 declaracao:
-  tipo t_identificador
+  tipo t_identificador {
+    Nodo **n = criaVetorNodo($1);
+    $1->filhos = criaVetorNodo(NULL);
+    $1->filhos[1] = valorNodo(TIPO_IDENTIFICADOR, $2,$1);
+    $$ = n;
+  }
   |tipo t_identificador t_igual expressao
   |tipo  t_abrivetor t_fechavetor t_identificador
 comandos:

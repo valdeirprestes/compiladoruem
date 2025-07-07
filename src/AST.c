@@ -16,7 +16,9 @@ Nodo *criarNodo()
 {
 	Nodo *n = (Nodo*) malloc(sizeof(Nodo));
 	n->nfilhos = 0;
-	n->filhos = NULL;
+	Nodo **n2 = malloc(MAXNODOS * sizeof(Nodo*));
+	for(int i=0; i<MAXNODOS; i++) n2[i] = NULL;
+	n->filhos = n2;
 	n->tipo = TIPO_REGRA;
 	return n;
 }
@@ -35,6 +37,7 @@ Nodo *valorNodo(Tipo tipo, char *valor, Nodo *nodotipo )
 		exit(-1);
 		return NULL; /* Nem sera executado no exemplo!*/
 	}
+	nodo->nome = strdup(valor);
 	nodo->tipo = tipo;
 	switch(tipo){
 		case TIPO_IDENTIFICADOR: /* ainda não sei como vou ajustar */
@@ -75,14 +78,18 @@ Nodo *criaNodoFuncao( char *identificador, Nodo *tipofunc,  Nodo **parametros, N
 	Nodo **filhos= criaVetorNodo(NULL);
 	int nparametros = numNodos(parametros);
 	int i =0;
+	//printf("linha 79\n");
 	while(i < nparametros){
 		if(parametros[i]){
+			//printf("linha 82 -> parametros -> %s->%s\n", parametros[i]->nome, strTipo(parametros[i]->tipo) );
 			filhos[i] = parametros[i];
 		}
 		i++;
 	}
 	filhos[i] = corpo;
+	filhos[i+1] = NULL;
 	nodofuncao->filhos = filhos;
+	//printf("linha 89 filhos = %d\n", numNodos(nodofuncao->filhos));
 	return nodofuncao;
 }
 
@@ -203,7 +210,7 @@ void printNodoFilhos(Nodo *n, int nivel, int niveis[NIVEIS][1])
 				break;
 		}
 	}
-	//printf("passou aqui nivel %d \n", nivel);
+	/*printf("passou aqui nivel %d \n", nivel);*/
 	int i=0;	
 	while(n->filhos && i < MAXNODOS && n && n->filhos[i] ){
 		printNodoFilhos(n->filhos[i], nivel + 1, niveis);
@@ -224,8 +231,6 @@ Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2)
 {
 	int tam = numNodos(n1) + numNodos(n2);
 	Nodo **n= malloc((tam+1) * sizeof(Nodo*));
-	printf("n ogual a %d\n", numNodos(n1));
-	printf("n ogual a %d\n", numNodos(n2));
 	if(!n){
 		printf("Não conseguiu alocar memoria em concacterFilhos\n");
 		exit(-1);
