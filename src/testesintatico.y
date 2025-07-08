@@ -17,7 +17,7 @@
 %union{
   char* texto;
   Nodo *nodo;
-  Nodo **vetor_nodos;
+  VetorNodo *vetor_nodos;
 }
 
 /* operadores lógicos */
@@ -71,75 +71,63 @@
 
 
 %type <nodo> inicio  funcao classe tipofunc tipo
-%type <vetor_nodos> codigos codigo
+%type <nodo> codigos codigo
 %type <nodo> expressao  
 %type <nodo> atributo chamada_funcao chamada_metodo corpofuncao 
-%type <vetor_nodos> parametrosfunc parametro parametros 
-%type <vetor_nodos> declaracoes declaracoes_comandos
-%type <vetor_nodos> declaracao
-%type <vetor_nodos> comandos 
-%type <nodo> comando corpoloop testeboleano comandoif
+%type <nodo> parametrosfunc parametro parametros 
+%type <nodo> declaracoes_comandos 
+%type <nodo> corpoloop testeboleano comandoif
+%type <vetor_nodos> declaracao comando declaracoes comandos
 %start inicio
 %% /* Gramática deste ponto para baixo*/
 inicio:
 codigos { 
-    Nodo *raiz = criarNodo();
-    raiz->nome = strdup("INICIO");
-    raiz->filhos = criaVetorNodo(NULL);
-    raiz->filhos = $1;
+    extern Nodo *raiz; 
+    raiz= criarNodoRegraInicio($1);
     printNodo(raiz);
     $$ = raiz;
   }
 codigos:
   %empty { $$ = NULL ; }
   | codigo codigos{
-    $$ = concactenaFilhosdeNodos($1, $2);
+    $$ = criarNodoRegraCodigos($1 , $2);
   }
   | codigo error {
       yyerror; 
       printf("Foi encontrado %d erro(s) de sintaxe no codigo\n", errossintatico);
     } 
 codigo:
-  funcao { $$ = criaVetorNodo($1);}
+  funcao { 
+    $$ = $1;
+    }
   | classe
 funcao:
 	tipofunc t_identificador t_abriparentes parametrosfunc t_fechaparentes corpofuncao {
-    Nodo *n = criaNodoFuncao( $2, $1 , $4, $6 );
-    printf("linha 108 filhos %d\n", numNodos(n->filhos));
-    $$ = n;
+    $$ = criaNodoRegraFuncao( $2, $1 , $4, $6 );
   }
 tipofunc:
   tipo { $$ = $1; }
   |tipo t_abrivetor t_fechavetor { $$ = $1;}
 parametrosfunc:
 	parametro { 
-      printf("entrou aqui linha 115\n");
-      $$ = $1; 
+      $$ = criarNodoRegraParametrosFunc($1 , NULL);
   }  
   | parametro t_virgula parametros { 
-      printf("entrou aqui linha 119\n");
-      Nodo **n = concactenaFilhosdeNodos($1, $3); 
-      printf(" linha 121 filhos %d\n", numNodos(n));
-      $$ = n;
+      $$ = criarNodoRegraParametrosFunc($1 , $3);
   }
 parametros:
-	parametro  { printf("entrou aqui linha 121\n"); $$ = $1; }
+	parametro  { $$ = criarNodoRegraParametrosFunc($1 , NULL); }
 | parametro t_virgula parametros {
-    $$ = concactenaFilhosdeNodos($1, $3); 
+    $$ = criarNodoRegraParametrosFunc($1 , $3);
   }
 parametro:
   %empty { $$ = NULL;}
   |tipo t_identificador {
-    printf("entrou aqui linha 128\n");
-    Nodo **n = criaVetorNodo(NULL);
-    n[0] = valorNodo(TIPO_IDENTIFICADOR, $2 , $1);
-    $$ = n;
+    $$ = criarNodoRegraParametro($1, $2 , TIPO_IDENTIFICADOR);
   }
   |tipo t_abrivetor t_fechavetor t_identificador
   {
-    Nodo *n[1] = {NULL};
-    n[0] = valorNodo(TIPO_VETOR, $2 , $1);
-    $$ = n;
+    $$ = criarNodoRegraParametro($1, $2 , TIPO_VETOR );
   }
 tipo:
   t_int { $$ =valorNodo(TIPO_INT , $1, NULL ); }
@@ -148,67 +136,77 @@ tipo:
   | t_identificador { $$ =valorNodo( TIPO_IDENTIFICADOR , $1, NULL ); }
 corpofuncao:
   t_abrichave declaracoes_comandos t_fechachave {
-    Nodo *n = criarNodo();
-
-    n->filhos = $2;
-    $$ = n;
+   $$ = criarNodoRegraCorpoFuncao( $2);
   }
 declaracoes_comandos:
   %empty { $$ = NULL;}
   | declaracao t_pontovirgula {
-    $$ = $1;
+    //$$ = criarNodoRegraDeclaracoesComandos($1, NULL);
+    $$ = converterVetorParaNodo($1, "DECLARACAO_COMANDO1", TIPO_REGRA);
+    //$$ = concactenaNodosFilhos($1, NULL, "DECLARACAO_COMANDO1", TIPO_REGRA);
   }
   | declaracao t_pontovirgula declaracoes {
-      $$ = concactenaFilhosdeNodos($1, $3 ); 
+    //$$ = criarNodoRegraDeclaracoesComandos($1, $3); 
+    VetorNodo *v = concactenarVetorNodo($1, $3);
+    //$$ = concactenaNodosFilhos($1, $3, "DECLARACAO_COMANDO2", TIPO_REGRA);
+    $$ = converterVetorParaNodo($1, "DECLARACAO_COMANDO2", TIPO_REGRA);
   }
   | declaracao t_pontovirgula comandos{
-      $$ = concactenaFilhosdeNodos($1, $3 ); 
+        //$$ = criarNodoRegraDeclaracoesComandos($1, $3); 
+    VetorNodo *v = concactenarVetorNodo($1, $3);
+    //$$ = concactenaNodosFilhos($1, $3, "DECLARACAO_COMANDO2", TIPO_REGRA);
+    $$ = converterVetorParaNodo($1, "DECLARACAO_COMANDO3", TIPO_REGRA);
   }
   | comando {
-    Nodo **n = criaVetorNodo($1);
-    $$ = n;
+    //$$ = criarNodoRegraDeclaracoesComandos($1, NULL);
+    //$$ = concactenaNodosFilhos($1, NULL, "DECLARACAO_COMANDO3", TIPO_REGRA);
+    $$ = converterVetorParaNodo($1, "DECLARACAO_COMANDO4", TIPO_REGRA);
   } 
   | comando declaracoes{
-      $$ = criaVetorNodoRecursivo($1, $2 );
+      VetorNodo *v = concactenarVetorNodo($1, $2);
+      $$ = converterVetorParaNodo(v, "DECLARACAO_COMANDO5", TIPO_REGRA);
+      //$$ = criarNodoRegNodoraDeclaracoesComandos($1, $2);
   }
   | comando comandos {
-      $$ = criaVetorNodoRecursivo($1, $2 );
+      VetorNodo *v = concactenarVetorNodo($1, $2);
+      $$ = converterVetorParaNodo(v, "DECLARACAO_COMANDO6", TIPO_REGRA);
   }
 declaracoes:
   declaracao t_pontovirgula {
-    $$ = $1;
+      $$ = $1;
   }
   |declaracao t_pontovirgula  comandos{
-      $$ = concactenaFilhosdeNodos($1, $3 );
+      VetorNodo *v = concactenarVetorNodo($1, $3);
+      $$ = v;
   }
   |declaracao t_pontovirgula declaracoes{
-      $$ = concactenaFilhosdeNodos($1, $3 );
+      VetorNodo *v = concactenarVetorNodo($1, $3);
+      $$ = v;
   }
 declaracao:
   tipo t_identificador {
-    Nodo **n = criaVetorNodo($1);
-    $1->filhos = criaVetorNodo(NULL);
-    $1->filhos[1] = valorNodo(TIPO_IDENTIFICADOR, $2,$1);
-    $$ = n;
+    Nodo *declaracao = criarNodoRegraDeclaracao($1, $2, TIPO_IDENTIFICADOR, NULL);
+    VetorNodo *v = novoVetorNodo(1);
+    adicionarNodoaVetorNodo(v, declaracao);
+    $$ = v;
   }
   |tipo t_identificador t_igual expressao
   |tipo  t_abrivetor t_fechavetor t_identificador
 comandos:
   comando {
-    Nodo **n= criaVetorNodo(NULL);
-    n[0] = $1; 
-    $$ = n;
+    $$ = $1;
   }
   | comando comandos {
-      $$ = criaVetorNodoRecursivo($1, $2 );
+      Nodo *n = criarNodoRegraDeclaracoesComandos($1, $2);
+      VetorNodo *v = novoVetorNodo(1);
+      adicionarNodoaVetorNodo(v, n);
+      $$ = v;
   }
   | comando declaracoes {
-      $$ = criaVetorNodoRecursivo($1, $2 );
+      $$ = criarNodoRegraDeclaracoesComandos($1, $2);
   }
   | comando error {
-    Nodo *n[1] = {NULL};
-    n[0] = $1; 
-    $$ = n;
+
   }
 comando:
   comandoif {
@@ -222,7 +220,11 @@ comando:
       Nodo *n = criarNodo();
       n->nome = strdup("RETURN");
       n->tipo = TIPO_RETURN;
-      n->filhos = criaVetorNodo($2);
+      n->filhos = criaVetorNodo(1);
+      n->nfilhos=1;
+      n->filhos[0]= $2;
+      VetorNodo *v = novoVetorNodo(2);
+      adicionarNodoaVetorNodo
       $$ = n;
   }
   | t_break t_pontovirgula

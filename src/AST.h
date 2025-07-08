@@ -4,6 +4,9 @@
 #define NIVEIS 1000
 #define ESPACOARVORE 10
 #define TAM 1000
+#define FRACASSO -1
+#define SUCESSO 1
+
 
 
 typedef enum _Tipo{
@@ -46,22 +49,43 @@ typedef struct Nodo{
 	int nfilhos;
 	struct Nodo **filhos;
 } Nodo;
-typedef struct AST{
-	Nodo *raiz;
-}AST;
-AST  *criarAST();
+
+typedef struct VetorNodo{
+	int capacidade;
+	int uso;
+	Nodo **nodos;
+}VetorNodo;
+
+
 Nodo *criarNodo();
-void vaziaAST(AST *arvore);
-Nodo *operacaoNodo(char *regra, double num1,char op, double num2);
+Nodo** criaVetorNodo(int tam);
+Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2);
+Nodo *criarNodoRegraInicio(Nodo *codigos);
+Nodo *criarNodoRegraCodigos(Nodo *n1, Nodo *n2);
+Nodo *criarNodoRegraParametrosFunc(Nodo *n1, Nodo *n2);
+Nodo *criarNodoRegraParametro(Nodo *tiponodo, char *identificador, Tipo tipo );
+Nodo *criaNodoRegraFuncao( char *identificador, Nodo *tipofunc, Nodo *parametros, Nodo *corpo );
+Nodo *criarNodoRegraCorpoFuncao( Nodo *declaracoes_comandos);
+Nodo *criarNodoRegraDeclaracao(Nodo *tiponodo, char *identificador, Tipo tipo, Nodo *filho);
+Nodo *criarNodoRegraDeclaracoesComandos(Nodo *n1, Nodo *n2);
+Nodo *criarNodoRegraComando( Nodo *comando);
 Nodo *valorNodo(Tipo tipo, char *valor, Nodo *nodotipo );
 int numNodos( Nodo **nodo);
-Nodo *criaNodoFuncao( char *identificador, Nodo *tipofunc, Nodo **parametros, Nodo *corpo );
+
+
+
+
 void printNodo(Nodo *nodo);
 char *strTipo(Tipo tipo);
 void printNodoFilhos(Nodo *n, int nivel,int niveis[NIVEIS][1]);
-Nodo** criaVetorNodo(Nodo *nodo);
-Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2);
+
+
 Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodo_direita);
 Nodo *criarIF( Nodo *corpocomandos);
 char *stringNivel(int nivel, int niveis[NIVEIS][1]);
+VetorNodo *novoVetorNodo(int nfilhos);
+int adicionarNodoaVetorNodo(VetorNodo *vetor, Nodo *nodo);
+VetorNodo *concactenarVetorNodo(VetorNodo *v1, VetorNodo *v2);
+Nodo *converterVetorParaNodo(VetorNodo *v, char *nome, Tipo tipo);
+Nodo *concactenaNodosFilhos(Nodo *n1, Nodo *n2, char *sregra, Tipo tipo);
 #endif

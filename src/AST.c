@@ -4,28 +4,271 @@
 #include <math.h>
 #include "AST.h"
 
-AST  *criarAST()
-{
-	AST *ast = (AST*) malloc(sizeof(AST));
-	if(!ast) return NULL;
-	ast->raiz= NULL;
-	return ast;
-}
-
 Nodo *criarNodo()
 {
 	Nodo *n = (Nodo*) malloc(sizeof(Nodo));
+	if(!n){
+		return NULL;
+	}
 	n->nfilhos = 0;
-	Nodo **n2 = malloc(MAXNODOS * sizeof(Nodo*));
-	for(int i=0; i<MAXNODOS; i++) n2[i] = NULL;
-	n->filhos = n2;
-	n->tipo = TIPO_REGRA;
+	n->filhos = NULL;
+	n->tipo = TIPO_REGRA; /*default*/
 	return n;
 }
 
-Nodo *operacaoNodo(char *regra, double num1,char op, double num2)
+Nodo** criaVetorNodo(int tam)
 {
+	Nodo **n= malloc(tam * sizeof(Nodo*));
+	if (!n) return NULL;
+	for(int i=0; i< tam; i++) n[i]= NULL;
+	return n;
+}
+
+Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2)
+{
+	int tam = numNodos(n1) + numNodos(n2);
+	Nodo **n= malloc((tam+1) * sizeof(Nodo*));
+	if(!n){
+		printf("Não conseguiu alocar memoria em concacterFilhos\n");
+		exit(-1);
+	}
+	for(int i=0; i< (tam+1); i++) n[i]= NULL;
+	int cont = 0;
+	if(n1)
+	{
+		while (n1[cont])
+		{
+			n[cont] = n1[cont];
+			cont++;
+		}
+	}
+	int cont2=0;
+	if(n2)
+	{
+		while (n2[cont2])
+		{
+			n[cont] = n2[cont2];
+			cont+= 1;
+			cont2+=1;
+		}
+	}
+	return n;
+}
+
+Nodo *criarNodoRegraInicio(Nodo *codigos){
+	Nodo *nodo = criarNodo();
+	if(!nodo){
+		printf("Não conseguiu alocar Nodo para regra inicio");
+		exit(-1);
+	}
+    nodo->nome = strdup("INICIO");
+	nodo->filhos = criaVetorNodo(1);
+	if(!nodo->filhos){
+		printf("Não conseguiu alocar Nodo para regra parametro");
+		exit(-1);
+	}
+	nodo->nfilhos = 1;
+	if(codigos)
+	{
+		nodo->filhos[0] = codigos;
+		nodo->nfilhos =1;
+	}
+    return nodo;
+}
+
+Nodo *criarNodoRegraCodigos(Nodo *n1, Nodo *n2)
+{
+	Nodo *n = criarNodo();
+	if(!n){
+		printf("Não conseguiu alocar Nodo para regra codigos");
+		exit(-1);
+	}
+	n->nome=strdup("CODIGOS");
+	n->tipo = TIPO_REGRA;	
+	int tam = 0;
+	if(n1) tam += n1->nfilhos;
+	if(n2) tam += n2->nfilhos;
+	n->filhos = criaVetorNodo(tam);
+	if(!n->filhos){
+		printf("Não conseguiu alocar filhos para o Nodo para regra codigos");
+		exit(-1);
+	}
+	n->nfilhos = tam;
+	int i=0;
+	while(n1 && i < n1->nfilhos)
+	{
+		n->filhos[i] = n1->filhos[i];
+		i += 1;
+	}
+	int i2 = 0;
+	while( n2 && i2 < n2->nfilhos)
+	{
+		printf("%s", n2->filhos[i2]->nome);
+		n->filhos[i] = n2->filhos[i2];
+		i2 += 1;
+		i += 1;
+	}
+	return n;
+}
+
+Nodo *criarNodoRegraParametrosFunc(Nodo *n1, Nodo *n2){
+	Nodo *n = criarNodo();
+	if(!n){
+		printf("Não conseguiu alocar Nodo para regra parametrosfunc\n");
+		exit(-1);
+	}
+	n->nome=strdup("PARAMETROS");
+	n->tipo = TIPO_REGRA;
+	int tam = 0;
+	if(n1) tam += n1->nfilhos;
+	if(n2) tam += n2->nfilhos;
+	n->filhos = criaVetorNodo(tam);
+	if(!n->filhos){
+		printf("Não conseguiu alocar filhos para o Nodo para regra parametrosfunc\n");
+		exit(-1);
+	}
+	n->nfilhos = tam;
+	int i=0;
+	while( n1 && i < n1->nfilhos)
+	{
+		n->filhos[i] = n1->filhos[i];
+		i += 1;
+	}
+	int i2 = 0;
+	while( n2 && i2 < n2->nfilhos)
+	{
+		printf("%s", n2->filhos[i2]->nome);
+		n->filhos[i] = n2->filhos[i2];
+		i2 += 1;
+		i += 1;
+	}
+	return n;
+}
+
+Nodo *criarNodoRegraParametro(Nodo *tiponodo, char *identificador, Tipo tipo ){
+	Nodo *n = criarNodo();
+	if(!n){
+		printf("Não conseguiu alocar Nodo para regra parametro\n");
+		exit(-1);
+	}
+	n->nome=strdup("PARAMETRO");
+	n->tipo = TIPO_REGRA;
+	n->filhos = criaVetorNodo(1);
+	if(!n->filhos){
+		printf("Não conseguiu alocar Nodo para regra parametro\n");
+		exit(-1);
+	}
+	n->nfilhos = 1;
+	int tam = 1;
+	n->filhos[0] = valorNodo(tipo, identificador , tiponodo);
+	return n;
+}
+Nodo *criaNodoRegraFuncao( char *identificador, Nodo *tipofunc,  Nodo *parametros, Nodo *corpo ){
+	Nodo *nodofuncao = criarNodo();
+	nodofuncao->nome = strdup(identificador);
+	nodofuncao->tipo = TIPO_FUNCAO;
+	nodofuncao->token.tval = tipofunc->tipo;
+	nodofuncao->filhos = criaVetorNodo(1);
+	if(!nodofuncao->filhos){
+		printf("Não conseguiu alocar Nodo para regra funcao\n");
+		exit(-1);
+	}
+	nodofuncao->nfilhos = 1;
+	nodofuncao->filhos[0] = corpo;
+	return nodofuncao;
+}
+
+Nodo *criarNodoRegraCorpoFuncao( Nodo *declaracoes_comandos)
+{
+	Nodo *n = criarNodo();
+	if(!n){
+		printf("Não conseguiu alocar Nodo para regra corpofuncao\n");
+		exit(-1);
+	}
+	n->nome=strdup("FUNCAO");
+	n->tipo = TIPO_FUNCAO;
+	n->filhos = criaVetorNodo(1);
+	if(!n->filhos){
+		printf("Não conseguiu alocar Nodo para regra corpofuncao\n");
+		exit(-1);
+	}
+	n->nfilhos = 1;
+	int tam = 1;
+	n->filhos[0] = declaracoes_comandos;
+	return n;
+}
+Nodo *criarNodoRegraDeclaracao(Nodo *tiponodo, char *identificador, Tipo tipo, Nodo *filho){
+	Nodo *n = criarNodo();
+	if(!n){
+		printf("Não conseguiu alocar Nodo para regra declaracao\n");
+		exit(-1);
+	}
+	n->nome=strdup("DECLARACAO");
+	n->tipo = TIPO_REGRA;
+	int tam = 1;
+	if(filho) tam +=1;
+	n->filhos = criaVetorNodo(tam);
+	if(!n->filhos){
+		printf("Não conseguiu alocar Nodo para regra declaracao\n");
+		exit(-1);
+	}
+	n->nfilhos = tam;
 	
+	n->filhos[0] = valorNodo(tipo, identificador , tiponodo);
+	if(filho)
+		n->filhos[1] = filho;
+	return n;
+}
+Nodo *criarNodoRegraDeclaracoesComandos(Nodo *n1, Nodo *n2){
+	Nodo *n = criarNodo();
+	if(!n){
+		printf("Não conseguiu alocar Nodo para regra declaracao_comandos\n");
+		exit(-1);
+	}
+	n->nome=strdup("DECLARACAO_COMANDOS");
+	n->tipo = TIPO_REGRA;
+	int tam = 0;
+	if(n1) tam += n1->nfilhos;
+	if(n2) tam += n2->nfilhos;
+	n->filhos = criaVetorNodo(tam);
+	if(!n->filhos){
+		printf("Não conseguiu alocar filhos para o Nodo para regra declaracao_comandos\n");
+		exit(-1);
+	}
+	int i=0;
+	while( n1 && i < n1->nfilhos)
+	{
+		n->filhos[i] = n1->filhos[i];
+		i += 1;
+	}
+	int i2 = 0;
+	while( n2 && i2 < n2->nfilhos)
+	{
+		printf("%s", n2->filhos[i2]->nome);
+		n->filhos[i] = n2->filhos[i2];
+		i2 += 1;
+		i += 1;
+	}
+	return n;
+}
+
+Nodo *criarNodoRegraComando( Nodo *comando)
+{
+	Nodo *n = criarNodo();
+	if(!n){
+		printf("Não conseguiu alocar Nodo para regra comando\n");
+		exit(-1);
+	}
+	n->nome=strdup("COMANDO");
+	n->tipo = TIPO_REGRA;
+	n->filhos = criaVetorNodo(1);
+	if(!n->filhos){
+		printf("Não conseguiu alocar Nodo para regra comando\n");
+		exit(-1);
+	}
+	int tam = 1;
+	n->filhos[0] = comando;
+	return n;
 }
 
 Nodo *valorNodo(Tipo tipo, char *valor, Nodo *nodotipo )
@@ -42,13 +285,15 @@ Nodo *valorNodo(Tipo tipo, char *valor, Nodo *nodotipo )
 	switch(tipo){
 		case TIPO_IDENTIFICADOR: /* ainda não sei como vou ajustar */
 			nodo->token.sval = strdup(valor);
-			nodo->token.tval = nodotipo->tipo;
+			if(nodotipo)
+				nodo->token.tval = nodotipo->tipo;
 			break;
 		case TIPO_INTEIRO:
 			nodo->token.ival = atoi(valor);
 			break;
 		case TIPO_STRING:
 			nodo->token.sval = strdup(valor);
+			nodo->nfilhos = 0;
 			break;
 		case TIPO_VETOR:
 			nodo->token.tval = nodotipo->tipo;
@@ -70,28 +315,10 @@ int numNodos( Nodo **nodo)
 	}
 	return i-1;
 }
-Nodo *criaNodoFuncao( char *identificador, Nodo *tipofunc,  Nodo **parametros, Nodo *corpo ){
-	Nodo *nodofuncao = criarNodo();
-	nodofuncao->nome = strdup(identificador);
-	nodofuncao->tipo = TIPO_FUNCAO;
-	nodofuncao->token.tval = tipofunc->tipo;
-	Nodo **filhos= criaVetorNodo(NULL);
-	int nparametros = numNodos(parametros);
-	int i =0;
-	//printf("linha 79\n");
-	while(i < nparametros){
-		if(parametros[i]){
-			//printf("linha 82 -> parametros -> %s->%s\n", parametros[i]->nome, strTipo(parametros[i]->tipo) );
-			filhos[i] = parametros[i];
-		}
-		i++;
-	}
-	filhos[i] = corpo;
-	filhos[i+1] = NULL;
-	nodofuncao->filhos = filhos;
-	//printf("linha 89 filhos = %d\n", numNodos(nodofuncao->filhos));
-	return nodofuncao;
-}
+
+
+
+
 
 
 
@@ -104,12 +331,13 @@ void printNodo(Nodo *nodo)
 	printf("|(%s)\n",  nodo->nome);
 	int i =0;
 	if(!nodo->filhos) return;
-	while( nodo->filhos[i] ){
+	while( i < nodo->nfilhos ){
 		if(nodo->filhos[i])
 			printNodoFilhos(nodo->filhos[i], 1, niveis);
 		i++;
 	}
 }
+
 
 char *strTipo(Tipo tipo){
 	char nome[TAM];
@@ -212,53 +440,19 @@ void printNodoFilhos(Nodo *n, int nivel, int niveis[NIVEIS][1])
 	}
 	/*printf("passou aqui nivel %d \n", nivel);*/
 	int i=0;	
-	while(n->filhos && i < MAXNODOS && n && n->filhos[i] ){
+	while( i <  n->nfilhos ){
 		printNodoFilhos(n->filhos[i], nivel + 1, niveis);
 		i+=1;
-		if(!n) break;
 	}
 }
 
 
-Nodo** criaVetorNodo(Nodo *nodo){
-	Nodo **n= malloc(MAXNODOS * sizeof(Nodo*));
-	for(int i=0; i< MAXNODOS; i++) n[i]= NULL;
-    n[0] = nodo;
-	return n;
-}
 
-Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2)
-{
-	int tam = numNodos(n1) + numNodos(n2);
-	Nodo **n= malloc((tam+1) * sizeof(Nodo*));
-	if(!n){
-		printf("Não conseguiu alocar memoria em concacterFilhos\n");
-		exit(-1);
-	}
-	for(int i=0; i< (tam+1); i++) n[i]= NULL;
-	int cont = 0;
-	if(n1)
-	{
-		while (n1[cont])
-		{
-			n[cont] = n1[cont];
-			cont++;
-		}
-	}
-	int cont2=0;
-	if(n2)
-	{
-		while (n2[cont2])
-		{
-			n[cont] = n2[cont2];
-			cont+= 1;
-			cont2+=1;
-		}
-	}
-	return n;
-}
+
+
 Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodo_direita){
-	Nodo **n = criaVetorNodo(nodo);
+	Nodo **n = criaVetorNodo(MAXNODOS);
+	n[1] = nodo;
 	int nn = 1;
     int i = 1;
     while(nodo_direita[i-1] && nn < MAXNODOS){
@@ -272,7 +466,7 @@ Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodo_direita){
 Nodo *criarIF( Nodo *corpocomandos){
 	Nodo *n = criarNodo();
 	n->nome = strdup("IF");
-	n->filhos = criaVetorNodo(NULL);
+	n->filhos = criaVetorNodo(MAXNODOS);
 	n->filhos[0]=corpocomandos;
 	return n;
 }
@@ -293,5 +487,110 @@ char *stringNivel(int nivel, int niveis[NIVEIS][1])
 	//niveis[nivel][0] -=1;
 	espaco[i]='\0';
 	return strdup(espaco);
+}
+
+VetorNodo *novoVetorNodo(int nfilhos){
+	VetorNodo *v =  malloc(sizeof(VetorNodo));
+	if(!v) return NULL;
+	v->uso=0;
+	v->capacidade=0;
+	v->nodos = NULL;
+	if(nfilhos)
+	{
+		v->nodos = malloc(nfilhos * sizeof(Nodo*));
+		if(!v) return NULL;
+		v->capacidade = nfilhos;
+	}
+	return v;
+}
+int adicionarNodoaVetorNodo(VetorNodo *vetor, Nodo *nodo)
+{
+	if(vetor->uso + 1 > vetor->capacidade)
+		return FRACASSO;
+	vetor->uso += 1;
+	vetor->nodos[vetor->uso - 1] = nodo;
+	return SUCESSO;
+}
+VetorNodo *concactenarVetorNodo(VetorNodo *v1, VetorNodo *v2)
+{
+	int tam = 0;
+	if(v1)  tam = v1->capacidade;
+	if(v2)  tam += v2->capacidade;
+	VetorNodo *v =  novoVetorNodo(tam);
+	if(v)
+	{
+		printf("Nao conseguiu alocar VetorNodo\n");
+		exit(-1);
+	}
+	if(v1)
+	{
+		while(v->uso < v1->uso)
+		{
+			v->nodos[v->uso] = v1->nodos[v->uso];
+			v->uso += 1;
+		} 
+	}
+	if(v2)
+	{
+		int cont = 0;
+		while(cont < v2->uso)
+		{
+			v->nodos[ v->uso + cont] = v2->nodos[cont];
+			cont += 1;
+
+		}
+		v->uso += cont; 
+	}
+	return v;
+}
+Nodo *converterVetorParaNodo(VetorNodo *v, char *nome, Tipo tipo)
+{
+	Nodo *nodo = criarNodo();
+	if( nodo){
+		printf("Falhou em criar o nodo para converter vetor para nodo\n");
+		exit(-1);
+	}
+	nodo->nome = nome;
+	nodo->tipo = tipo;
+	nodo->nfilhos = v->uso;
+	nodo->filhos = v->nodos;
+	return nodo;
+}
+
+Nodo *concactenaNodosFilhos(Nodo *n1, Nodo *n2, char *sregra, Tipo tipo)
+{
+	Nodo *n = criarNodo();
+	if(!n){
+		printf("Não conseguiu alocar Nodo para regra codigos");
+		exit(-1);
+	}
+	n->nome=strdup(sregra);
+	n->tipo = TIPO_REGRA;	
+	int tam = 0;
+	if(n1) tam += n1->nfilhos;
+	if(n2) tam += n2->nfilhos;
+	n->filhos = criaVetorNodo(tam);
+	if(!n->filhos){
+		printf("Não conseguiu alocar filhos para o Nodo para regra codigos");
+		exit(-1);
+	}
+	n->nfilhos = tam;
+	//printf("alocado %d ", tam);
+	int i=0;
+	while(n1 && i < n1->nfilhos)
+	{
+		printf("%s", n1->filhos[i]->nome);
+		n->filhos[i] = n1->filhos[i];
+		i += 1;
+	}
+	int i2 = 0;
+	while( n2 && i2 < n2->nfilhos)
+	{
+		printf("%s", n2->filhos[i2]->nome);
+		n->filhos[i] = n2->filhos[i2];
+		i2 += 1;
+		i += 1;
+	}
+	return n;
 }
 
