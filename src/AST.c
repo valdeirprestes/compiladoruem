@@ -517,7 +517,7 @@ VetorNodo *concactenarVetorNodo(VetorNodo *v1, VetorNodo *v2)
 	if(v1)  tam = v1->capacidade;
 	if(v2)  tam += v2->capacidade;
 	VetorNodo *v =  novoVetorNodo(tam);
-	if(v)
+	if(!v)
 	{
 		printf("Nao conseguiu alocar VetorNodo\n");
 		exit(-1);
@@ -546,7 +546,7 @@ VetorNodo *concactenarVetorNodo(VetorNodo *v1, VetorNodo *v2)
 Nodo *converterVetorParaNodo(VetorNodo *v, char *nome, Tipo tipo)
 {
 	Nodo *nodo = criarNodo();
-	if( nodo){
+	if(!nodo){
 		printf("Falhou em criar o nodo para converter vetor para nodo\n");
 		exit(-1);
 	}

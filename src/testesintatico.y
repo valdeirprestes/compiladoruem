@@ -197,20 +197,21 @@ comandos:
     $$ = $1;
   }
   | comando comandos {
-      Nodo *n = criarNodoRegraDeclaracoesComandos($1, $2);
-      VetorNodo *v = novoVetorNodo(1);
-      adicionarNodoaVetorNodo(v, n);
+      VetorNodo *v = concactenarVetorNodo($1, $2);
       $$ = v;
   }
   | comando declaracoes {
-      $$ = criarNodoRegraDeclaracoesComandos($1, $2);
+      VetorNodo *v = concactenarVetorNodo($1, $2);
+      $$ = v;
   }
   | comando error {
 
   }
 comando:
   comandoif {
-    $$ = criarIF( $1);
+     VetorNodo *v = novoVetorNodo(1);
+    adicionarNodoaVetorNodo(v, $1);
+    $$ = v;
   }
   | comandoswitch
   | forcomando 
@@ -224,8 +225,8 @@ comando:
       n->nfilhos=1;
       n->filhos[0]= $2;
       VetorNodo *v = novoVetorNodo(2);
-      adicionarNodoaVetorNodo
-      $$ = n;
+      adicionarNodoaVetorNodo(v, n);
+      $$ = v;
   }
   | t_break t_pontovirgula
 comandoswitch:
