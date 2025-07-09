@@ -13,7 +13,7 @@ int valor(){
 int[] valores(){
     int i = 1;
     while(i)
-        i = get(  );
-    put();
+        i = get(  ); 
+    put(i);
     
 }

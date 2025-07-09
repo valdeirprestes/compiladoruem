@@ -51,6 +51,7 @@ int addFilhoaoNodo(Nodo *nodopai, Nodo *nodofilho)
 	}
 	if(nodopai->uso > nodopai->nfilhos){
 		printf("Nodo filhos insuficientes - falta de memoria\n");
+		// Por padrao o numero de nodos filhos são 20 (MAXNODOS)
 		//return FRACASSO;
 		exit(-1);
 	}
@@ -448,6 +449,21 @@ char *strTipo(Tipo tipo){
 		break;
 	case TIPO_VETOR:
 		strncpy(nome,"TIPO_VETOR", TAM);
+		break;
+	case TIPO_BLOCO:
+		strncpy(nome,"TIPO_BLOCO", TAM);
+		break;
+	case TIPO_OPERACAO:
+		strncpy(nome,"TIPO_OPERACAO", TAM);
+		break;
+	case TIPO_TESTEBOLEAN:
+		strncpy(nome,"TIPO_BOLEAN", TAM);
+		break;
+	case TIPO_ARGUMENTOS:
+		strncpy(nome,"TIPO_ARGUMENTOS", TAM);
+		break;
+	case TIPO_PARAMETROS:
+		strncpy(nome,"TIPO_PARAMETROS", TAM);
 		break;
 	default:
 		strncpy(nome,"DESCONHECIDO", TAM);
