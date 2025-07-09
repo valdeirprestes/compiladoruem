@@ -11,9 +11,52 @@ Nodo *criarNodo()
 		return NULL;
 	}
 	n->nfilhos = 0;
+	n->uso = 0;
 	n->filhos = NULL;
 	n->tipo = TIPO_REGRA; /*default*/
 	return n;
+}
+
+Nodo *criarNodo2(char *nome, Tipo tipo, int linha, int coluna)
+{
+	Nodo *n = (Nodo*) malloc(sizeof(Nodo));
+	if(!n){
+		return NULL;
+	}
+	if(!nome){
+		printf("Nao eh possivel criar o nodo porque o nome eh invalido\n");
+		exit(-1);
+	}
+	n->nome = nome;
+	n->tipo = tipo;
+	n->linha = linha;
+	n->coluna = coluna;
+	n->nfilhos = 0;
+	n->filhos = criaVetorNodo(MAXNODOS);
+	if(!n->filhos )
+	{
+		printf("Não conseguiu alocar os nodos filhos\n");
+		free(n);
+		exit(-1);
+	}
+	n->nfilhos = MAXNODOS;
+	n->uso = 0;
+	return n;
+}
+
+int addFilhoaoNodo(Nodo *nodopai, Nodo *nodofilho)
+{
+	if(!nodofilho){
+		return FRACASSO;
+	}
+	if(nodopai->uso > nodopai->nfilhos){
+		printf("Nodo filhos insuficientes - falta de memoria\n");
+		//return FRACASSO;
+		exit(-1);
+	}
+	nodopai->filhos[nodopai->uso] = nodofilho;
+	nodopai->uso += 1;
+	return SUCESSO;
 }
 
 Nodo** criaVetorNodo(int tam)
@@ -331,7 +374,7 @@ void printNodo(Nodo *nodo)
 	printf("|(%s)\n",  nodo->nome);
 	int i =0;
 	if(!nodo->filhos) return;
-	while( i < nodo->nfilhos ){
+	while( i < nodo->uso ){
 		if(nodo->filhos[i])
 			printNodoFilhos(nodo->filhos[i], 1, niveis);
 		i++;
@@ -429,9 +472,9 @@ void printNodoFilhos(Nodo *n, int nivel, int niveis[NIVEIS][1])
 			case TIPO_STRING:
 				printf("-> %s (%s)\n", n->token.sval, strTipo(n->tipo));
 				break;
-			case TIPO_IDENTIFICADOR:
+			/*case TIPO_IDENTIFICADOR:
 				printf("-> %s (%s -> %s )\n", n->token.sval,  strTipo(n->tipo), strTipo(n->tipo_identificador));
-				break;
+				break;*/
 			default: /*depuração*/
 				printf("-> %s (%s)\n", n->nome, strTipo(n->tipo));
 
@@ -440,7 +483,7 @@ void printNodoFilhos(Nodo *n, int nivel, int niveis[NIVEIS][1])
 	}
 	/*printf("passou aqui nivel %d \n", nivel);*/
 	int i=0;	
-	while( i <  n->nfilhos ){
+	while( i <  n->uso ){
 		printNodoFilhos(n->filhos[i], nivel + 1, niveis);
 		i+=1;
 	}

@@ -1,6 +1,6 @@
 #ifndef ABSTRACTSINTATICTREE
 #define ABSTRACTSINTATICTREE
-#define MAXNODOS 10
+#define MAXNODOS 20
 #define NIVEIS 1000
 #define ESPACOARVORE 10
 #define TAM 1000
@@ -47,6 +47,9 @@ typedef struct Nodo{
 	Tipo tipo;
 	Tipo tipo_identificador;
 	int nfilhos;
+	int uso;
+	long linha;
+	long coluna;
 	struct Nodo **filhos;
 } Nodo;
 
@@ -58,6 +61,8 @@ typedef struct VetorNodo{
 
 
 Nodo *criarNodo();
+Nodo *criarNodo2(char *nome, Tipo tipo, int linha, int coluna);
+int addFilhoaoNodo(Nodo *nodopai, Nodo *nodofilho);
 Nodo** criaVetorNodo(int tam);
 Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2);
 Nodo *criarNodoRegraInicio(Nodo *codigos);

@@ -76,54 +76,69 @@
 %type <nodo> atributo chamada_funcao chamada_metodo corpofuncao 
 %type <nodo> parametrosfunc parametro parametros 
 %type <nodo> declaracoes_comandos 
-%type <nodo> corpoloop testeboleano comandoif
-%type <vetor_nodos> declaracao comando declaracoes comandos
+%type <nodo> corpoloop testeboleano comandoif 
+%type <nodo> declaracao  declaracoes comando comandos
 %start inicio
 %% /* Gramática deste ponto para baixo*/
 inicio:
-codigos { 
-    extern Nodo *raiz; 
-    raiz= criarNodoRegraInicio($1);
+  codigos { 
+    Nodo *raiz = $1;
     printNodo(raiz);
     $$ = raiz;
   }
-codigos:
-  %empty { $$ = NULL ; }
-  | codigo codigos{
-    $$ = criarNodoRegraCodigos($1 , $2);
-  }
-  | codigo error {
+  | codigos error {
       yyerror; 
       printf("Foi encontrado %d erro(s) de sintaxe no codigo\n", errossintatico);
-    } 
+  } 
+
+codigos:
+  codigo{
+    Nodo *n = criarNodo2("CODIGO", TIPO_REGRA, linha, coluna);
+    addFilhoaoNodo(n, $1);
+    $$ = n;
+  }
+  |codigos codigo{
+    addFilhoaoNodo($1, $2);
+    $$ = $1;
+  }
 codigo:
   funcao { 
     $$ = $1;
     }
-  | classe
+  | classe {$$ = $1;}
 funcao:
 	tipofunc t_identificador t_abriparentes parametrosfunc t_fechaparentes corpofuncao {
-    $$ = criaNodoRegraFuncao( $2, $1 , $4, $6 );
+      Nodo *n = criarNodo2($2, TIPO_FUNCAO, linha, coluna);
+      addFilhoaoNodo(n, $1);
+      addFilhoaoNodo(n, $4);
+      addFilhoaoNodo(n, $6);
+      $$ = n;
   }
 tipofunc:
   tipo { $$ = $1; }
   |tipo t_abrivetor t_fechavetor { $$ = $1;}
 parametrosfunc:
-	parametro { 
-      $$ = criarNodoRegraParametrosFunc($1 , NULL);
+	parametros { 
+      $$ = $1;
   }  
-  | parametro t_virgula parametros { 
-      $$ = criarNodoRegraParametrosFunc($1 , $3);
-  }
 parametros:
-	parametro  { $$ = criarNodoRegraParametrosFunc($1 , NULL); }
-| parametro t_virgula parametros {
-    $$ = criarNodoRegraParametrosFunc($1 , $3);
+	parametro  {
+      if($1 ){
+      Nodo *n = criarNodo2("Parametros", TIPO_IDENTIFICADOR, linha, coluna);
+      addFilhoaoNodo(n, $1);
+      $$ = n;
+      } else NULL;
+  }
+| parametros t_virgula parametro {
+      addFilhoaoNodo($1, $3);
+      $$ = $1;
   }
 parametro:
   %empty { $$ = NULL;}
   |tipo t_identificador {
-    $$ = criarNodoRegraParametro($1, $2 , TIPO_IDENTIFICADOR);
+      Nodo *n = criarNodo2($2, TIPO_IDENTIFICADOR, linha, coluna);
+      addFilhoaoNodo(n, $1);
+      $$ = n;
   }
   |tipo t_abrivetor t_fechavetor t_identificador
   {
@@ -136,59 +151,49 @@ tipo:
   | t_identificador { $$ =valorNodo( TIPO_IDENTIFICADOR , $1, NULL ); }
 corpofuncao:
   t_abrichave declaracoes_comandos t_fechachave {
-   $$ = criarNodoRegraCorpoFuncao( $2);
+   //$$ = criarNodoRegraCorpoFuncao( $2);
+   $$ = $2;
   }
 declaracoes_comandos:
   %empty { $$ = NULL;}
   | declaracao t_pontovirgula {
-    //$$ = criarNodoRegraDeclaracoesComandos($1, NULL);
-    $$ = converterVetorParaNodo($1, "DECLARACAO_COMANDO1", TIPO_REGRA);
-    //$$ = concactenaNodosFilhos($1, NULL, "DECLARACAO_COMANDO1", TIPO_REGRA);
+    $$ = $1;
   }
   | declaracao t_pontovirgula declaracoes {
-    //$$ = criarNodoRegraDeclaracoesComandos($1, $3); 
-    VetorNodo *v = concactenarVetorNodo($1, $3);
-    //$$ = concactenaNodosFilhos($1, $3, "DECLARACAO_COMANDO2", TIPO_REGRA);
-    $$ = converterVetorParaNodo($1, "DECLARACAO_COMANDO2", TIPO_REGRA);
+    addFilhoaoNodo($1, $3);
+    $$ = $1;
   }
   | declaracao t_pontovirgula comandos{
-        //$$ = criarNodoRegraDeclaracoesComandos($1, $3); 
-    VetorNodo *v = concactenarVetorNodo($1, $3);
-    //$$ = concactenaNodosFilhos($1, $3, "DECLARACAO_COMANDO2", TIPO_REGRA);
-    $$ = converterVetorParaNodo($1, "DECLARACAO_COMANDO3", TIPO_REGRA);
+    addFilhoaoNodo($1, $3);
+    $$ = $1;
   }
   | comando {
-    //$$ = criarNodoRegraDeclaracoesComandos($1, NULL);
-    //$$ = concactenaNodosFilhos($1, NULL, "DECLARACAO_COMANDO3", TIPO_REGRA);
-    $$ = converterVetorParaNodo($1, "DECLARACAO_COMANDO4", TIPO_REGRA);
+    $$ = $1;
   } 
   | comando declaracoes{
-      VetorNodo *v = concactenarVetorNodo($1, $2);
-      $$ = converterVetorParaNodo(v, "DECLARACAO_COMANDO5", TIPO_REGRA);
-      //$$ = criarNodoRegNodoraDeclaracoesComandos($1, $2);
+      addFilhoaoNodo($1, $2);
+      $$ = $1;
   }
   | comando comandos {
-      VetorNodo *v = concactenarVetorNodo($1, $2);
-      $$ = converterVetorParaNodo(v, "DECLARACAO_COMANDO6", TIPO_REGRA);
+      addFilhoaoNodo($1, $2);
+      $$ = $1;
   }
 declaracoes:
   declaracao t_pontovirgula {
       $$ = $1;
   }
   |declaracao t_pontovirgula  comandos{
-      VetorNodo *v = concactenarVetorNodo($1, $3);
-      $$ = v;
+      addFilhoaoNodo($1, $3);
+      $$ = $1;
   }
   |declaracao t_pontovirgula declaracoes{
-      VetorNodo *v = concactenarVetorNodo($1, $3);
-      $$ = v;
+      addFilhoaoNodo($1, $3);
+      $$ = $1;
   }
 declaracao:
   tipo t_identificador {
     Nodo *declaracao = criarNodoRegraDeclaracao($1, $2, TIPO_IDENTIFICADOR, NULL);
-    VetorNodo *v = novoVetorNodo(1);
-    adicionarNodoaVetorNodo(v, declaracao);
-    $$ = v;
+    $$ = declaracao;
   }
   |tipo t_identificador t_igual expressao
   |tipo  t_abrivetor t_fechavetor t_identificador
@@ -197,36 +202,28 @@ comandos:
     $$ = $1;
   }
   | comando comandos {
-      VetorNodo *v = concactenarVetorNodo($1, $2);
-      $$ = v;
+      addFilhoaoNodo($1, $2);
+      $$ = $1;
   }
   | comando declaracoes {
-      VetorNodo *v = concactenarVetorNodo($1, $2);
-      $$ = v;
+      addFilhoaoNodo($1, $2);
+      $$ = $1;
   }
   | comando error {
 
   }
 comando:
   comandoif {
-     VetorNodo *v = novoVetorNodo(1);
-    adicionarNodoaVetorNodo(v, $1);
-    $$ = v;
+    $$ = $1;
   }
   | comandoswitch
   | forcomando 
   | whilecomando 
   | atribuicao t_pontovirgula
   | t_return expressao t_pontovirgula {  
-      Nodo *n = criarNodo();
-      n->nome = strdup("RETURN");
-      n->tipo = TIPO_RETURN;
-      n->filhos = criaVetorNodo(1);
-      n->nfilhos=1;
-      n->filhos[0]= $2;
-      VetorNodo *v = novoVetorNodo(2);
-      adicionarNodoaVetorNodo(v, n);
-      $$ = v;
+      Nodo *n = criarNodo2("Expressao", TIPO_RETURN , linha, coluna);
+      addFilhoaoNodo(n, $2);
+      $$ = n;
   }
   | t_break t_pontovirgula
 comandoswitch:
