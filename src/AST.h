@@ -30,7 +30,8 @@ typedef enum _Tipo{
 	TIPO_DECIMAL,
 	TIPO_CHAMADA_FUNCAO,
 	TIPO_CHAMADA_METODO,
-	TIPO_VETOR
+	TIPO_VETOR,
+	TIPO_BLOCO
 } Tipo;
 
 typedef union token{

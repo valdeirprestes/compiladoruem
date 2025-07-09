@@ -1,11 +1,11 @@
 int main(){
+    return "minhastring";
     int valor;
-
+    int valor2;
 }
 int valor(){
-    return "valor";
     int valor;
     int valor2;
     int valor3;
-
+    return "minhastring";
 }
