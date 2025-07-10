@@ -9,6 +9,7 @@
   long linha=1;
   long coluna=1;
   long coluna_tmp = 0;
+  long imprimir_ast =0;
   int errossintatico = 0;
 %}
 

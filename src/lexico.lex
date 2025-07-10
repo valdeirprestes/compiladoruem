@@ -6,7 +6,8 @@
 	extern long linha;
 	extern long coluna;
 	extern long coluna_tmp;
-	extern Nodo *raiz;	
+	extern long imprimir_ast;
+	
 	long linhacomentario = 0;
 	char *meustring = NULL;
 
@@ -108,12 +109,13 @@ int tam(char *s)
 
 void yyerror (char const *s){
 	extern long linha;
-	fprintf(stderr, "Ultimo lexema aceito [%s], linha [%d], coluna[%d],  %s\n",yytext, linha, coluna, s );
+	//fprintf(stderr, "Ultimo lexema aceito [%s], linha [%d], coluna[%d],  %s\n",yytext, linha, coluna, s );
 }
 
 
+
 int main(int argc, char *arqv[]){
-	int imprimir_ast = 0 ;
+	 
 	for(int i = 1; i < argc ; i++){
 		if( strcmp(arqv[i], "-e") == 0 && i<argc){
 			yyin = fopen(arqv[i+1],"r");
@@ -126,12 +128,11 @@ int main(int argc, char *arqv[]){
 			yyout = fopen(arqv[i+1],"w");
 			i = i+1;
 		}else if (strcmp(arqv[i], "-t") == 0){
-			imprimir_ast;
+			imprimir_ast = 1;
 		}
 	}
 	yyparse();
-	/*
-	if(imprimir_ast)
-		printNodo(raiz);*/
+	
+
 
 }

@@ -11,6 +11,7 @@
   long coluna=1;
   long coluna_tmp = 0;
   int errossintatico = 0;
+  long imprimir_ast =0;
   Nodo *raiz;
 %}
 
@@ -87,14 +88,10 @@
 inicio:
   codigos { 
     raiz = $1;
+    if(imprimir_ast)
     printNodo(raiz);
     $$ = raiz;
   }
-  | codigos error {
-      yyerror; 
-      printf("Foi encontrado %d erro(s) de sintaxe no codigo\n", errossintatico);
-  } 
-  ;
 codigos:
   codigo{
     Nodo *n = criarNodo2("CODIGO", TIPO_REGRA, linha, coluna);
@@ -190,6 +187,13 @@ declaracoes_comandos:
         $$ = n;
       }
   }
+   | declaracoes_comandos  error   {
+    //yyerror; 
+    printf("->>> Esperava ; e veio %s na linha %d e coluna %d\n",$1, linha, coluna);
+    //yyerrok;
+    $$ = $1;
+
+   }
 ;
 
 
