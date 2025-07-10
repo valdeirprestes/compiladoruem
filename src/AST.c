@@ -465,6 +465,42 @@ char *strTipo(Tipo tipo){
 	case TIPO_PARAMETROS:
 		strncpy(nome,"TIPO_PARAMETROS", TAM);
 		break;
+	case TIPO_SOMA:
+		strncpy(nome,"TIPO_SOMA", TAM);
+		break;
+	case TIPO_DIVISAO:
+		strncpy(nome,"TIPO_DIVISAO", TAM);
+		break;
+	case TIPO_MULTIPLICACAO:
+		strncpy(nome,"TIPO_MULTIPLICACAO", TAM);
+		break;
+	case TIPO_SUBTRACAO:
+		strncpy(nome,"TIPO_SUBTRACAO", TAM);
+		break;
+	case TIPO_ATRIBUICAO:
+		strncpy(nome,"TIPO_ATRIBUICAO", TAM);
+		break;
+	case TIPO_TESTE_IGUAL:
+		strncpy(nome,"TIPO_TESTE_IGUAL", TAM);
+		break;
+	case TIPO_TESTE_DIFERENTE:
+		strncpy(nome,"TIPO_TESTE_DIFERENTE", TAM);
+		break;
+	case TIPO_TESTE_MAIOR:
+		strncpy(nome,"TIPO_TESTE_MAIOR", TAM);
+		break;
+	case TIPO_TESTE_MAIORIGUAL:
+		strncpy(nome,"TIPO_TESTE_MAIORIGUAL", TAM);
+		break;
+	case TIPO_TESTE_MENOR:
+		strncpy(nome,"TIPO_TESTE_MENOR", TAM);
+		break;
+	case TIPO_TESTE_MENOR_IGUAL:
+		strncpy(nome,"TIPO_TESTE_MENOR_IGUAL", TAM);
+		break;
+	case TIPO_OP_NEGACAO:
+		strncpy(nome,"TIPO_OP_NEGACAO", TAM);
+		break;
 	default:
 		strncpy(nome,"DESCONHECIDO", TAM);
 		break;

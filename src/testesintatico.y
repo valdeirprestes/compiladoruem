@@ -385,11 +385,11 @@ parte1for:
 atribuicao:
   t_identificador t_igual expressao {
     Nodo *n = criarNodo2($1, TIPO_IDENTIFICADOR, linha, coluna);
-    Nodo *n2 = criarNodo2($1, TIPO_OPERACAO, linha, coluna);
+    Nodo *n2 = criarNodo2($1, TIPO_ATRIBUICAO, linha, coluna);
     addFilhoaoNodo(n, n2);
     addFilhoaoNodo(n2, $3);
     $$ = n;};
-  | expressao
+  | expressao { $$ = $1; }
    ;
 atributo:
   t_identificador 
@@ -425,20 +425,20 @@ parte2for:
   ;
 testeboleano:
   atributo t_igual_a atributo {
-    Nodo *n = criarNodo2("ComparacaoIgualdade", TIPO_TESTEBOLEAN, linha, coluna);
+    Nodo *n = criarNodo2("ComparacaoIgualdade", TIPO_TESTE_IGUAL , linha, coluna);
     addFilhoaoNodo(n, $1);
     addFilhoaoNodo(n, $3);
     $$ = n; 
   }
   | atributo t_diferente_de atributo {
-    Nodo *n = criarNodo2("Diferente", TIPO_TESTEBOLEAN, linha, coluna);
+    Nodo *n = criarNodo2("Diferente", TIPO_TESTE_DIFERENTE, linha, coluna);
     addFilhoaoNodo(n, $1);
     addFilhoaoNodo(n, $3);
     $$ = n; 
   }
   | atributo t_maior_ou_igual atributo {
     {
-    Nodo *n = criarNodo2("MaiorOuIgual", TIPO_TESTEBOLEAN, linha, coluna);
+    Nodo *n = criarNodo2("MaiorOuIgual", TIPO_TESTE_MAIORIGUAL, linha, coluna);
     addFilhoaoNodo(n, $1);
     addFilhoaoNodo(n, $3);
     $$ = n; 
@@ -446,7 +446,7 @@ testeboleano:
   }
   | atributo t_menor_ou_igual atributo {
     {
-    Nodo *n = criarNodo2("MenorOuIgual", TIPO_TESTEBOLEAN, linha, coluna);
+    Nodo *n = criarNodo2("MenorOuIgual", TIPO_TESTE_MENOR_IGUAL, linha, coluna);
     addFilhoaoNodo(n, $1);
     addFilhoaoNodo(n, $3);
     $$ = n; 
@@ -454,7 +454,7 @@ testeboleano:
   }
   | atributo t_maior atributo {
     {
-    Nodo *n = criarNodo2("ComparacaoMaior", TIPO_TESTEBOLEAN, linha, coluna);
+    Nodo *n = criarNodo2("ComparacaoMaior", TIPO_TESTE_MAIOR, linha, coluna);
     addFilhoaoNodo(n, $1);
     addFilhoaoNodo(n, $3);
     $$ = n; 
@@ -462,13 +462,17 @@ testeboleano:
   }
   | atributo t_menor atributo {
     {
-    Nodo *n = criarNodo2("ComparacaoMenor", TIPO_TESTEBOLEAN, linha, coluna);
+    Nodo *n = criarNodo2("ComparacaoMenor", TIPO_TESTE_MENOR, linha, coluna);
     addFilhoaoNodo(n, $1);
     addFilhoaoNodo(n, $3);
     $$ = n; 
   }
   }
-  | t_exclamacao atributo { $$ = $2;}
+  | t_exclamacao atributo { 
+    Nodo *n = criarNodo2("NegacaoAtributo", TIPO_OP_NEGACAO, linha, coluna);
+    addFilhoaoNodo(n, $2);
+    $$ = n;
+  }
   | t_abriparentes atributo t_fechaparentes { $$ = $2;}
   | atributo {
       Nodo *n = criarNodo2("Verificacao", TIPO_TESTEBOLEAN, linha, coluna); 
@@ -564,16 +568,69 @@ corpowhile:
     }
     ;
 expressao:
-  expressao t_mais expressao
-  | expressao t_menos expressao
-  | expressao t_asteristico expressao
-  | expressao t_barra expressao
-  | expressao t_igual_a expressao
-  | expressao t_diferente_de expressao
-  | expressao t_maior expressao
-  | expressao t_maior_ou_igual expressao
-  | expressao t_menor
-  | expressao t_menor_ou_igual
+  expressao t_mais expressao {
+    Nodo *n = criarNodo2("Soma", TIPO_SOMA , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+
+  | expressao t_menos expressao {
+    Nodo *n = criarNodo2("Subtracao", TIPO_SUBTRACAO , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+  | expressao t_asteristico expressao {
+    {
+    Nodo *n = criarNodo2("Multiplicacao", TIPO_MULTIPLICACAO , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+  }
+  | expressao t_barra expressao {
+    Nodo *n = criarNodo2("Divisao", TIPO_DIVISAO , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+  | expressao t_igual_a expressao {
+    Nodo *n = criarNodo2("Atribuicao", TIPO_TESTE_IGUAL , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+  | expressao t_diferente_de expressao {
+    Nodo *n = criarNodo2("TesteDiferente", TIPO_TESTE_DIFERENTE , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+  | expressao t_maior expressao {
+    Nodo *n = criarNodo2("TesteMaior", TIPO_TESTE_MAIOR , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+  | expressao t_maior_ou_igual expressao {
+    Nodo *n = criarNodo2("TesteMaiorIgual", TIPO_TESTE_MAIORIGUAL , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+  | expressao t_menor expressao {
+    Nodo *n = criarNodo2("TesteMenor", TIPO_TESTE_MENOR , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+  | expressao t_menor_ou_igual expressao{
+    Nodo *n = criarNodo2("TesteMenorIgual", TIPO_TESTE_MENOR_IGUAL , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
   | t_abriparentes expressao t_fechaparentes { $$ = $2;  };
   | atributo { $$ = $1;}
   ;
