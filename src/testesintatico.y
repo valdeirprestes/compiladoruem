@@ -81,7 +81,8 @@
 %type <nodo> forcomando parte1for parte2for parte3for corpofor atribuicao
 %type <nodo> whilecomando corpowhile
 %type <nodo> argumento argumentos
-%type <nodo> corpoclasse 
+%type <nodo> corpoclasse
+%type <nodo> comandoswitch corposwitch cases case defaultswitch
 %start inicio
 %% /* Gramática deste ponto para baixo*/
 inicio:
@@ -234,9 +235,9 @@ comando:
   comandoif {
     $$ = $1;
   }
-  | comandoswitch
-  | forcomando { $$ = $1;}
-  | whilecomando {$$ = $1;}
+  | comandoswitch { $$ = $1; };
+  | forcomando { $$ = $1;} ;
+  | whilecomando {$$ = $1;} ;
   | atribuicao t_pontovirgula {
     $$ = $1;
   };
@@ -245,43 +246,89 @@ comando:
       addFilhoaoNodo(n, $2);
       $$ = n;
   }
-  | t_break t_pontovirgula
+  | t_break t_pontovirgula {
+      Nodo *n = criarNodo2($1 , TIPO_BREAK , linha, coluna);
+      $$ = n; 
+  }
   ;
 comandoswitch:
-  t_switch t_abriparentes atributo t_fechaparentes  t_abrichave corposwitch t_fechachave
+  t_switch t_abriparentes atributo t_fechaparentes  t_abrichave corposwitch t_fechachave{
+      Nodo *n = criarNodo2($1 , TIPO_SWICTH , linha, coluna);
+      addFilhoaoNodo(n, $3);
+      addFilhoaoNodo($3, $6);
+      $$ = n;
+  }
   ;
 corposwitch:
-  cases
-  | cases defaultswitch
+  cases { $$ =  $1; };
+  | cases defaultswitch {
+    {
+      if($1){
+        addFilhoaoNodo($1, $2);
+        $$ = $1;
+      }else if($2){
+        Nodo *n = criarNodo2("BlocoCase" , TIPO_BLOCO , linha, coluna);
+        addFilhoaoNodo(n, $1);
+        $$ = n;
+      }else $$ = NULL;
+    }
+  };
   ;
 cases:
-  case
-  |case cases
+  case {
+    Nodo *n = criarNodo2("BlocoCase" , TIPO_BLOCO , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    $$ = n;
+  };
+  |cases case {
+    if($1){
+    addFilhoaoNodo($1, $2);
+    $$ = $1;
+    }else{
+      Nodo *n = criarNodo2("BlocoCase" , TIPO_BLOCO , linha, coluna);
+      addFilhoaoNodo(n, $2);
+      $$ = n;
+    }
+  }
   ;
 case:
-  t_case atributo t_doispontos comandos
-  |t_case atributo t_doispontos t_abrichave comandos t_fechachave
+  t_case atributo t_doispontos comandos {
+    Nodo *n = criarNodo2($1 , TIPO_CASE , linha, coluna);
+    addFilhoaoNodo(n, $2);
+    addFilhoaoNodo(n, $4);
+    $$ = n;
+  };
+  |t_case atributo t_doispontos t_abrichave comandos t_fechachave {
+    Nodo *n = criarNodo2($1 , TIPO_CASE , linha, coluna);
+    addFilhoaoNodo(n, $2);
+    addFilhoaoNodo(n, $5);
+    $$ = n;
+  }
   ;
 defaultswitch:
-  t_default  t_doispontos comandos
-  |t_default  t_doispontos t_abrichave comandos t_fechachave
-  ;
+  t_default  t_doispontos comandos {
+    Nodo *n = criarNodo2($1 , TIPO_DEFAULT , linha, coluna);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  };
+  |t_default  t_doispontos t_abrichave comandos t_fechachave {
+    Nodo *n = criarNodo2($1 , TIPO_DEFAULT , linha, coluna);
+    addFilhoaoNodo(n, $4);
+    $$ = n;
+  };
 comandoif:
   t_if t_abriparentes testeboleano t_fechaparentes  corpoloop %prec "then" {
-    Nodo *n = criarNodo();
-    n->filhos[0] = $5;
+    Nodo *n = criarNodo2($1 , TIPO_IF, linha, coluna);
+    addFilhoaoNodo(n, $3);
+    addFilhoaoNodo(n, $5);
     $$ = n;
   }
   | t_if t_abriparentes testeboleano t_fechaparentes  corpoloop t_else corpoloop{
-    Nodo *n = criarNodo();
-    Nodo *n2 = criarNodo();
-    n2->filhos[0] = $5;
-    n->filhos[0] = $3;
-    n->filhos[0] = n2;
-    n->filhos[1] = criarNodo();
-    n->filhos[1]->nome="ELSE";
-    n->filhos[1]->tipo = TIPO_ELSE;
-    n->filhos[1]->filhos[0] = $5;
+    Nodo *n = criarNodo2("ifelse" , TIPO_IFELSE, linha, coluna);
+    Nodo *n1 = criarNodo2($1 , TIPO_IFELSE, linha, coluna);
+    Nodo *n2 = criarNodo2($6 , TIPO_IFELSE, linha, coluna);
+    addFilhoaoNodo(n, $5);
+    addFilhoaoNodo(n, $7);
     $$ = n;
   }
   ;
@@ -323,7 +370,7 @@ forcomando:
   }
   ;
 parte1for:
-  %empty
+  %empty { $$ = NULL;}
   | tipo t_identificador t_igual atributo {
     Nodo *n = criarNodo2($2, TIPO_IDENTIFICADOR, linha, coluna);
     addFilhoaoNodo(n, $1);
@@ -349,32 +396,32 @@ atributo:
   t_identificador 
   {
     Tipo tipo = TIPO_IDENTIFICADOR;
-    Nodo *n = valorNodo(tipo , $1, NULL );
+    Nodo *n = criarNodo2($1, tipo, linha, coluna);
     $$ = n;
   }
   | t_decimal
   {
     Tipo tipo = TIPO_DECIMAL;
-    Nodo *n = valorNodo(tipo , $1 , NULL);
+    Nodo *n = criarNodo2($1, tipo, linha, coluna);
     $$ = n;
   } 
   | t_num 
   {
     Tipo tipo = TIPO_INTEIRO;
-    Nodo *n = valorNodo(tipo , $1 , NULL);
+    Nodo *n = criarNodo2($1, tipo, linha, coluna);
     $$ = n;
   }
   | t_string
   {
     Tipo tipo = TIPO_STRING;
-    Nodo *n = valorNodo(tipo , $1 , NULL);
+    Nodo *n = criarNodo2($1, tipo, linha, coluna);
     $$ = n;
   }
   | chamada_funcao { $$ = $1; };
   | chamada_metodo { $$ = $1;} ;
   ;
 parte2for:
-  %empty
+  %empty { $$ = NULL;}
   | testeboleano { $$ = $1;}
   ;
 testeboleano:
@@ -497,7 +544,11 @@ chamada_funcao:
   | t_identificador t_abriparentes argumentos t_fechaparentes error { printf("ERRO em chamada_funcao");}
   ;
 chamada_metodo:
-  t_identificadorclasse t_abriparentes argumentos t_fechaparentes {}
+  t_identificadorclasse t_abriparentes argumentos t_fechaparentes { 
+    Nodo *n = criarNodo2($1 , TIPO_CHAMADA_METODO, linha, coluna);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
   ;
 whilecomando:
   t_while t_abriparentes testeboleano t_fechaparentes corpowhile{
@@ -524,7 +575,7 @@ expressao:
   | expressao t_maior_ou_igual expressao
   | expressao t_menor
   | expressao t_menor_ou_igual
-  | t_abriparentes expressao t_fechaparentes
+  | t_abriparentes expressao t_fechaparentes { $$ = $2;  };
   | atributo { $$ = $1;}
   ;
 classe:
@@ -535,35 +586,57 @@ classe:
    }
   ;
 corpoclasse:
-  %empty
+  %empty { $$ = NULL;}
   | corpoclasse tipo t_identificador t_pontovirgula  {
+    Nodo *nodo;
+    if($1)
+      nodo = $1;
+    else
+      nodo = criarNodo2("CorpoClasse", TIPO_BLOCO, linha, coluna);  
     Nodo *n = criarNodo2($3, TIPO_IDENTIFICADORCLASSE, linha, coluna);
-    addFilhoaoNodo(n, $2);
-    $$ = n;
+    addFilhoaoNodo(nodo, n);
+    $$ = nodo;
   }
   | corpoclasse tipo t_abrivetor t_fechavetor t_identificador  t_pontovirgula{
+    Nodo *nodo;
+    if($1)
+      nodo = $1;
+    else
+      nodo = criarNodo2("CorpoClasse", TIPO_BLOCO, linha, coluna);
+
     Nodo *n = criarNodo2($5, TIPO_IDENTIFICADORCLASSE, linha, coluna);
     Nodo *n2 = criarNodo2("Vetor", TIPO_VETOR, linha, coluna);
+    addFilhoaoNodo(nodo, n);
     addFilhoaoNodo(n, n2);
     addFilhoaoNodo(n2, $2);
-    addFilhoaoNodo(n2, $1);
-    $$ = n;
+    $$ = nodo;
   }
   | corpoclasse tipo t_identificador t_abriparentes parametros t_fechaparentes t_abrichave declaracoes_comandos t_fechachave 
   {
+    Nodo *nodo;
+    if($1)
+      nodo = $1;
+    else
+      nodo = criarNodo2("CorpoClasse", TIPO_BLOCO, linha, coluna);
     Nodo *n = criarNodo2($3 , TIPO_METODOCLASSE , linha, coluna);
+    addFilhoaoNodo(nodo, n);
     addFilhoaoNodo(n, $2);
     addFilhoaoNodo(n, $5);
-    addFilhoaoNodo(n, $1);
-    $$ = n;
+    $$ = nodo;
   };
   | corpoclasse tipo t_abrivetor t_fechavetor t_identificador t_abriparentes parametros t_fechaparentes t_abrichave declaracoes_comandos t_fechachave 
   {
+    Nodo *nodo;
+    if($1)
+      nodo = $1;
+    else
+      nodo = criarNodo2("CorpoClasse", TIPO_BLOCO, linha, coluna);
     Nodo *n = criarNodo2($5 , TIPO_METODOCLASSE , linha, coluna);
     Nodo *n2 = criarNodo2("Vetor" , TIPO_VETOR , linha, coluna);
+    addFilhoaoNodo(nodo, n);
     addFilhoaoNodo(n, n2);
     addFilhoaoNodo(n2, $7);
     addFilhoaoNodo(n2, $10);
-    $$ = n;
+    $$ = nodo;
   }
   ;

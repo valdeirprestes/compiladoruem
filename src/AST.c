@@ -408,8 +408,8 @@ char *strTipo(Tipo tipo){
 	case TIPO_IF:
 		strncpy(nome,"TIPO_IF", TAM);
 		break;
-	case TIPO_ELSE:
-		strncpy(nome,"TIPO_ELSE", TAM);
+	case TIPO_IFELSE:
+		strncpy(nome,"IFTIPO_ELSE", TAM);
 		break;
 	case TIPO_SWICTH:
 		strncpy(nome,"TIPO_SWICTH", TAM);
