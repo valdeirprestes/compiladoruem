@@ -1,10 +1,12 @@
 %option noyywrap
 %{
 	#include <string.h>
-    #include "testelexico.tab.h"
+	#include "AST.h"
+    #include "testesintatico.tab.h"
 	extern long linha;
 	extern long coluna;
 	extern long coluna_tmp;
+	extern Nodo *raiz;	
 	long linhacomentario = 0;
 	char *meustring = NULL;
 
@@ -111,6 +113,7 @@ void yyerror (char const *s){
 
 
 int main(int argc, char *arqv[]){
+	int imprimir_ast = 0 ;
 	for(int i = 1; i < argc ; i++){
 		if( strcmp(arqv[i], "-e") == 0 && i<argc){
 			yyin = fopen(arqv[i+1],"r");
@@ -122,7 +125,13 @@ int main(int argc, char *arqv[]){
 		}else if(strcmp(arqv[i],"-s") == 0 && i<argc){
 			yyout = fopen(arqv[i+1],"w");
 			i = i+1;
+		}else if (strcmp(arqv[i], "-t") == 0){
+			imprimir_ast;
 		}
 	}
-	return yyparse();
+	yyparse();
+	/*
+	if(imprimir_ast)
+		printNodo(raiz);*/
+
 }

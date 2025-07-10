@@ -17,7 +17,6 @@
 %union{
   char* texto;
   Nodo *nodo;
-  VetorNodo *vetor_nodos;
 }
 
 /* operadores lógicos */
@@ -87,7 +86,7 @@
 %% /* Gramática deste ponto para baixo*/
 inicio:
   codigos { 
-    Nodo *raiz = $1;
+    raiz = $1;
     printNodo(raiz);
     $$ = raiz;
   }
