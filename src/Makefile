@@ -10,7 +10,7 @@ all: $(BIN)
 testelexico.tab.c: testelexico.y
 	bison -H testelexico.y --report=counterexamples -Wother -Wconflicts-sr
 testesintatico.tab.c: testesintatico.y
-	bison -H testesintatico.y --report=counterexamples -Wother -Wcounterexamples -v
+	bison -H testesintatico.y --report=counterexamples -Wother -Wconflicts-sr
 #parser.tab.c: parser.y
 #	bison -H parser.y --report=counterexamples -Wother
 lex.yy.c: lexico.lex $(FONTETESTESINTATICO)

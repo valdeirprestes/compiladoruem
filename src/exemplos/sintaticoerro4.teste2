@@ -1,0 +1,4 @@
+main(arg1) {
+    int i; 
+    return "num"
+}

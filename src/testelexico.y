@@ -2,19 +2,26 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include <string.h>
+  #include "AST.h"
   int yylex (void);
   void yyerror (char const *);
-  extern FILE *yyout;
 
+  extern FILE *yyout;
+  char **source;
   long linha=1;
   long coluna=1;
   long coluna_tmp = 0;
-  long imprimir_ast =0;
   int errossintatico = 0;
+  long imprimir_ast =0;
+  Nodo *raiz;
+  void printErrorsrc(char **source, int linha, int coluna);
+   void meudebug(char *texto);
+  int debug = 0;
 %}
 
 %union{
   char* texto;
+  Nodo *nodo;
 }
 
 /* operadores lógicos */

@@ -7,10 +7,11 @@
 	extern long coluna;
 	extern long coluna_tmp;
 	extern long imprimir_ast;
-	
+	extern char **source;
+	extern int debug;
 	long linhacomentario = 0;
 	char *meustring = NULL;
-
+	void printErrorsrc(char **src, int linha, int coluna);
 	int tam(char *s);
 %}
 
@@ -33,15 +34,22 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 <comentario>{fechamentocomentario} {BEGIN(INITIAL); /*É um escape do sub scanner 'comentario' - fim de comentário*/}
 <comentario>[^*\n]+ {coluna +=tam(yytext);}
 <comentario>"*" {coluna +=tam(yytext);}
-<comentario><<EOF>> { coluna +=tam(yytext); fprintf(stderr, "<< Comentario não fechado da linha %d ate a linha %d >>\n", linhacomentario , linha); exit(-1); }
+<comentario><<EOF>> { 
+	coluna +=tam(yytext);
+	//printErrorsrc(source, linha, coluna);
+	fprintf(stderr, "<< Comentario não fechado da linha %d ate a linha %d >>\n", linhacomentario , linha); 
+	exit(-1); 
+}
 <comentario>{novalinha} {coluna =1; linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 
 \" {BEGIN(textoscanner);}
 <textoscanner>\" {BEGIN(INITIAL); coluna +=coluna_tmp; coluna_tmp=tam(yytext);}
 <textoscanner>{novalinha} { 
 	coluna +=coluna_tmp ; 
-	coluna_tmp=tam(yytext); 
-	fprintf(stderr, "<< String quebrada na linha %d >>\n", linha); exit(-1);
+	coluna_tmp=tam(yytext);
+	printErrorsrc(source, linha, coluna);
+	fprintf(stderr, "<< String quebrada na linha %d >>\n", linha);
+	exit(-1);
 }
 <textoscanner>[^"\n]* {coluna +=coluna_tmp; coluna_tmp=tam(yytext); yylval.texto= strdup(yytext); return t_string;}
 
@@ -96,9 +104,43 @@ break {coluna+=coluna_tmp; coluna_tmp=tam(yytext);yylval.texto= strdup(yytext); 
 {espaco} {coluna+=1;} /* Não faz nada, apenas consome*/
 
 
-. {  printf("\'%c\' (linha %d coluna %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha, coluna); exit(-1);}
+. { 
+	printErrorsrc(source, linha, coluna);
+	printf("\'%c\' (linha %d coluna %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha, coluna); 
+	exit(-1);
+	}
 %%
 
+
+
+
+char **alocaSource(FILE *fp){
+	char linha[1000];
+	char **src = malloc( 5000 * sizeof(char*));
+	if(!src) return NULL;
+	int cont=0;
+	while(!feof(fp)){
+		fgets(linha, 1000, fp);
+		src[cont] = strdup(linha);
+		cont +=1;
+	}
+	fseek(fp, 0, SEEK_SET);
+	return src;
+}
+
+void printErrorsrc(char **src, int linha, int coluna)
+{
+	if(!src){
+		printf("Não pode acessar o src");
+		exit(-1);
+	}
+	puts(src[linha-1]);
+	for( int i=0; i <coluna; i++) printf(" ");
+	printf("^");
+	for( int i=1; i < 10; i++) printf("~");
+	puts("");
+
+}
 
 int tam(char *s)
 {
@@ -112,6 +154,12 @@ void yyerror (char const *s){
 	//fprintf(stderr, "Ultimo lexema aceito [%s], linha [%d], coluna[%d],  %s\n",yytext, linha, coluna, s );
 }
 
+void meudebug( char *texto){
+	if( debug) {
+		printf("{Entrda linha %d} %s\n", linha, texto);
+	}
+}
+
 
 
 int main(int argc, char *arqv[]){
@@ -123,14 +171,23 @@ int main(int argc, char *arqv[]){
 				printf("Não foi possível abrir o arquivo %s\n",arqv[i+1]);
 				exit(-1);
 			}
+			source = alocaSource(yyin);
+			if(!source){
+				printf("Erro, não conseguiu alocar %s na memoria\n", arqv[i]);
+				exit(-1);
+			}
 			i = i+1;
 		}else if(strcmp(arqv[i],"-s") == 0 && i<argc){
 			yyout = fopen(arqv[i+1],"w");
 			i = i+1;
 		}else if (strcmp(arqv[i], "-t") == 0){
 			imprimir_ast = 1;
+		}else if (strcmp(arqv[i], "-d") == 0){
+			debug = 1;
 		}
+
 	}
+
 	yyparse();
 	
 
