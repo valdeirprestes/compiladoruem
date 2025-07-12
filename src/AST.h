@@ -81,37 +81,16 @@ typedef struct VetorNodo{
 }VetorNodo;
 
 
-Nodo *criarNodo();
-Nodo *criarNodo2(char *nome, Tipo tipo, int linha, int coluna);
+
+Nodo *criarNodo(char *nome, Tipo tipo, int linha, int coluna);
 int addFilhoaoNodo(Nodo *nodopai, Nodo *nodofilho);
-Nodo** criaVetorNodo(int tam);
-Nodo **concactenaFilhosdeNodos(Nodo **n1, Nodo **n2);
-Nodo *criarNodoRegraInicio(Nodo *codigos);
-Nodo *criarNodoRegraCodigos(Nodo *n1, Nodo *n2);
-Nodo *criarNodoRegraParametrosFunc(Nodo *n1, Nodo *n2);
-Nodo *criarNodoRegraParametro(Nodo *tiponodo, char *identificador, Tipo tipo );
-Nodo *criaNodoRegraFuncao( char *identificador, Nodo *tipofunc, Nodo *parametros, Nodo *corpo );
-Nodo *criarNodoRegraCorpoFuncao( Nodo *declaracoes_comandos);
-Nodo *criarNodoRegraDeclaracao(Nodo *tiponodo, char *identificador, Tipo tipo, Nodo *filho);
-Nodo *criarNodoRegraDeclaracoesComandos(Nodo *n1, Nodo *n2);
-Nodo *criarNodoRegraComando( Nodo *comando);
-Nodo *valorNodo(Tipo tipo, char *valor, Nodo *nodotipo );
+Nodo *criarNodoComFilho(char *nome, Tipo tipo, int linha, int coluna,Nodo *filho);
 int numNodos( Nodo **nodo);
-
-
-
-
 void printNodo(Nodo *nodo);
 char *strTipo(Tipo tipo);
 void printNodoFilhos(Nodo *n, int nivel,int niveis[NIVEIS][1]);
-
-
 Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodo_direita);
-Nodo *criarIF( Nodo *corpocomandos);
 char *stringNivel(int nivel, int niveis[NIVEIS][1]);
-VetorNodo *novoVetorNodo(int nfilhos);
-int adicionarNodoaVetorNodo(VetorNodo *vetor, Nodo *nodo);
-VetorNodo *concactenarVetorNodo(VetorNodo *v1, VetorNodo *v2);
-Nodo *converterVetorParaNodo(VetorNodo *v, char *nome, Tipo tipo);
-Nodo *concactenaNodosFilhos(Nodo *n1, Nodo *n2, char *sregra, Tipo tipo);
+Nodo *criarNodoFuncao(char *nome, Nodo *tipofuncao, Nodo* parametrosfunc, Nodo* corpofuncao, int linha, int coluna);
+Nodo *addRecursivoNodo(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodo1, Nodo *nodo2);
 #endif

@@ -151,12 +151,16 @@ int tam(char *s)
 
 void yyerror (char const *s){
 	extern long linha;
-	//fprintf(stderr, "Ultimo lexema aceito [%s], linha [%d], coluna[%d],  %s\n",yytext, linha, coluna, s );
+	extern long coluna;
+	/*fprintf(stderr, "Erro desconhecido:\
+ultimo lexema aceito [%s], linha [%d], coluna[%d],  %s\n",yytext, linha, coluna, s );*/
+	printErrorsrc(source, linha, coluna);
+	printf("->>> %s - linha %d coluna %d\n", s, linha, coluna);
 }
 
 void meudebug( char *texto){
 	if( debug) {
-		printf("{Entrda linha %d} %s\n", linha, texto);
+		printf("{Codigo na linha %d} %s\n", linha, texto);
 	}
 }
 

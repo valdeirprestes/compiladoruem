@@ -1,4 +1,4 @@
-main(arg1) {
+int main(arg1 {
     int i; 
-    return "num"
+    return "num";
 }
