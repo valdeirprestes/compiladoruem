@@ -114,16 +114,17 @@ break {coluna+=coluna_tmp; coluna_tmp=tam(yytext);yylval.texto= strdup(yytext); 
 
 
 
-char **alocaSource(FILE *fp){
+char **alocaSource(FILE *fp, int *nlinhas){
 	char linha[1000];
 	char **src = malloc( 5000 * sizeof(char*));
-	if(!src) return NULL;
+	if(!src){ nlinhas =0; return NULL;}
 	int cont=0;
-	while(!feof(fp)){
-		fgets(linha, 1000, fp);
+	while(fgets(linha, 1000, fp)){
 		src[cont] = strdup(linha);
 		cont +=1;
 	}
+	//printf("foram %d linhas", cont);
+	*nlinhas = cont;
 	fseek(fp, 0, SEEK_SET);
 	return src;
 }
@@ -160,14 +161,14 @@ ultimo lexema aceito [%s], linha [%d], coluna[%d],  %s\n",yytext, linha, coluna,
 
 void meudebug( char *texto){
 	if( debug) {
-		printf("{Codigo na linha %d} %s\n", linha, texto);
+		printf("{Codigo na linha %d coluna %d} %s\n", linha, coluna, texto);
 	}
 }
 
 
 
 int main(int argc, char *arqv[]){
-	 
+	int nlinhas;
 	for(int i = 1; i < argc ; i++){
 		if( strcmp(arqv[i], "-e") == 0 && i<argc){
 			yyin = fopen(arqv[i+1],"r");
@@ -175,7 +176,8 @@ int main(int argc, char *arqv[]){
 				printf("Não foi possível abrir o arquivo %s\n",arqv[i+1]);
 				exit(-1);
 			}
-			source = alocaSource(yyin);
+			source = alocaSource(yyin, &nlinhas);
+			
 			if(!source){
 				printf("Erro, não conseguiu alocar %s na memoria\n", arqv[i]);
 				exit(-1);
@@ -188,6 +190,15 @@ int main(int argc, char *arqv[]){
 			imprimir_ast = 1;
 		}else if (strcmp(arqv[i], "-d") == 0){
 			debug = 1;
+		}
+		else if (strcmp(arqv[i], "-p") == 0){
+			//printf("foram %d linhas", nlinhas);
+			for(int i=0; i< 100; i++) printf("-");
+			puts("");	
+			for(int i=0; i < nlinhas; i++)
+				puts(source[i]);
+		    for(int i=0; i< 100; i++) printf("-");
+			puts("");
 		}
 
 	}

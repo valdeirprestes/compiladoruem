@@ -50,7 +50,7 @@
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha 
 
- 
+%token error 
 
 /* Generate the parser description file. */
 /*%verbose*/
@@ -78,11 +78,11 @@
 %type <nodo> codigos codigo
 %type <nodo> expressao  
 %type <nodo> chamada_funcao chamada_metodo corpofuncao 
-%type <nodo> parametrosfunc parametro parametros 
+%type <nodo> parametro parametros 
 %type <nodo> declaracoes_comandos 
 %type <nodo> corpoloop  comandoif 
 %type <nodo> declaracao  comando comandos
-%type <nodo> forcomando parte1for parte2for parte3for corpofor atribuicao
+%type <nodo> forcomando  parte2for parte3for corpofor atribuicao
 %type <nodo> whilecomando corpowhile
 %type <nodo> argumento argumentos
 %type <nodo> corpoclasse
@@ -123,29 +123,43 @@ codigo:
   ;
 
 funcao:
-	tipofunc t_identificador t_abriparentes parametrosfunc t_fechaparentes corpofuncao {
+	tipofunc t_identificador t_abriparentes parametros t_fechaparentes corpofuncao {
       meudebug("Funcao linha 127");
       $$ = criarNodoFuncao($2, $1, $4, $6 ,linha, coluna);
   }
-  | tipofunc t_identificador t_abriparentes parametrosfunc  t_fechaparentes error  {
-    meudebug("Funcao linha 131");
-    yyerror("Esperava \')\'' ");
-    $$ = $1;
+  | t_identificador error {
+    meudebug("CorpoFuncao linha 131");
+    yyerror("Esperava tipagem da funcao");
+    //yyerrok;
+    //yyclearin;
+  }
+  | tipofunc t_identificador t_abriparentes parametros error t_fechachave {
+    meudebug("CorpoFuncao linha 136");
+    yyerror("Esperava \')\' na declaração anterior ");
+    //yyerrok;
+    //yyclearin;
+  }
+  | tipofunc t_identificador parametros error t_fechachave {
+    meudebug("CorpoFuncao linha 143");
+    yyerror("Esperava \'(\' na declaração anterior ");
+    //yyerrok;
+    //yyclearin;
+  }
+  | tipofunc t_identificador t_abriparentes t_identificador error  {
+    meudebug("CorpoFuncao linha 149");
+    yyerror("Esperava tipo do parametro ");
+    //yyerrok;
+    //yyclearin;
   }
  ;
 tipofunc:
   tipo {
-    meudebug("TipoFunc linha 138");
+    meudebug("TipoFunc linha 139");
     $$ = $1; 
   }
   |tipo t_abrivetor t_fechavetor { meudebug("TipoFunc linha 141"); $$ = $1;}
   ;
-parametrosfunc:
-	parametros { 
-    meudebug("ParametrosFunc linha 145");
-      $$ = $1;
-  }
-  ;  
+ 
 parametros:
   %empty { $$ = NULL;}
 	|parametro  {
@@ -180,10 +194,6 @@ corpofuncao:
    meudebug("CorpoFuncao linha 180");
    $$ = $2;
   }
-  |t_abrichave declaracoes_comandos t_fechachave error{
-    meudebug("CorpoFuncao linha 191");
-    yyerror("Esperava um }");
-  }
   ;
 declaracoes_comandos:
   %empty { 
@@ -198,10 +208,10 @@ declaracoes_comandos:
       meudebug("Declaracoes_comandos linha 215");
       $$ = addRecursivoNodo("Bloco", TIPO_BLOCO, linha, coluna, $1, $2);
   }
-   | declaracoes_comandos error   {
-    meudebug("Declaracoes_comandos linha 226");
-    yyerror("Esperava ;");
-    $$ = $1;
+  | declaracoes_comandos declaracao error {
+    meudebug("Declaracoes_comandos linha 196");
+    yyerror("Esperava ; na declaracao anterior");
+    
    }
 ;
 
@@ -344,13 +354,9 @@ argumento:
     meudebug("Argumento linha 344");
     $$ = $1;
   }
-  | tipo t_identificador {
-    meudebug("Argumentos linha 348");
-    $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
-  }
   ;
 forcomando:
-  t_for t_abriparentes parte1for t_pontovirgula parte2for t_pontovirgula parte3for t_fechaparentes corpofor{
+  t_for t_abriparentes atribuicao t_pontovirgula parte2for t_pontovirgula parte3for t_fechaparentes corpofor{
     meudebug("ForComando linha 354");
     Nodo *n = criarNodo($1, TIPO_FOR, linha, coluna);
     addFilhoaoNodo(n, $3);
@@ -360,22 +366,7 @@ forcomando:
     $$ = n;
   }
   ;
-parte1for:
-  %empty { meudebug("Parte1For linha 364"); $$ = NULL;}
-  | tipo t_identificador t_igual expressao {
-    meudebug("Parte1For linha 366");
-    Nodo *n = criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
-    addFilhoaoNodo(n, $1);
-    addFilhoaoNodo(n, $4);
-    $$ = n;
-  }
-  | t_identificador t_igual expressao {
-    meudebug("Parte1For linha 373");
-    Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
-    addFilhoaoNodo(n, $3);
-    $$ = n;
-  }
-  ;
+
 atribuicao:
   t_identificador t_igual expressao {
     meudebug("Atribuicao linha 381");
@@ -383,9 +374,9 @@ atribuicao:
     Nodo *n2 = criarNodo($1, TIPO_ATRIBUICAO, linha, coluna);
     addFilhoaoNodo(n, n2);
     addFilhoaoNodo(n2, $3);
-    $$ = n;};
-  | expressao { $$ = $1; }
-   ;
+    $$ = n;
+  }
+  ;
 
   
 parte2for:
@@ -503,14 +494,13 @@ expressao:
     $$ = n;
   };
   | expressao t_asteristico expressao {
-    {
+    
     meudebug("Expressao linha 507");
     Nodo *n = criarNodo("Multiplicacao", TIPO_MULTIPLICACAO , linha, coluna);
     addFilhoaoNodo(n, $1);
     addFilhoaoNodo(n, $3);
     $$ = n;
   };
-  }
   | expressao t_barra expressao {
     meudebug("Expressao linha 515");
     Nodo *n = criarNodo("Divisao", TIPO_DIVISAO , linha, coluna);

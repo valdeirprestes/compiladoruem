@@ -1,4 +1,4 @@
 main(int arg1) {
-    int i 
-    return "num"
+    int i;
+    return "num";
 }
