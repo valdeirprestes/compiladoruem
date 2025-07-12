@@ -18,7 +18,8 @@
   void meudebug(char *texto);
   int debug = 0;
 %}
-
+%define parse.error detailed
+%define parse.lac full
 %union{
   char* texto;
   Nodo *nodo;
@@ -129,27 +130,34 @@ funcao:
   }
   | t_identificador error {
     meudebug("CorpoFuncao linha 131");
-    yyerror("Esperava tipagem da funcao");
+    //--yyerrstatus;
+    yyerror("Erro de sintaxe: esperava tipagem da funcao");
+    yyclearin;
+  }
+  | t_abrivetor error {
+    meudebug("CorpoFuncao linha 138");
+    //--yyerrstatus;
+    yyerror("Erro de sintaxe: esperava tipagem da funcao");
     //yyerrok;
-    //yyclearin;
+    yyclearin;
   }
   | tipofunc t_identificador t_abriparentes parametros error t_fechachave {
-    meudebug("CorpoFuncao linha 136");
-    yyerror("Esperava \')\' na declaração anterior ");
+    meudebug("CorpoFuncao linha 146");
+    yyerror("Erro de sintaxe: esperava \')\' na declaração anterior ");
     //yyerrok;
-    //yyclearin;
+    yyclearin;
   }
   | tipofunc t_identificador parametros error t_fechachave {
-    meudebug("CorpoFuncao linha 143");
-    yyerror("Esperava \'(\' na declaração anterior ");
+    meudebug("CorpoFuncao linha 152");
+    yyerror("Erro de sintaxe: esperava \'(\' na declaração anterior ");
     //yyerrok;
-    //yyclearin;
+    yyclearin;
   }
   | tipofunc t_identificador t_abriparentes t_identificador error  {
     meudebug("CorpoFuncao linha 149");
-    yyerror("Esperava tipo do parametro ");
+    yyerror("Erro de sintaxe: esperava tipo do parametro ");
     //yyerrok;
-    //yyclearin;
+    yyclearin;
   }
  ;
 tipofunc:

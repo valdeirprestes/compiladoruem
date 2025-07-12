@@ -169,17 +169,19 @@ void meudebug( char *texto){
 
 int main(int argc, char *arqv[]){
 	int nlinhas;
+	int ifile;
 	for(int i = 1; i < argc ; i++){
 		if( strcmp(arqv[i], "-e") == 0 && i<argc){
-			yyin = fopen(arqv[i+1],"r");
+			ifile = i+1;
+			yyin = fopen(arqv[ifile],"r");
 			if(!yyin){
-				printf("Não foi possível abrir o arquivo %s\n",arqv[i+1]);
+				printf("Não foi possível abrir o arquivo %s\n",arqv[ifile]);
 				exit(-1);
 			}
 			source = alocaSource(yyin, &nlinhas);
 			
 			if(!source){
-				printf("Erro, não conseguiu alocar %s na memoria\n", arqv[i]);
+				printf("Erro, não conseguiu alocar %s na memoria\n", arqv[ifile]);
 				exit(-1);
 			}
 			i = i+1;
@@ -196,8 +198,10 @@ int main(int argc, char *arqv[]){
 			for(int i=0; i< 100; i++) printf("-");
 			puts("");	
 			for(int i=0; i < nlinhas; i++)
-				puts(source[i]);
+				printf("%4d %s", i+1, source[i]);
 		    for(int i=0; i< 100; i++) printf("-");
+			printf("\nArquivo acima: %s\n",arqv[ifile]);
+			for(int i=0; i< 100; i++) printf("-");
 			puts("");
 		}
 
