@@ -1,73 +1,695 @@
 %{
   #include <stdio.h>
-  int yylex (void);
-  void yyerror (char const *);
-  extern FILE *yyout;
+  #include <stdlib.h>
+  #include <string.h>
+  #include "AST.h"
+  #include "parser.tab.h"
+  # define YYLTYPE_IS_DECLARED 1
+  
 
-  long linha=1;
+
+  int yylex (YYSTYPE *lval, YYLTYPE *lloc);
+  void yyerror ( YYLTYPE *locp, char const *s);
+  YYLTYPE yylloc;
+	YYSTYPE yylval;
+  extern FILE *yyout;
+  char **source;
+  long coluna_tmp = 0;
+  long utoken_linha=0; /* guarda o ultimo linha com token válido -> para erros */
+  long utoken_coluna=0;/*guarda a ultima linha com token válido  -> para erros*/
+  long linha=1; /* guarda a linha do token atual  -> para erros*/
+  long coluna=1;/*guarda a coluna do token atual  -> para erros*/
+  int errossintatico = 0;
+  long imprimir_ast =0;
+  Nodo *raiz;
+  void printErrorsrc(char **source, int linha, int coluna);
+  void meudebug(char *texto);
+  int debug = 0;
+
 %}
+
+
+%locations
+%define api.location.type {YYLTYPE}
+%define parse.error verbose
+%define api.pure full
+%define parse.lac full
+
+%code requires {
+  typedef struct YYLTYPE {
+        int first_line;
+        int first_column;
+        int last_line;
+        int last_column;
+    } YYLTYPE;
+}
 
 %union{
   char* texto;
-  long numero_inteiro;
-  double numero_decimal;
+  Nodo *nodo;
 }
+
+
+
 
 /* operadores lógicos */
 %token <texto> t_mais t_menos t_asteristico t_barra
-
 %token <texto> t_maior t_menor t_igual t_exclamacao
-
+%token <texto> t_igual_a t_diferente_de t_menor_ou_igual t_maior_ou_igual
 /* tipos */
 %token <texto> t_abrivetor t_fechavetor t_int t_float t_char
-
-
 /* valores de atribuição para tipos*/
-%token <numero_inteiro> t_num 
-%token <texto> t_palavra t_palavranum 
-%token <numero_decimal> t_decimal 
-%token <texto> t_varname 
-
+%token <texto> t_num 
+%token <texto> t_identificador
+%token <texto> t_decimal 
+%token <texto> t_string t_eof
 /* Tokens de repetição e condicionais */
 %token <texto> t_for t_while t_if t_else t_switch t_case t_default t_break t_abrichave t_fechachave t_abriparentes t_fechaparentes
-%token <texto> t_pontovirgula t_doispontos t_interrogacao  
-
+%token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao  t_ponto
 /* Tokens classe e função */
-%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel
+%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_this t_identificadorclasse
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
-%token t_espaco t_novalinha
+%token t_espaco t_novalinha 
+
+%token error 
+
+/* Generate the parser description file. */
+/*%verbose*/
+/* Enable run-time traces (yydebug). */
+/*%define parse.trace*/
+/*%printer { fprintf (yyo, "%s", $$); } t_main;
+%printer { fprintf (yyo, "%s", $$); } t_abriparentes;*/
+%left t_igual
+%left t_igual_a
+%left t_maior
+%left t_maior_ou_igual
+%left t_menor
+%left t_menor_ou_igual
+%left t_diferente_de
+%left t_mais
+%left t_menos
+%left t_asteristico
+%left t_barra
+
+%nonassoc "then"
+%nonassoc t_else
+
+
+%type <nodo> inicio  funcao classe tipofunc tipo
+%type <nodo> codigos codigo
+%type <nodo> expressao  
+%type <nodo> chamada_funcao chamada_metodo corpofuncao 
+%type <nodo> parametro parametros 
+%type <nodo> declaracoes_comandos 
+%type <nodo> corpoloop  comandoif 
+%type <nodo> declaracao  comando comandos
+%type <nodo> forcomando  parte1for parte2for parte3for corpofor 
+%type <nodo> whilecomando corpowhile
+%type <nodo> argumento argumentos
+%type <nodo> corpoclasse
+%type <nodo> comandoswitch corposwitch cases case defaultswitch 
+
 
 %start inicio
-%type <texto> programa  operadores tipos controle classefuncao valorespermitidos comparacao
-
-
-
-
 %% /* Gramática deste ponto para baixo*/
 inicio:
-  %empty| inicio programa 
-programa:
-  comparacao {fprintf(yyout, "[%d] Achou um operador (%s)\n", linha, $1);} |
-  operadores   {fprintf(yyout, "[%d] Achou um operador (%s)\n", linha, $1);} |
-  tipos   {fprintf(yyout, "[%d] Achou um tipo (%s)\n", linha, $1);} | 
-  t_num {fprintf(yyout, "[%d] Achou um t_float (%d)\n", linha, $1);}|
-  t_decimal {fprintf(yyout, "[%d] Achou um t_float (%f)\n", linha, $1);}|
-  valorespermitidos   {fprintf(yyout, "[%d] Achou um valorespermitidos (%s)\n", linha, $1);}| 
-  controle  {fprintf(yyout, "[%d] Achou um controle (%s)\n", linha, $1);} | 
-  classefuncao  {fprintf(yyout, "[%d] Achou um classe_funcao_variavel (%s)\n", linha, $1);}
-operadores:
-  t_mais | t_menos | t_asteristico | t_barra
-comparacao:
-  t_igual | t_maior | t_menor | t_exclamacao
-tipos:
-  t_char | t_int | t_float  | t_abrivetor | t_fechavetor 
-valorespermitidos:
-  t_palavra | t_palavranum |  t_varname | t_variavel
-controle:
-  t_for | t_while | t_if | t_else | t_switch | t_case | t_default | t_break | t_abrichave | t_fechachave | 
-  t_abriparentes | t_fechaparentes | t_pontovirgula | t_interrogacao | t_doispontos
-classefuncao:
-  t_class | t_func | t_construtor| t_destrutor | t_return
-%%
+  codigos {
+    meudebug("Inicio linha 96"); 
+    raiz = $1;
+    if(imprimir_ast)
+      printNodo(raiz);
+    $$ = raiz;
+  }
+  ;
+codigos:
+  codigo{
+    meudebug("Codigo linha 105");
+    $$ = criarNodoComFilho("CODIGO", TIPO_REGRA, linha, coluna, $1 );
+  }
+  |codigos codigo{
+    meudebug("Codigos Codigo linha 109");
+    addFilhoaoNodo($1, $2);
+    $$ = $1;
+  }
+  ;
+codigo:
+  funcao { 
+    meudebug("Codigo linha 116");
+    $$ = $1;
+    }
+  | classe {
+    meudebug("Codigo linha 120");
+    $$ = $1;
+    }
+  ;
 
+funcao:
+	tipofunc t_identificador t_abriparentes parametros t_fechaparentes corpofuncao {
+      meudebug("Funcao linha 147");
+      $$ = criarNodoFuncao($2, $1, $4, $6 ,linha, coluna);
+  }
+  | t_identificador error {
+    meudebug("CorpoFuncao linha 151");
+    //--yyerrstatus;
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipagem da funcao");
+    yyclearin;
+  }
+  | t_abrivetor error {
+    meudebug("CorpoFuncao linha 157");
+    //--yyerrstatus;
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipagem da funcao");
+    //yyerrok;
+    yyclearin;
+  }
+  | tipofunc t_identificador t_abriparentes parametros error t_fechachave {
+    meudebug("CorpoFuncao linha 164");
+    yyerror(&yylloc, "Erro de sintaxe: esperava \')\' na declaração anterior ");
+    //yyerrok;
+    yyclearin;
+  }
+  | tipofunc t_identificador parametros error t_fechachave {
+    meudebug("CorpoFuncao linha 170");
+    yyerror(&yylloc, "Erro de sintaxe: esperava \'(\' na declaração anterior ");
+    //yyerrok;
+    yyclearin;
+  }
+  | tipofunc t_identificador t_abriparentes t_identificador error  {
+    meudebug("CorpoFuncao linha 176");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo do parametro ");
+    //yyerrok;
+    yyclearin;
+  }
+ ;
+tipofunc:
+  tipo {
+    meudebug("TipoFunc linha 139");
+    $$ = $1; 
+  }
+  |tipo t_abrivetor t_fechavetor { meudebug("TipoFunc linha 141"); $$ = $1;}
+  | t_identificador error t_pontovirgula t_abriparentes {
+    meudebug("Tipo linha 220");
+    yyerror(&yylloc, "Esperava ; na declaracao anterior");
+    
+   }
+  | t_identificador error t_igual t_abriparentes {
+    meudebug("Tipo linha 220");
+    yyerror(&yylloc, "Esperava atribuicao na declaracao anterior");
+    
+   }
+  ;
+ 
+parametros:
+  %empty { $$ = NULL;}
+	|parametro  {
+      meudebug("Parametros linha 152");
+      $$ = criarNodo("Parametros", TIPO_IDENTIFICADOR, linha, coluna);
+  }
+| parametros t_virgula parametro {
+      meudebug("Parametros linha 156");
+      $$= addRecursivoNodo("Parametros", TIPO_PARAMETROS, linha, coluna, $1, $3);
+  }
+  ;
+parametro:
+  tipo t_identificador {
+    meudebug("Parametro linha 162");
+    $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna,$1);
+  }
+  |tipo t_abrivetor t_fechavetor t_identificador
+  {
+    meudebug("Parametro linha 167");
+    $$ = criarNodoComFilho($4, TIPO_IDENTIFICADOR, linha, coluna, $1);
+  }
+  ;
+tipo:
+  t_int { meudebug("Tipo linha 172"); $$ = criarNodo($1, TIPO_INT, linha, coluna); }
+  | t_float {meudebug("Tipo linha 173"); $$ = criarNodo($1, TIPO_FLOAT, linha, coluna); }
+  | t_char  {meudebug("Tipo linha 174"); $$ = criarNodo($1, TIPO_CHAR, linha, coluna);}
+  | t_identificador {meudebug("Tipo linha 175"); $$ = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna); }
+  ;
+  
+corpofuncao:
+  t_abrichave declaracoes_comandos t_fechachave {
+   meudebug("CorpoFuncao linha 180");
+   $$ = $2;
+  }
+  ;
+declaracoes_comandos:
+  %empty { 
+      meudebug("Declaracoes_comandos linha 201");
+      $$ = NULL; 
+  }
+  | declaracoes_comandos declaracao t_pontovirgula {
+      meudebug("Declaracoes_comandos linha 204");
+      $$ = addRecursivoNodo("Bloco", TIPO_BLOCO, linha, coluna, $1, $2);
+  }
+  | declaracoes_comandos comando {
+      meudebug("Declaracoes_comandos linha 215");
+      $$ = addRecursivoNodo("Bloco", TIPO_BLOCO, linha, coluna, $1, $2);
+  }
+  | declaracoes_comandos declaracao error {
+    meudebug("Declaracoes_comandos linha 196");
+    yyerror(&yylloc, "Esperava ; na declaracao anterior");
+    
+   }
+;
+
+
+
+comandos:
+    comandos comando 
+    {
+      meudebug("Comandos linha 213");
+      addFilhoaoNodo($1, $2);
+      $$ = $1;
+    }
+  | comando {
+      meudebug("Comandos linha 218");
+      $$ = criarNodoComFilho("Comandos", TIPO_BLOCO, linha, coluna, $1);
+    }
+;
+
+declaracao:
+  tipo t_identificador {
+      meudebug("Declaracao linha 225");
+      $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
+  }
+  |tipo t_identificador t_igual expressao {
+      meudebug("Declaracao linha 229");
+      Nodo *n = criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
+      addFilhoaoNodo(n, $1);
+      addFilhoaoNodo(n, $4);
+      $$ = n;
+  }
+  |tipo  t_abrivetor t_fechavetor t_identificador{
+      meudebug("Declaracao linha 236");
+      $$ = criarNodoComFilho($4, TIPO_IDENTIFICADOR, linha, coluna, $1);
+  } 
+  ;
+
+  
+comando:
+  comandoif {
+    meudebug("Comando linha 283");
+    $$ = $1;
+  }
+  | comandoswitch { meudebug("Comando linha 247"); $$ = $1; }
+  | forcomando { meudebug("Comando linha 248"); $$ = $1;} 
+  | whilecomando {meudebug("Comando linha 249");$$ = $1;} 
+  | expressao t_pontovirgula { meudebug("Comando linha 250");
+    $$ = $1;
+  }
+  | t_return expressao t_pontovirgula {  
+      meudebug("Comando linha 254");
+      $$ = criarNodoComFilho("Expressao", TIPO_RETURN , linha, coluna, $2);
+  }
+  | t_break t_pontovirgula {
+      meudebug("Comando linha 258");
+      $$ = criarNodo($1 , TIPO_BREAK , linha, coluna);
+  }
+  ;
+comandoswitch:
+  t_switch t_abriparentes expressao t_fechaparentes  t_abrichave corposwitch t_fechachave{
+      meudebug("ComandoSwitch linha 264");
+      Nodo *n = criarNodo($1 , TIPO_SWICTH , linha, coluna);
+      addFilhoaoNodo(n, $3);
+      addFilhoaoNodo($3, $6);
+      $$ = n;
+  }
+  ;
+corposwitch:
+  cases { meudebug("CorpoSwitchlinha 272"); $$ =  $1; };
+  | cases defaultswitch {
+    meudebug("CorpoSwitch linha 274");
+    $$ = addRecursivoNodo("BlocoCase", TIPO_BLOCO, linha, coluna, $1, $2);
+  };
+  ;
+cases:
+  case {
+    meudebug("Cases linha 280");
+    $$ = criarNodoComFilho("BlocoCase" , TIPO_BLOCO , linha, coluna, $1);
+  }
+  |cases case {
+    meudebug("Cases case linha 284");
+    $$ = addRecursivoNodo("BlocoCase", TIPO_BLOCO, linha, coluna, $1, $2);
+  }
+  ;
+case:
+  t_case expressao t_doispontos comandos {
+    meudebug("Case linha 290");
+    Nodo *n = criarNodo($1 , TIPO_CASE , linha, coluna);
+    addFilhoaoNodo(n, $2);
+    addFilhoaoNodo(n, $4);
+    $$ = n;
+  };
+  |t_case expressao t_doispontos t_abrichave comandos t_fechachave {
+    meudebug("Case linha 297");
+    Nodo *n = criarNodo($1 , TIPO_CASE , linha, coluna);
+    addFilhoaoNodo(n, $2);
+    addFilhoaoNodo(n, $5);
+    $$ = n;
+  }
+  ;
+defaultswitch:
+  t_default  t_doispontos comandos {
+    meudebug("DefaultSwitch linha 306");
+    $$ = criarNodoComFilho($1 , TIPO_DEFAULT , linha, coluna, $3);
+  };
+  |t_default  t_doispontos t_abrichave comandos t_fechachave {
+    meudebug("DefaultSwitch linha 306");
+    $$ = criarNodoComFilho($1 , TIPO_DEFAULT , linha, coluna,$4);
+  };
+comandoif:
+  t_if t_abriparentes expressao t_fechaparentes  corpoloop %prec "then" {
+    meudebug("Comandoif linha 315");
+    Nodo *n = criarNodo($1 , TIPO_IF, linha, coluna);
+    addFilhoaoNodo(n, $3);
+    addFilhoaoNodo(n, $5);
+    $$ = n;
+  }
+  | t_if t_abriparentes expressao t_fechaparentes  corpoloop t_else corpoloop{
+    meudebug("Comandoif linha 322");
+    Nodo *n = criarNodo("ifelse" , TIPO_IFELSE, linha, coluna);
+    Nodo *n1 = criarNodo($1 , TIPO_IFELSE, linha, coluna);
+    Nodo *n2 = criarNodo($6 , TIPO_IFELSE, linha, coluna);
+    addFilhoaoNodo(n, $5);
+    addFilhoaoNodo(n, $7);
+    $$ = n;
+  }
+  ;
+argumentos:
+  %empty { $$ = NULL;}
+  | argumento {
+      meudebug("Argumentos linha 393");
+      $$ = criarNodoComFilho("Argumentos", TIPO_IDENTIFICADOR, linha, coluna, $1);
+  }
+  | argumentos t_virgula argumento {
+      meudebug("Argumentos linha 338");
+      $$ = addRecursivoNodo("Argumentos", TIPO_IDENTIFICADOR,  linha,  coluna, $1, $3);
+  }
+  ;
+argumento:
+  expressao {
+    meudebug("Argumento linha 344");
+    $$ = $1;
+  }
+  ;
+forcomando:
+  t_for t_abriparentes parte1for t_pontovirgula parte2for t_pontovirgula parte3for t_fechaparentes corpofor{
+    meudebug("ForComando linha 354");
+    Nodo *n = criarNodo($1, TIPO_FOR, linha, coluna);
+    addFilhoaoNodo(n, $3);
+    addFilhoaoNodo(n, $5);
+    addFilhoaoNodo(n, $7);
+    addFilhoaoNodo(n, $9);
+    $$ = n;
+  }
+  ;
+
+parte1for:
+  %empty {meudebug("Parte2For linha 392"); $$ = NULL;}
+  | tipo t_identificador t_igual expressao { 
+    meudebug("Parte2For linha 394");
+    $$ = $1;
+  } 
+  ;
+
+  
+parte2for:
+  %empty {meudebug("Parte2For linha 392"); $$ = NULL;}
+  | expressao { 
+    meudebug("Parte2For linha 394");
+    $$ = $1;}
+  ;
+
+parte3for:
+  t_identificador t_igual expressao t_mais expressao {
+    meudebug("Parte3For linha 561");
+    Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+    Nodo *n2 = criarNodo("=", TIPO_IDENTIFICADOR, linha, coluna);
+    Nodo *n3 = criarNodo("+", TIPO_IDENTIFICADOR, linha, coluna);
+    addFilhoaoNodo(n, n2);
+    addFilhoaoNodo(n2, n3);
+    addFilhoaoNodo(n3, $3);
+    addFilhoaoNodo(n3, $5);
+    $$ = n;
+  }
+  | t_identificador t_igual expressao t_menos expressao {
+    meudebug("Parte3For linha 572");
+    Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+    Nodo *n2 = criarNodo("=", TIPO_IDENTIFICADOR, linha, coluna);
+    Nodo *n3 = criarNodo("-", TIPO_IDENTIFICADOR, linha, coluna);
+    addFilhoaoNodo(n, n2);
+    addFilhoaoNodo(n2, n3);
+    addFilhoaoNodo(n3, $3);
+    addFilhoaoNodo(n3, $5);
+    $$ = n;
+  }
+  | t_identificador t_igual expressao t_barra expressao {
+    meudebug("Parte3 linha 583");
+    Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+    Nodo *n2 = criarNodo("=", TIPO_IDENTIFICADOR, linha, coluna);
+    Nodo *n3 = criarNodo("/", TIPO_IDENTIFICADOR, linha, coluna);
+    addFilhoaoNodo(n, n2);
+    addFilhoaoNodo(n2, n3);
+    addFilhoaoNodo(n3, $3);
+    addFilhoaoNodo(n3, $5);
+    $$ = n;
+  }
+  | t_identificador t_igual expressao t_asteristico expressao {
+    meudebug("Parte3For linha 594");
+    Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+    Nodo *n2 = criarNodo("=", TIPO_IDENTIFICADOR, linha, coluna);
+    Nodo *n3 = criarNodo("*", TIPO_IDENTIFICADOR, linha, coluna);
+    addFilhoaoNodo(n, n2);
+    addFilhoaoNodo(n2, n3);
+    addFilhoaoNodo(n3, $3);
+    addFilhoaoNodo(n3, $5);
+    $$ = n;
+  }
+  ;
+corpofor:
+  corpoloop { $$ = $1;}
+  ;
+corpoloop:
+  comando {
+      meudebug("CorpoLoop linha 449");
+      //printf("479 Corpo while simples -> %s line %d\n", $1->nome, $1->linha);
+      Nodo *n = criarNodo("BLOCO", TIPO_BLOCO, linha, coluna);
+      addFilhoaoNodo(n, $1);
+      $$ = n;
+  }
+  | t_abrichave comandos t_fechachave {
+    meudebug("CorpoLoop linha 456");
+    Nodo *n = criarNodo("BLOCO", TIPO_BLOCO, linha, coluna);
+    addFilhoaoNodo(n, $2);
+    $$ = n;
+  }
+  ;
+chamada_funcao:
+  t_identificador t_abriparentes argumentos t_fechaparentes {
+    meudebug("Chamada_funcao linha 464");
+    Nodo *n = criarNodo($1 , TIPO_CHAMADA_FUNCAO, linha, coluna);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | t_identificador t_abriparentes argumentos  error { printf("ERRO em chamada_funcao");}
+  ;
+chamada_metodo:
+  t_identificadorclasse t_abriparentes argumentos t_fechaparentes { 
+    meudebug("ChamadaMetodo linha 473");
+    Nodo *n = criarNodo($1 , TIPO_CHAMADA_METODO, linha, coluna);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  ;
+whilecomando:
+  t_while t_abriparentes expressao t_fechaparentes corpowhile{
+    meudebug("WhileComando linha 481");
+    Nodo *n = criarNodo($1, TIPO_WHILE, linha, coluna);
+    addFilhoaoNodo(n, $3);
+    addFilhoaoNodo(n, $5);
+    $$ = n;
+  };
+corpowhile:
+  corpoloop { $$ = $1;}
+expressao:
+  expressao t_igual expressao {
+    meudebug("Expressao linha 521");
+    Nodo *n = criarNodo("Soma", TIPO_ATRIBUICAO , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  |expressao t_mais expressao {
+    meudebug("Expressao linha 528");
+    Nodo *n = criarNodo("Soma", TIPO_SOMA , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+
+  | expressao t_menos expressao {
+    meudebug("Expressao linha 536");
+    Nodo *n = criarNodo("Subtracao", TIPO_SUBTRACAO , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | expressao t_asteristico expressao {
+    
+    meudebug("Expressao linha 507");
+    Nodo *n = criarNodo("Multiplicacao", TIPO_MULTIPLICACAO , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | expressao t_barra expressao {
+    meudebug("Expressao linha 515");
+    Nodo *n = criarNodo("Divisao", TIPO_DIVISAO , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | expressao t_igual_a expressao {
+    meudebug("Expressao linha 522 ");
+    Nodo *n = criarNodo("Atribuicao", TIPO_TESTE_IGUAL , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | expressao t_diferente_de expressao {
+    meudebug("Expressao linha 529");
+    Nodo *n = criarNodo("TesteDiferente", TIPO_TESTE_DIFERENTE , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | expressao t_maior expressao {
+    meudebug("Expressao linha 536");
+    Nodo *n = criarNodo("TesteMaior", TIPO_TESTE_MAIOR , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | expressao t_maior_ou_igual expressao {
+    meudebug("Expressao linha 543");
+    Nodo *n = criarNodo("TesteMaiorIgual", TIPO_TESTE_MAIORIGUAL , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | expressao t_menor expressao {
+    meudebug("Expressao linha 550");
+    Nodo *n = criarNodo("TesteMenor", TIPO_TESTE_MENOR , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | expressao t_menor_ou_igual expressao{
+    meudebug("Expressao linha 558");
+    Nodo *n = criarNodo("TesteMenorIgual", TIPO_TESTE_MENOR_IGUAL , linha, coluna);
+    addFilhoaoNodo(n, $1);
+    addFilhoaoNodo(n, $3);
+    $$ = n;
+  }
+  | t_abriparentes expressao t_fechaparentes { $$ = $2;  };
+  |t_identificador 
+  {
+    meudebug(" Expressao linha 566");
+    Tipo tipo = TIPO_IDENTIFICADOR;
+    Nodo *n = criarNodo($1, tipo, linha, coluna);
+    $$ = n;
+  }
+  | t_decimal
+  {
+    Tipo tipo = TIPO_DECIMAL;
+    meudebug("Expressao linha 574");
+    Nodo *n = criarNodo(
+      $1, tipo, linha, coluna);
+    $$ = n;
+  } 
+  | t_num 
+  {
+    Tipo tipo = TIPO_INTEIRO;
+    Nodo *n = criarNodo($1, tipo, linha, coluna);
+    $$ = n;
+  }
+  | t_string
+  {
+    meudebug("linha 479");
+    Tipo tipo = TIPO_STRING;
+    Nodo *n = criarNodo(
+      $1, tipo, linha, coluna);
+    $$ = n;
+  }
+  | chamada_funcao { $$ = $1; };
+  | chamada_metodo { $$ = $1;} ;
+  ;
+classe:
+  t_class t_identificador t_abrichave corpoclasse t_fechachave { 
+    meudebug("linha 731");
+    Nodo *n = criarNodo($2, TIPO_CLASSE , linha, coluna);
+    addFilhoaoNodo(n, $4);
+    $$ = n;
+   }
+  ;
+corpoclasse:
+  %empty { $$ = NULL;}
+  | corpoclasse tipo t_identificador t_pontovirgula  {
+    meudebug("linha 740");
+    Nodo *nodo;
+    if($1)
+      nodo = $1;
+    else
+      nodo = criarNodo("CorpoClasse", TIPO_BLOCO, linha, coluna);  
+    Nodo *n = criarNodo($3, TIPO_IDENTIFICADORCLASSE, linha, coluna);
+    addFilhoaoNodo(nodo, n);
+    $$ = nodo;
+  }
+  | corpoclasse tipo t_abrivetor t_fechavetor t_identificador  t_pontovirgula{
+    meudebug("linha 751");
+    Nodo *nodo;
+    if($1)
+      nodo = $1;
+    else
+      nodo = criarNodo("CorpoClasse", TIPO_BLOCO, linha, coluna);
+
+    Nodo *n = criarNodo($5, TIPO_IDENTIFICADORCLASSE, linha, coluna);
+    Nodo *n2 = criarNodo("Vetor", TIPO_VETOR, linha, coluna);
+    addFilhoaoNodo(nodo, n);
+    addFilhoaoNodo(n, n2);
+    addFilhoaoNodo(n2, $2);
+    $$ = nodo;
+  }
+  | corpoclasse tipo t_identificador t_abriparentes parametros t_fechaparentes t_abrichave declaracoes_comandos t_fechachave 
+  {
+    meudebug("linha 767");
+    Nodo *nodo;
+    if($1)
+      nodo = $1;
+    else
+      nodo = criarNodo("CorpoClasse", TIPO_BLOCO, linha, coluna);
+    Nodo *n = criarNodo($3 , TIPO_METODOCLASSE , linha, coluna);
+    addFilhoaoNodo(nodo, n);
+    addFilhoaoNodo(n, $2);
+    addFilhoaoNodo(n, $5);
+    $$ = nodo;
+  };
+  | corpoclasse tipo t_abrivetor t_fechavetor t_identificador t_abriparentes parametros t_fechaparentes t_abrichave declaracoes_comandos t_fechachave 
+  {
+    meudebug("linha 781");
+    Nodo *nodo;
+    if($1)
+      nodo = $1;
+    else
+      nodo = criarNodo("CorpoClasse", TIPO_BLOCO, linha, coluna);
+    Nodo *n = criarNodo($5 , TIPO_METODOCLASSE , linha, coluna);
+    Nodo *n2 = criarNodo("Vetor" , TIPO_VETOR , linha, coluna);
+    addFilhoaoNodo(nodo, n);
+    addFilhoaoNodo(n, n2);
+    addFilhoaoNodo(n2, $7);
+    addFilhoaoNodo(n2, $10);
+    $$ = nodo;
+  }
+  ;

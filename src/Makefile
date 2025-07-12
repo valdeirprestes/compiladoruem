@@ -1,26 +1,24 @@
 CC = gcc -g  
-BIN= testelexico testesintatico #compiler
+BIN= compilador
+ARQUIVOLEX=lexico.lex
 FONTELEXICO = lex.yy.c
-FONTETESTELEXICO = testelexico.tab.c 
-FONTETESTESINTATICO = testesintatico.tab.c 
+FONTEparser = parser.tab.c 
 FONTEPARSER= parser.tab.c 
-FONTEHEADERS = testelexico.tab.h testesintatico.tab.h parser.tab.h
+FONTEHEADERS = testelexico.tab.h parser.tab.h parser.tab.h
 all: $(BIN)
 	@echo "Arquivos compilados!"
 testelexico.tab.c: testelexico.y
 	bison -H testelexico.y --report=counterexamples -Wother -Wconflicts-sr
-testesintatico.tab.c: testesintatico.y
-	bison -H testesintatico.y --report=counterexamples -Wother -Wconflicts-sr -Wcounterexamples
-#parser.tab.c: parser.y
-#	bison -H parser.y --report=counterexamples -Wother
-lex.yy.c: lexico.lex $(FONTETESTESINTATICO)
-	flex lexico.lex 
-testelexico: $(FONTELEXICO) $(FONTETESTELEXICO)
-	$(CC) -o testelexico $(FONTELEXICO) $(FONTETESTELEXICO) 
-testesintatico: $(FONTELEXICO) $(FONTETESTESINTATICO) AST.c
-	$(CC) -o testesintatico $(FONTELEXICO) $(FONTETESTESINTATICO) AST.c
-compiler: $(FONTELEXICO) $(FONTEPARSER)
-	$(CC) -o compiler $(FONTELEXICO) $(FONTEPARSER)
+parser.tab.c: parser.y
+	bison -H parser.y --report=counterexamples -Wother -Wconflicts-sr -Wcounterexamples
+lex.yy.c: $(FONTEparser)
+	flex $(ARQUIVOLEX) 
+testelexico: $(FONTELEXICO) 
+	$(CC) -o testelexico $(FONTELEXICO)  
+parser: $(FONTELEXICO) $(FONTEparser) AST.c
+	$(CC) -o parser $(FONTELEXICO) $(FONTEparser) AST.c
+compilador: $(FONTELEXICO) $(FONTEPARSER) AST.c AST.h
+	$(CC) -o compilador $(FONTELEXICO) $(FONTEPARSER) AST.c
 clean:
-	rm -vf $(BIN) $(FONTELEXICO) $(FONTETESTESINTATICO) $(FONTETESTELEXICO) $(FONTEPARSER) $(FONTEHEADERS) *.output
+	rm -vf $(BIN) $(FONTELEXICO) $(FONTEparser)  $(FONTEPARSER) $(FONTEHEADERS) *.output
 
