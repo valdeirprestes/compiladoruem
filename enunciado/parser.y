@@ -102,10 +102,10 @@
 %type <nodo> chamada_funcao chamada_metodo corpofuncao 
 %type <nodo> parametro parametros 
 %type <nodo> declaracoes_comandos 
-%type <nodo> blococodigo  comandoif 
+%type <nodo> corpoloop  comandoif 
 %type <nodo> declaracao  comando comandos
-%type <nodo> forcomando  parte1for parte2for parte3for blocofor 
-%type <nodo> whilecomando blocowhile
+%type <nodo> forcomando  parte1for parte2for parte3for corpofor 
+%type <nodo> whilecomando corpowhile
 %type <nodo> argumento argumentos
 %type <nodo> corpoclasse
 %type <nodo> comandoswitch corposwitch cases case defaultswitch 
@@ -122,8 +122,8 @@ inicio:
     $$ = raiz;
   }
   | error  {
-    meudebug("blococodigo linha 125");
-    yyerror(&yylloc, "Erro de sintaxe: o codigo acabou inesperadamente");
+    meudebug("Corpoloop linha 125");
+    yyerror(&yylloc, "Erro de sintaxe: erro na regra inicial de erro ");
     //yyerrok;
     yyclearin;
   }
@@ -189,7 +189,7 @@ funcao:
   }
   | tipofunc t_identificador t_abriparentes parametros t_abrichave error t_fechachave  {
     meudebug("Funcao linha 185");
-    yyerror(&yylloc, "Erro de sintaxe: declaracao incompleta, um \'}\' inesperado");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \'}\' ");
     //yyerrok;
     yyclearin;
   }
@@ -244,13 +244,13 @@ corpofuncao:
   }
   |t_abrichave declaracoes_comandos t_pontovirgula  error t_fechachave {
     meudebug("CorpoFuncao linha 234");
-    yyerror(&yylloc, "Erro de sintaxe: caractere \'}\' inesperado ");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \'}\' ");
     //yyerrok;
     yyclearin;
   }
   |t_abrichave declaracoes_comandos  error t_fechachave {
     meudebug("CorpoFuncao linha 252");
-    yyerror(&yylloc, "Erro de sintaxe: faltou um \'{\' ou teve um tem \'}\' excedente");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \'}\' ou campo vazio entre as chaves ");
     //yyerrok;
     yyclearin;
   }
@@ -268,22 +268,10 @@ declaracoes_comandos:
       meudebug("Declaracoes_comandos linha 215");
       $$ = addRecursivoNodo("Bloco", TIPO_BLOCO, linha, coluna, $1, $2);
   }
-  |declaracoes_comandos  error t_pontovirgula {
-    meudebug("Declaracoes_comandos error t_pontovirgula linha 272");
-    yyerror(&yylloc, "Erro de sintaxe:  faltou declaracao, pois veio um \';\' inesperado");
-    yyclearin;
-  }
-  |declaracoes_comandos  t_while error {
-    meudebug("Declaracoes_comandos t_while error linha 277");
-    yyerror(&yylloc, "Erro de sintaxe:  while mal declarado");
-    yyclearin;
-    //yyerrok;
-   }
-   |declaracoes_comandos  t_for error {
-    meudebug("Declaracoes_comandos t_for error linha 283");
-    yyerror(&yylloc, "Erro de sintaxe:  for mal declarado");
-    yyclearin;
-    //yyerrok;
+   |declaracoes_comandos  error t_pontovirgula {
+    meudebug("declaracoes_comandos linha 241");
+    yyerror(&yylloc, "Esperava esperando ; e veio a declaracao acima");
+    
    }
 ;
 
@@ -393,14 +381,14 @@ defaultswitch:
     $$ = criarNodoComFilho($1 , TIPO_DEFAULT , linha, coluna,$4);
   };
 comandoif:
-  t_if t_abriparentes expressao t_fechaparentes  blococodigo %prec "then" {
+  t_if t_abriparentes expressao t_fechaparentes  corpoloop %prec "then" {
     meudebug("Comandoif linha 315");
     Nodo *n = criarNodo($1 , TIPO_IF, linha, coluna);
     addFilhoaoNodo(n, $3);
     addFilhoaoNodo(n, $5);
     $$ = n;
   }
-  | t_if t_abriparentes expressao t_fechaparentes  blococodigo t_else blococodigo{
+  | t_if t_abriparentes expressao t_fechaparentes  corpoloop t_else corpoloop{
     meudebug("Comandoif linha 322");
     Nodo *n = criarNodo("ifelse" , TIPO_IFELSE, linha, coluna);
     Nodo *n1 = criarNodo($1 , TIPO_IFELSE, linha, coluna);
@@ -434,7 +422,7 @@ argumento:
   }
   ;
 forcomando:
-  t_for t_abriparentes parte1for t_pontovirgula parte2for t_pontovirgula parte3for t_fechaparentes blocofor{
+  t_for t_abriparentes parte1for t_pontovirgula parte2for t_pontovirgula parte3for t_fechaparentes corpofor{
     meudebug("ForComando linha 354");
     Nodo *n = criarNodo($1, TIPO_FOR, linha, coluna);
     addFilhoaoNodo(n, $3);
@@ -444,7 +432,7 @@ forcomando:
     $$ = n;
   }
   |t_for t_abriparentes parte1for t_pontovirgula parte2for t_pontovirgula parte3for t_fechaparentes  error  {
-    meudebug("blococodigo linha 510");
+    meudebug("Corpoloop linha 510");
     yyerror(&yylloc, "Erro de sintaxe: esperava tipo \'}\' ");
     //yyerrok;
     yyclearin;
@@ -453,14 +441,9 @@ forcomando:
 
 parte1for:
   %empty {meudebug("Parte1For linha 392"); $$ = NULL;}
-  | t_identificador t_igual expressao { 
-    meudebug("Parte1For linha 394");
-    $$ = criarNodoComFilho($1, TIPO_IDENTIFICADOR, linha, coluna, $3);
-  } 
   | tipo t_identificador t_igual expressao { 
-    meudebug("Parte1For linha 394");
-    $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna, $4);
-    addFilhoaoNodo($4, $1);
+    meudebug("Parte2For linha 394");
+    $$ = $1;
   } 
   ;
 
@@ -523,20 +506,19 @@ parte3for:
     $$ = n;
   }
   ;
-blocofor:
-  t_pontovirgula {$$=NULL;}
-  |blococodigo { $$ = $1;}
+corpofor:
+  corpoloop { $$ = $1;}
   ;
-blococodigo:
+corpoloop:
   comando {
-      meudebug("blococodigo linha 449");
+      meudebug("CorpoLoop linha 449");
       //printf("479 Corpo while simples -> %s line %d\n", $1->nome, $1->linha);
       Nodo *n = criarNodo("BLOCO", TIPO_BLOCO, linha, coluna);
       addFilhoaoNodo(n, $1);
       $$ = n;
   }
-  | t_abrichave declaracoes_comandos t_fechachave {
-    meudebug("blococodigo linha 456");
+  | t_abrichave comandos t_fechachave {
+    meudebug("CorpoLoop linha 456");
     Nodo *n = criarNodo("BLOCO", TIPO_BLOCO, linha, coluna);
     addFilhoaoNodo(n, $2);
     $$ = n;
@@ -560,23 +542,15 @@ chamada_metodo:
   }
   ;
 whilecomando:
-  t_while t_abriparentes expressao t_fechaparentes blocowhile{
+  t_while t_abriparentes expressao t_fechaparentes corpowhile{
     meudebug("WhileComando linha 481");
     Nodo *n = criarNodo($1, TIPO_WHILE, linha, coluna);
     addFilhoaoNodo(n, $3);
     addFilhoaoNodo(n, $5);
     $$ = n;
-  }
-  | t_while error t_fechaparentes {
-    meudebug("Funcao linha 179");
-    yyerror(&yylloc, "Erro de sintaxe: faltou definir corretamente a condicao da while ");
-    yyclearin;
-    //yyerrok;
   };
-  ;
-blocowhile:
-  t_pontovirgula { $$ = NULL;}
-  |blococodigo { $$ = $1;}
+corpowhile:
+  corpoloop { $$ = $1;}
 expressao:
   expressao t_igual expressao {
     meudebug("Expressao linha 521");

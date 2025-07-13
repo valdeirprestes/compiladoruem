@@ -1,9 +1,9 @@
 int main (int arg1) {
     int i; 
-    return "num";
+    return 1;
 	if(i ){
 		return 1;
-	}else{
+	}else
 	}
 
 }
