@@ -4,7 +4,7 @@ int main(){
 	 char valor2;
 }
 int valor(){
-    int[] valor;
+    int valor[];
 }
 int[] valores(){
     

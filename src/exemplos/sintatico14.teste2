@@ -1,10 +1,10 @@
 class MinhaClasse{
     int atributo;
-    int[] atributo;
+    int atributo[];
     int metodo1(){}
     int metodo2( char param1){}
     int metodo3( char param1, char param2){}
-    int metodo4( char[] param1, char[] param2){}
+    int metodo4( char param1[], char param2[]){}
     int[] metodo5( char param1, char param2){}
-    int[] metodo5( char[] param1, char[] param2){}
+    int[] metodo5( char param1[], char param2[]){}
 }

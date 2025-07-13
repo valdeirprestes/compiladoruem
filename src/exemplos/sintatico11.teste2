@@ -1,6 +1,6 @@
 
 int valor(){
-    int[] valor;
+    int valor[];
     while(1)
      while (2)
         valor = 1;

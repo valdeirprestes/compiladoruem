@@ -106,7 +106,7 @@
 %type <nodo> whilecomando blocowhile
 %type <nodo> argumento argumentos
 %type <nodo> corpoclasse
-%type <nodo> comandoswitch corposwitch cases case defaultswitch condicao
+%type <nodo> comandoswitch corposwitch cases case defaultswitch condicao acesso_vetor
 %type <texto> operador_aritmetico_relacional 
 
 
@@ -223,7 +223,7 @@ parametro:
     meudebug("Parametro linha 162");
     $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna,$1);
   }
-  |tipo t_abrivetor t_fechavetor t_identificador
+  |tipo  t_identificador t_abrivetor t_fechavetor
   {
     meudebug("Parametro linha 167");
     $$ = criarNodoComFilho($4, TIPO_IDENTIFICADOR, linha, coluna, $1);
@@ -309,19 +309,31 @@ declaracao:
   |tipo t_identificador t_igual expressao {
       meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
       Nodo *n = criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
-      addFilhoaoNodo(n, $1);
-      addFilhoaoNodo(n, $4);
-      $$ = n;
+      addFilhoaoNodo($1, $4);
+      $$ = criarExpOperador( $3, n, $1, linha, coluna );
+      
   }
   | t_identificador t_igual expressao {
       meudebug("Declaracao: t_identificador t_igual expressao linha 229");
       Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
-      addFilhoaoNodo(n, $3);
-      $$ = n;
+      $$ = criarExpOperador( $2, n, $3, linha, coluna );
   }
-  |tipo  t_abrivetor t_fechavetor t_identificador{
+  |tipo  t_identificador t_abrivetor t_fechavetor {
       meudebug("Declaracao linha 236");
-      $$ = criarNodoComFilho($4, TIPO_IDENTIFICADOR, linha, coluna, $1);
+      $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
+  }
+  |acesso_vetor t_igual expressao {
+      meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
+      $$ = criarExpOperador( $2, $1, $1, linha, coluna );
+  }
+  |acesso_vetor t_igual acesso_vetor {
+    meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
+    $$ = criarExpOperador( $2, $1, $3, linha, coluna );
+  }
+  |t_identificador t_igual acesso_vetor {
+      meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
+      Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+      $$ = criarExpOperador( $2, n, $3, linha, coluna );
   }
   ;
   
@@ -602,6 +614,13 @@ expressao:
     yyclearin;
   }
   ;
+acesso_vetor:
+  t_identificador t_abrivetor expressao t_abrivetor
+  {
+    meudebug(" Expressao linha 566");
+    Nodo *vetor = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+    $$ = criarNodoComFilho($1, TIPO_IDENTIFICADOR, linha, coluna,vetor);
+  }
 
 condicao:
    expressao t_or_logico expressao {
@@ -644,7 +663,7 @@ corpoclasse:
     addFilhoaoNodo(nodo, n);
     $$ = nodo;
   }
-  | corpoclasse tipo t_abrivetor t_fechavetor t_identificador  t_pontovirgula{
+  | corpoclasse tipo t_identificador t_abrivetor t_fechavetor   t_pontovirgula{
     meudebug("linha 751");
     Nodo *nodo;
     if($1)
@@ -652,7 +671,7 @@ corpoclasse:
     else
       nodo = criarNodo("CorpoClasse", TIPO_BLOCO, linha, coluna);
 
-    Nodo *n = criarNodo($5, TIPO_IDENTIFICADORCLASSE, linha, coluna);
+    Nodo *n = criarNodo($3, TIPO_IDENTIFICADORCLASSE, linha, coluna);
     Nodo *n2 = criarNodo("Vetor", TIPO_VETOR, linha, coluna);
     addFilhoaoNodo(nodo, n);
     addFilhoaoNodo(n, n2);
