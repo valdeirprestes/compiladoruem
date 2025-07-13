@@ -50,8 +50,9 @@ typedef enum _Tipo{
 	TIPO_TESTE_MAIORIGUAL,
 	TIPO_TESTE_MENOR,
 	TIPO_TESTE_MENOR_IGUAL,
-	TIPO_OP_NEGACAO
-
+	TIPO_OP_NEGACAO,
+	TIPO_OP_OU,
+	TIPO_OP_AND
 } Tipo;
 
 typedef union token{
@@ -93,4 +94,5 @@ Nodo** criaVetorNodoRecursivo(Nodo *nodo, Nodo **nodo_direita);
 char *stringNivel(int nivel, int niveis[NIVEIS][1]);
 Nodo *criarNodoFuncao(char *nome, Nodo *tipofuncao, Nodo* parametrosfunc, Nodo* corpofuncao, int linha, int coluna);
 Nodo *addRecursivoNodo(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodo1, Nodo *nodo2);
+Nodo *criarExpOperador( char *operador, Nodo *expr1, Nodo *expr2, int linha, int coluna );
 #endif

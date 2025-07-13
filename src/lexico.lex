@@ -87,6 +87,9 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 "!=" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_diferente_de;}
 "<=" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_menor_ou_igual;}
 ">=" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_maior_ou_igual;}
+"&&" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_and_logico;}
+"||" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_or_logico;}
+"!" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_not_logico;}
 "," {SETLOC(yytext); yylval->texto= strdup(yytext); return t_virgula;}
 ";" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_pontovirgula; }
 "=" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_igual; }
@@ -102,7 +105,6 @@ varincorreta [0-9]+[\.]*[a-zA-z]
 ")" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_fechaparentes;}
 "{" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_abrichave;}
 "}" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_fechachave;}
-"!" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_exclamacao;}
 "?" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_interrogacao;}
 ":" {SETLOC(yytext); yylval->texto= strdup(yytext); return t_doispontos;}
 "." {SETLOC(yytext); yylval->texto= strdup(yytext); return t_ponto;}

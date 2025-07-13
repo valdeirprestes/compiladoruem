@@ -214,6 +214,12 @@ char *strTipo(Tipo tipo){
 	case TIPO_TESTE_MENOR_IGUAL:
 		strncpy(nome,"TIPO_TESTE_MENOR_IGUAL", TAM);
 		break;
+	case TIPO_OP_OU:
+		strncpy(nome,"TIPO_OP_OU", TAM);
+		break;
+	case TIPO_OP_AND:
+		strncpy(nome,"TIPO_OP_AND", TAM);
+		break;
 	case TIPO_OP_NEGACAO:
 		strncpy(nome,"TIPO_OP_NEGACAO", TAM);
 		break;
@@ -297,6 +303,65 @@ Nodo *addRecursivoNodo(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodo1
 	}
 	else
 		return NULL;
+}
+
+Nodo *criarExpOperador( char *operador, Nodo *expr1, Nodo *expr2, int linha, int coluna )
+{
+	Tipo tipo;
+	char nome[20];
+	if(!operador || !expl || !exp2 || linha < 1 || coluna <1) return NULL;
+
+	if (strcmp(operador, "=" ) == 0){ //t_igual
+		strncpy(nome, "Atribuicao",10);
+		tipo = TIPO_ATRIBUICAO;
+	}else if (strcmp(operador, "+" ) == 0){ //t_mais
+		strncpy(nome, "Soma",10);
+		tipo = TIPO_SOMA;
+	}else if (strcmp(operador, "-") == 0){ // t_menos
+		strncpy(nome, "Subtracao",10);
+		tipo = TIPO_SUBTRACAO;
+	}else if (strcmp(operador, "*") == 0){ // t_asteristico
+		strncpy(nome, "Multiplicacao",10);
+		tipo = TIPO_MULTIPLICACAO;
+	}else if (strcmp(operador, "/") == 0){// t_barra
+		strncpy(nome, "Divisao",10);
+		tipo = TIPO_DIVISAO;
+	}else if (strcmp(operador, "==") == 0){//t_igual_a
+		strncpy(nome, "ComparacaoIgualdade",10);
+		tipo = TIPO_TESTE_IGUAL;
+	}else if (strcmp(operador, "!=") == 0){//t_diferente_de
+		strncpy(nome, "ComparacaoDiferente",10);
+		tipo = TIPO_TESTE_DIFERENTE;
+	}else if (strcmp(operador,">") == 0){ //t_maior
+		strncpy(nome, "ComparacaoMaior",10);
+		tipo = TIPO_TESTE_MAIOR;
+	}else if (strcmp(operador,">=") == 0){ //t_maior_igual
+		strncpy(nome, "ComparacaoMaiorIgual",10);
+		tipo = TIPO_TESTE_MAIORIGUAL;
+	}else if (strcmp(operador,"<") == 0){ //t_menor
+		strncpy(nome, "ComparacaoMenor",10);
+		tipo = TIPO_TESTE_MENOR;
+	}else if (strcmp(operador,"<=") == 0){ //t_maior
+		strncpy(nome, "ComparacaoMenorIgual",10);
+		tipo = TIPO_TESTE_MENOR_IGUAL;
+	}else if (strcmp(operador,"||") == 0){ //t_or_logico
+		strncpy(nome, "TesteOU",10);
+		tipo = TIPO_OP_OU;
+	}else if (strcmp(operador,"&&") == 0){ //t_and_logico
+		strncpy(nome, "TesteE",10);
+		tipo = TIPO_OP_AND;
+	}else if (strcmp(operador,"!") == 0){ //t_not_logico
+		strncpy(nome, "Negacao",10);
+		tipo = TIPO_OP_NEGACAO;
+	}else {
+		strncpy(nome, "Desconhecido",10);
+		tipo = TIPO_REGRA;
+	}
+
+	Nodo *n = criarNodo( nome, tipo , linha, coluna);
+    addFilhoaoNodo(n, expr1);
+    addFilhoaoNodo(n, expr2);
+    return n;
 }
 
 
