@@ -121,6 +121,12 @@ inicio:
       printNodo(raiz);
     $$ = raiz;
   }
+  | error  {
+    meudebug("Corpoloop linha 125");
+    yyerror(&yylloc, "Erro de sintaxe: erro na regra inicial de erro ");
+    //yyerrok;
+    yyclearin;
+  }
   ;
 codigos:
   codigo{
@@ -150,13 +156,13 @@ funcao:
       $$ = criarNodoFuncao($2, $1, $4, $6 ,linha, coluna);
   }
   | t_identificador error {
-    meudebug("CorpoFuncao linha 151");
+    meudebug("Funcao linha 151");
     //--yyerrstatus;
     yyerror(&yylloc, "Erro de sintaxe: esperava tipagem da funcao");
     yyclearin;
   }
   | t_abrivetor error {
-    meudebug("CorpoFuncao linha 157");
+    meudebug("Funcao linha 157");
     //--yyerrstatus;
     yyerror(&yylloc, "Erro de sintaxe: esperava tipagem da funcao");
     //yyerrok;
@@ -164,14 +170,26 @@ funcao:
   }
   
   | tipofunc t_identificador parametros error t_fechachave {
-    meudebug("CorpoFuncao linha 170");
+    meudebug("Funcao linha 170");
     yyerror(&yylloc, "Erro de sintaxe: esperava \'(\' na declaração anterior ");
     //yyerrok;
     yyclearin;
   }
   | tipofunc t_identificador t_abriparentes t_identificador error  {
-    meudebug("CorpoFuncao linha 176");
+    meudebug("Funcao linha 176");
     yyerror(&yylloc, "Erro de sintaxe: esperava tipo do parametro ");
+    //yyerrok;
+    yyclearin;
+  }
+  | tipofunc t_identificador t_abriparentes parametros t_abrichave error t_fechaparentes  {
+    meudebug("Funcao linha 179");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \')\' ");
+    //yyerrok;
+    yyclearin;
+  }
+  | tipofunc t_identificador t_abriparentes parametros t_abrichave error t_fechachave  {
+    meudebug("Funcao linha 185");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \'}\' ");
     //yyerrok;
     yyclearin;
   }
@@ -187,12 +205,18 @@ tipofunc:
 parametros:
   %empty { $$ = NULL;}
 	|parametro  {
-      meudebug("Parametros linha 152");
+      meudebug("Parametros linha 196");
       $$ = criarNodo("Parametros", TIPO_IDENTIFICADOR, linha, coluna);
   }
 | parametros t_virgula parametro {
-      meudebug("Parametros linha 156");
+      meudebug("Parametros linha 200");
       $$= addRecursivoNodo("Parametros", TIPO_PARAMETROS, linha, coluna, $1, $3);
+  }
+  | parametros error t_virgula {
+    meudebug("Parametros linha 204");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \';\' ");
+    //yyerrok;
+    yyclearin;
   }
   ;
 parametro:
@@ -217,6 +241,18 @@ corpofuncao:
   t_abrichave declaracoes_comandos t_fechachave {
    meudebug("CorpoFuncao linha 180");
    $$ = $2;
+  }
+  |t_abrichave declaracoes_comandos t_pontovirgula  error t_fechachave {
+    meudebug("CorpoFuncao linha 234");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \'}\' ");
+    //yyerrok;
+    yyclearin;
+  }
+  |t_abrichave declaracoes_comandos  error t_fechachave {
+    meudebug("CorpoFuncao linha 252");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \'}\' ou campo vazio entre as chaves ");
+    //yyerrok;
+    yyclearin;
   }
   ;
 declaracoes_comandos:
@@ -361,6 +397,12 @@ comandoif:
     addFilhoaoNodo(n, $7);
     $$ = n;
   }
+  |t_if t_abriparentes t_fechaparentes  error t_fechachave {
+    meudebug("comandoif linha 395");
+    yyerror(&yylloc, "Erro de sintaxe: esperava argumentos ");
+    //yyerrok;
+    yyclearin;
+  }
   ;
 argumentos:
   %empty { $$ = NULL;}
@@ -389,10 +431,16 @@ forcomando:
     addFilhoaoNodo(n, $9);
     $$ = n;
   }
+  |t_for t_abriparentes parte1for t_pontovirgula parte2for t_pontovirgula parte3for t_fechaparentes  error  {
+    meudebug("Corpoloop linha 510");
+    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \'}\' ");
+    //yyerrok;
+    yyclearin;
+  }
   ;
 
 parte1for:
-  %empty {meudebug("Parte2For linha 392"); $$ = NULL;}
+  %empty {meudebug("Parte1For linha 392"); $$ = NULL;}
   | tipo t_identificador t_igual expressao { 
     meudebug("Parte2For linha 394");
     $$ = $1;
@@ -405,7 +453,12 @@ parte2for:
   | expressao { 
     meudebug("Parte2For linha 394");
     $$ = $1;}
-  ;
+  |error t_identificador{
+    meudebug("Funcao linha 179");
+    yyerror(&yylloc, "Erro de sintaxe: esperava um variavel \')\' ");
+    //yyerrok;
+    //yyclearin;
+  };
 
 parte3for:
   t_identificador t_igual expressao t_mais expressao {
@@ -610,6 +663,12 @@ expressao:
   }
   | chamada_funcao { $$ = $1; };
   | chamada_metodo { $$ = $1;} ;
+  | t_abriparentes  t_fechaparentes  {
+    meudebug("Expressao linha 650");
+    yyerror(&yylloc, "Erro de sintaxe: faltou um variavel ou expressao ");
+    //yyerrok;
+    yyclearin;
+  }
   ;
 classe:
   t_class t_identificador t_abrichave corpoclasse t_fechachave { 

@@ -187,9 +187,11 @@ int tam(char *s)
 	if(locp == NULL)
 		printf("->>>  %s - linha %d coluna %d\n", s, linha, coluna);
 	//printf("locp->first_line %d  locp->first_column %d \n" , locp->first_line, locp->first_column);
-	printErrorsrc(source, linha, coluna);
+	//printErrorsrc(source, linha, coluna); 
+	printErrorsrc(source, utoken_linha, utoken_coluna);
 	
-	printf("->>> %s - linha %d coluna %d\n", s, linha,coluna);
+	//printf("->>> %s - linha %d coluna %d\n", s, linha,coluna);
+	printf("->>> %s - linha %d coluna %d\n", s, utoken_linha, utoken_coluna);
 }
 
 void meudebug( char *texto){
