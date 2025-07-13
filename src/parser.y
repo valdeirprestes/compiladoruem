@@ -162,12 +162,7 @@ funcao:
     //yyerrok;
     yyclearin;
   }
-  | tipofunc t_identificador t_abriparentes parametros error t_fechachave {
-    meudebug("CorpoFuncao linha 164");
-    yyerror(&yylloc, "Erro de sintaxe: esperava \')\' na declaração anterior ");
-    //yyerrok;
-    yyclearin;
-  }
+  
   | tipofunc t_identificador parametros error t_fechachave {
     meudebug("CorpoFuncao linha 170");
     yyerror(&yylloc, "Erro de sintaxe: esperava \'(\' na declaração anterior ");
@@ -187,16 +182,6 @@ tipofunc:
     $$ = $1; 
   }
   |tipo t_abrivetor t_fechavetor { meudebug("TipoFunc linha 141"); $$ = $1;}
-  | t_identificador error t_pontovirgula t_abriparentes {
-    meudebug("Tipo linha 220");
-    yyerror(&yylloc, "Esperava ; na declaracao anterior");
-    
-   }
-  | t_identificador error t_igual t_abriparentes {
-    meudebug("Tipo linha 220");
-    yyerror(&yylloc, "Esperava atribuicao na declaracao anterior");
-    
-   }
   ;
  
 parametros:
@@ -247,9 +232,9 @@ declaracoes_comandos:
       meudebug("Declaracoes_comandos linha 215");
       $$ = addRecursivoNodo("Bloco", TIPO_BLOCO, linha, coluna, $1, $2);
   }
-  | declaracoes_comandos declaracao error {
-    meudebug("Declaracoes_comandos linha 196");
-    yyerror(&yylloc, "Esperava ; na declaracao anterior");
+   |declaracoes_comandos  error t_pontovirgula {
+    meudebug("declaracoes_comandos linha 241");
+    yyerror(&yylloc, "Esperava esperando ; e veio a declaracao acima");
     
    }
 ;
@@ -284,7 +269,7 @@ declaracao:
   |tipo  t_abrivetor t_fechavetor t_identificador{
       meudebug("Declaracao linha 236");
       $$ = criarNodoComFilho($4, TIPO_IDENTIFICADOR, linha, coluna, $1);
-  } 
+  }
   ;
 
   

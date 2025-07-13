@@ -56,3 +56,6 @@ src/lex.yy.c
 teste
 saida.teste
 testelexico
+*.tab.*
+*.output
+src/compilador

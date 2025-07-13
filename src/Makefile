@@ -7,11 +7,9 @@ FONTEPARSER= parser.tab.c
 FONTEHEADERS = testelexico.tab.h parser.tab.h parser.tab.h
 all: $(BIN)
 	@echo "Arquivos compilados!"
-testelexico.tab.c: testelexico.y
-	bison -H testelexico.y --report=counterexamples -Wother -Wconflicts-sr
 parser.tab.c: parser.y
 	bison -H parser.y --report=counterexamples -Wother -Wconflicts-sr -Wcounterexamples
-lex.yy.c: $(FONTEparser)
+lex.yy.c: $(FONTEparser) $(ARQUIVOLEX) 
 	flex $(ARQUIVOLEX) 
 testelexico: $(FONTELEXICO) 
 	$(CC) -o testelexico $(FONTELEXICO)  

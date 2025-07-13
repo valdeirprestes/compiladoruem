@@ -167,7 +167,7 @@ void printErrorsrc(char **src, int minhalinha, int minhacoluna)
 		return;
 	}
 	printf("%4d %s\n", minhalinha, src[minhalinha-1]);
-	for( int i=0; i <minhacoluna; i++) printf(" ");
+	for( int i=0; i <minhacoluna+4; i++) printf(" ");
 	printf("^");
 	for( int i=1; i < 10; i++) printf("~");
 	puts("");
@@ -184,8 +184,6 @@ int tam(char *s)
   void yyerror ( YYLTYPE *locp, char const *s){
 	extern long linha;
 	extern long coluna;
-	/*fprintf(stderr, "Erro desconhecido:\
-ultimo lexema aceito [%s], linha [%d], coluna[%d],  %s\n",yytext, linha, coluna, s );*/
 	if(locp == NULL)
 		printf("->>>  %s - linha %d coluna %d\n", s, linha, coluna);
 	//printf("locp->first_line %d  locp->first_column %d \n" , locp->first_line, locp->first_column);
