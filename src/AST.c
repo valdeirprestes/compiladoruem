@@ -31,6 +31,12 @@ Nodo *criarNodoDeclaracao(Nodo *idcomfilhotipo, int linha, int coluna){
 	return n;
 }
 
+Nodo *criarNodoParametro(Nodo *idcomfilhotipo, int linha, int coluna){
+	Nodo *n= criarNodo("Declaracao", TIPO_DECLARACAO, linha, coluna);
+	addFilhoaoNodo(n, idcomfilhotipo);
+	return n;
+}
+
 
 Nodo *criarNodoIdentificador(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodotipo)
 {
@@ -197,6 +203,9 @@ char *strTipo(Tipo tipo){
 		break;
 	case TIPO_PARAMETROS:
 		strncpy(nome,"TIPO_PARAMETROS", TAM);
+		break;
+	case TIPO_PARAMETRO:
+		strncpy(nome,"TIPO_PARAMETRO", TAM);
 		break;
 	case TIPO_SOMA:
 		strncpy(nome,"TIPO_SOMA", TAM);

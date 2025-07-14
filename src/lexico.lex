@@ -212,7 +212,7 @@ void meudebug( char *texto){
 int main(int argc, char *arqv[]){
 	int nlinhas;
 	int ifile;
-	int imprimir_simbolos = 0;
+	extern int imprimir_simbolos;
 	for(int i = 1; i < argc ; i++){
 		if( strcmp(arqv[i], "-e") == 0 && i<argc){
 			ifile = i+1;
@@ -237,7 +237,6 @@ int main(int argc, char *arqv[]){
 		}
 		else if (strcmp(arqv[i], "-t") == 0){
 			imprimir_simbolos = 1;
-			puts("imprir simbolos = 1");
 		}
 		else if (strcmp(arqv[i], "-p") == 0){
 			//printf("foram %d linhas", nlinhas);
@@ -255,8 +254,10 @@ int main(int argc, char *arqv[]){
 	}
 
 	yyparse();
-	if( imprimir_simbolos && tabelaSimbolos && raiz )
+	if( imprimir_simbolos && tabelaSimbolos )
+	{
 		imprimirTabelaSimbolos();
+	}
 
 
 }

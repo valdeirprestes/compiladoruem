@@ -53,7 +53,8 @@ typedef enum _Tipo{
 	TIPO_OP_NEGACAO,
 	TIPO_OP_OU,
 	TIPO_OP_AND,
-	TIPO_DECLARACAO
+	TIPO_DECLARACAO,
+	TIPO_PARAMETRO
 } Tipo;
 
 typedef union token{
@@ -80,6 +81,7 @@ typedef struct Nodo{
 
 Nodo *criarNodo(char *nome, Tipo tipo, int linha, int coluna);
 Nodo *criarNodoDeclaracao(Nodo *idcomfilhotipo, int linha, int coluna);
+Nodo *criarNodoParametro(Nodo *idcomfilhotipo, int linha, int coluna);
 Nodo *criarNodoIdentificador(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodotipo);
 int addFilhoaoNodo(Nodo *nodopai, Nodo *nodofilho);
 Nodo *criarNodoComFilho(char *nome, Tipo tipo, int linha, int coluna,Nodo *filho);

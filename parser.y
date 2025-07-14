@@ -22,7 +22,6 @@
   long coluna=1;/*guarda a coluna do token atual  -> para erros*/
   int errossintatico = 0;
   long imprimir_ast =0;
-  int imprimir_simbolos;
   Nodo *raiz;
   void printErrorsrc(char **source, int linha, int coluna);
   void meudebug(char *texto);
@@ -120,10 +119,9 @@ inicio:
   codigos {
     meudebug("Inicio linha 96"); 
     raiz = $1;
+    gerarTabelaSimbolosDaAST(raiz);
     if(imprimir_ast)
       printNodo(raiz);
-    if(imprimir_simbolos)
-      gerarTabelaSimbolosDaAST(raiz);
     $$ = raiz;
   }
   | error  {
@@ -155,7 +153,7 @@ codigo:
     }
   | t_global declaracao t_pontovirgula{
     meudebug("Codigo linha 120");
-    $$ = $2; //criarNodoDeclaracao($2, linha, coluna);
+    $$ = criarNodoDeclaracao($2, linha, coluna);
     }
   ;
 
@@ -215,13 +213,11 @@ parametros:
   %empty { $$ = NULL;}
 	|parametro  {
       meudebug("Parametros linha 196");
-      Nodo *p =criarNodoDeclaracao($1,  linha, coluna);
-      $$ = criarNodoComFilho("Parametros", TIPO_PARAMETROS, linha, coluna, p);
+      $$ = criarNodoComFilho("Parametros", TIPO_PARAMETROS, linha, coluna, $1);
   }
 | parametros t_virgula parametro {
       meudebug("Parametros linha 200");
-      Nodo *p =criarNodoDeclaracao($3,  linha, coluna);
-      $$= addRecursivoNodo("Parametros", TIPO_PARAMETROS, linha, coluna, $1, p);
+      $$= addRecursivoNodo("Parametros", TIPO_PARAMETROS, linha, coluna, $1, $3);
   }
   | parametros error t_virgula {
     meudebug("Parametros linha 204");

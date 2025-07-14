@@ -5,6 +5,7 @@ char *escopoAtual = "global";
 extern int debug;
 
 
+
 Simbolo* buscarSimbolo(const char *nome, const char *escopo) {
     Simbolo *atual = tabelaSimbolos;
     if(!nome) return NULL;
@@ -103,14 +104,13 @@ void imprimirTabelaSimbolos() {
     printf("----------------------------------------------------------------------------------------------------\n");
 }
 
-void gerarTabelaSimbolosDaAST(Nodo *noraiz) {
-    if (noraiz == NULL) {
+void gerarTabelaSimbolosDaAST(Nodo *no) {
+    if (no == NULL) {
         return;
     }
-
     char *escopoAnterior = NULL;
-    if(noraiz->tipo == TIPO_DECLARACAO && noraiz->filhos){ 
-        Nodo *no = noraiz->filhos[0];
+    if((no->tipo == TIPO_DECLARACAO  || no->tipo == TIPO_FUNCAO || no->tipo == TIPO_CLASSE || no->tipo == TIPO_IDENTIFICADOR) && no->filhos){
+        //no= no->filhos[0]; 
         if (no->tipo == TIPO_FUNCAO || no->tipo == TIPO_CLASSE ) {
             escopoAnterior = escopoAtual;
             escopoAtual = no->nome;
@@ -151,17 +151,15 @@ void gerarTabelaSimbolosDaAST(Nodo *noraiz) {
 
     }
     // --- Percorrer os filhos (recursão) ---
-    for (int i = 0; i < noraiz->nfilhos; i++) {
-        gerarTabelaSimbolosDaAST(noraiz->filhos[i]);
+    for (int i = 0; i < no->nfilhos; i++) {
+        gerarTabelaSimbolosDaAST(no->filhos[i]);
     // --- Lógica de Saída de Escopo ---
-        if (noraiz->tipo == TIPO_FUNCAO || noraiz->tipo == TIPO_CLASSE || noraiz->tipo == TIPO_METODOCLASSE) {
-            char *noTipoStr = strTipo(noraiz->tipo);
-            if(debug)
-                printf("<<< Saindo do escopo: %s (Nó: %s, Tipo: %s)\n", escopoAtual, noraiz->nome, noTipoStr);
-            free(noTipoStr); // Liberar memória
-            escopoAtual = escopoAnterior;
-        }
+    if (no->tipo == TIPO_FUNCAO || no->tipo == TIPO_CLASSE || no->tipo == TIPO_METODOCLASSE) {
+        char *noTipoStr = strTipo(no->tipo);
+        if(debug)
+            printf("<<< Saindo do escopo: %s (Nó: %s, Tipo: %s)\n", escopoAtual, no->nome, noTipoStr);
+        free(noTipoStr); // Liberar memória
+        escopoAtual = escopoAnterior;
     }
-
-    
+    }
 }

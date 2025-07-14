@@ -1,2 +1,2 @@
 global int i;
-int main(){}
+int main(){int x;}
