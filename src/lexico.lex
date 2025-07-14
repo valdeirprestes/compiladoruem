@@ -5,8 +5,12 @@
 	#include <string.h>
 	#include "AST.h"
     #include "parser.tab.h"
+	#include "simbolo.h"
 	extern YYLTYPE yylloc;
 	extern YYSTYPE yylval;
+	extern Nodo *raiz;
+	extern Simbolo *tabelaSimbolos;
+	extern char *escopoAtual;
 	
 	
 	extern long coluna_tmp;
@@ -125,6 +129,7 @@ switch { SETLOC(yytext);yylval->texto= strdup(yytext); return t_switch;}
 case { SETLOC(yytext);yylval->texto= strdup(yytext); return t_case;}
 default { SETLOC(yytext);yylval->texto= strdup(yytext); return t_default;}
 break {SETLOC(yytext);yylval->texto= strdup(yytext); return t_break;}
+global {SETLOC(yytext);yylval->texto= strdup(yytext); return t_global;}
 
 
 {numero} {SETLOC(yytext); yylval->texto= strdup(yytext);  return t_num;}
@@ -207,6 +212,7 @@ void meudebug( char *texto){
 int main(int argc, char *arqv[]){
 	int nlinhas;
 	int ifile;
+	int imprimir_simbolos = 0;
 	for(int i = 1; i < argc ; i++){
 		if( strcmp(arqv[i], "-e") == 0 && i<argc){
 			ifile = i+1;
@@ -221,14 +227,17 @@ int main(int argc, char *arqv[]){
 				printf("Erro, não conseguiu alocar %s na memoria\n", arqv[ifile]);
 				exit(-1);
 			}
-			i = i+1;
+			
 		}else if(strcmp(arqv[i],"-s") == 0 && i<argc){
 			yyout = fopen(arqv[i+1],"w");
-			i = i+1;
-		}else if (strcmp(arqv[i], "-t") == 0){
+		}else if (strcmp(arqv[i], "-a") == 0){
 			imprimir_ast = 1;
 		}else if (strcmp(arqv[i], "-d") == 0){
 			debug = 1;
+		}
+		else if (strcmp(arqv[i], "-t") == 0){
+			imprimir_simbolos = 1;
+			puts("imprir simbolos = 1");
 		}
 		else if (strcmp(arqv[i], "-p") == 0){
 			//printf("foram %d linhas", nlinhas);
@@ -246,7 +255,8 @@ int main(int argc, char *arqv[]){
 	}
 
 	yyparse();
-	
+	if( imprimir_simbolos && tabelaSimbolos && raiz )
+		imprimirTabelaSimbolos();
 
 
 }

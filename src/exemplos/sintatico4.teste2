@@ -1,9 +1,9 @@
 int main(){
     return "minhastring";
-    int valor;
+    int valor = 1;
     int valor2;
 }
-int valor(){
+int minhafuc(){
     int valor;
     int valor2;
     int valor3;

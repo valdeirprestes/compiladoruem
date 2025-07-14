@@ -3,6 +3,7 @@
   #include <stdlib.h>
   #include <string.h>
   #include "AST.h"
+  #include "simbolo.h"
   #include "parser.tab.h"
   # define YYLTYPE_IS_DECLARED 1
   
@@ -25,7 +26,8 @@
   void printErrorsrc(char **source, int linha, int coluna);
   void meudebug(char *texto);
   int debug = 0;
-
+  extern Simbolo *tabelaSimbolos;
+	extern char *escopoAtual;
 %}
 
 
@@ -75,6 +77,7 @@
 %token <texto> t_and_logico // Para &&
 %token <texto> t_or_logico  // Para ||
 %token <texto> t_not_logico // Para ! (se não for t_exclamacao)
+%token t_global
 
 %token error 
 
@@ -116,6 +119,7 @@ inicio:
   codigos {
     meudebug("Inicio linha 96"); 
     raiz = $1;
+    gerarTabelaSimbolosDaAST(raiz);
     if(imprimir_ast)
       printNodo(raiz);
     $$ = raiz;
@@ -141,11 +145,15 @@ codigos:
 codigo:
   funcao { 
     meudebug("Codigo linha 116");
-    $$ = $1;
+    $$ = criarNodoDeclaracao($1, linha, coluna);
     }
   | classe {
     meudebug("Codigo linha 120");
-    $$ = $1;
+    $$ = criarNodoDeclaracao($1, linha, coluna);
+    }
+  | t_global declaracao t_pontovirgula{
+    meudebug("Codigo linha 120");
+    $$ = criarNodoDeclaracao($2, linha, coluna);
     }
   ;
 
@@ -205,7 +213,7 @@ parametros:
   %empty { $$ = NULL;}
 	|parametro  {
       meudebug("Parametros linha 196");
-      $$ = criarNodo("Parametros", TIPO_IDENTIFICADOR, linha, coluna);
+      $$ = criarNodoComFilho("Parametros", TIPO_PARAMETROS, linha, coluna, $1);
   }
 | parametros t_virgula parametro {
       meudebug("Parametros linha 200");
@@ -221,7 +229,8 @@ parametros:
 parametro:
   tipo t_identificador {
     meudebug("Parametro linha 162");
-    $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna,$1);
+    //$$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna,$1);
+    $$ = criarNodoIdentificador($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
   }
   |tipo  t_identificador t_abrivetor t_fechavetor
   {
@@ -304,13 +313,17 @@ comandos:
 declaracao: 
   tipo t_identificador {
       meudebug("Declaracao: tipo t_identificador linha 225");
-      $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
+      Nodo *n = criarNodoIdentificador($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
+      $$ = criarNodoDeclaracao(n, linha, coluna);
+      
+
   }
   |tipo t_identificador t_igual expressao {
       meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
       Nodo *n = criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
       addFilhoaoNodo($1, $4);
       $$ = criarExpOperador( $3, n, $1, linha, coluna );
+      //$$ = criarNodoDeclaracao(n, linha, coluna);
       
   }
   | t_identificador t_igual expressao {

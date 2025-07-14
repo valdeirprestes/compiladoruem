@@ -21,7 +21,24 @@ Nodo *criarNodo(char *nome, Tipo tipo, int linha, int coluna)
 	n->coluna = coluna;
 	n->nfilhos = 0;
 	n->filhos = NULL;
+	n->tipo_identificador = TIPO_REGRA;
 	return n;
+}
+
+Nodo *criarNodoDeclaracao(Nodo *idcomfilhotipo, int linha, int coluna){
+	Nodo *n= criarNodo("Declaracao", TIPO_DECLARACAO, linha, coluna);
+	addFilhoaoNodo(n, idcomfilhotipo);
+	return n;
+}
+
+
+Nodo *criarNodoIdentificador(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodotipo)
+{
+	Nodo *nodo = criarNodo(nome, tipo, linha, coluna);
+	if(!nodo || !nodotipo) return NULL;
+	nodo->tipo_identificador = nodotipo->tipo;
+	addFilhoaoNodo(nodo, nodotipo);
+	return nodo;
 }
 
 int addFilhoaoNodo(Nodo *nodopai, Nodo *nodofilho)
@@ -223,6 +240,9 @@ char *strTipo(Tipo tipo){
 	case TIPO_OP_NEGACAO:
 		strncpy(nome,"TIPO_OP_NEGACAO", TAM);
 		break;
+	case TIPO_DECLARACAO:
+		strncpy(nome,"TIPO_DECLARACAO", TAM);
+		break;
 	default:
 		strncpy(nome,"DESCONHECIDO", TAM);
 		break;
@@ -284,6 +304,8 @@ char *stringNivel(int nivel, int niveis[NIVEIS][1])
 
 Nodo *criarNodoFuncao(char *nome, Nodo *tipofuncao, Nodo* parametrosfunc, Nodo* corpofuncao, int linha, int coluna){
 	Nodo *nodo = criarNodo(nome, TIPO_FUNCAO, linha, coluna);
+	if(tipofuncao)
+		nodo->tipo_identificador = tipofuncao->tipo;
     addFilhoaoNodo(nodo, tipofuncao);
     addFilhoaoNodo(nodo, parametrosfunc);
     addFilhoaoNodo(nodo, corpofuncao);

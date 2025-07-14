@@ -1,1 +1,2 @@
+global int i;
 int main(){}

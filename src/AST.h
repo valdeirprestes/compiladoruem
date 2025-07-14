@@ -52,7 +52,8 @@ typedef enum _Tipo{
 	TIPO_TESTE_MENOR_IGUAL,
 	TIPO_OP_NEGACAO,
 	TIPO_OP_OU,
-	TIPO_OP_AND
+	TIPO_OP_AND,
+	TIPO_DECLARACAO
 } Tipo;
 
 typedef union token{
@@ -75,15 +76,11 @@ typedef struct Nodo{
 	struct Nodo **filhos;
 } Nodo;
 
-typedef struct VetorNodo{
-	int capacidade;
-	int uso;
-	Nodo **nodos;
-}VetorNodo;
-
 
 
 Nodo *criarNodo(char *nome, Tipo tipo, int linha, int coluna);
+Nodo *criarNodoDeclaracao(Nodo *idcomfilhotipo, int linha, int coluna);
+Nodo *criarNodoIdentificador(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodotipo);
 int addFilhoaoNodo(Nodo *nodopai, Nodo *nodofilho);
 Nodo *criarNodoComFilho(char *nome, Tipo tipo, int linha, int coluna,Nodo *filho);
 int numNodos( Nodo **nodo);
