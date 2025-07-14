@@ -103,14 +103,14 @@ void imprimirTabelaSimbolos() {
     printf("----------------------------------------------------------------------------------------------------\n");
 }
 
-void gerarTabelaSimbolosDaAST(Nodo *no) {
-    if (no == NULL) {
+void gerarTabelaSimbolosDaAST(Nodo *noraiz) {
+    if (noraiz == NULL) {
         return;
     }
 
     char *escopoAnterior = NULL;
-    if(no->tipo == TIPO_DECLARACAO && no->filhos){ 
-        no = no->filhos[0];
+    if(noraiz->tipo == TIPO_DECLARACAO && noraiz->filhos){ 
+        Nodo *no = noraiz->filhos[0];
         if (no->tipo == TIPO_FUNCAO || no->tipo == TIPO_CLASSE ) {
             escopoAnterior = escopoAtual;
             escopoAtual = no->nome;
@@ -151,13 +151,13 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
 
     }
     // --- Percorrer os filhos (recursão) ---
-    for (int i = 0; i < no->nfilhos; i++) {
-        gerarTabelaSimbolosDaAST(no->filhos[i]);
+    for (int i = 0; i < noraiz->nfilhos; i++) {
+        gerarTabelaSimbolosDaAST(noraiz->filhos[i]);
     // --- Lógica de Saída de Escopo ---
-        if (no->tipo == TIPO_FUNCAO || no->tipo == TIPO_CLASSE || no->tipo == TIPO_METODOCLASSE) {
-            char *noTipoStr = strTipo(no->tipo);
+        if (noraiz->tipo == TIPO_FUNCAO || noraiz->tipo == TIPO_CLASSE || noraiz->tipo == TIPO_METODOCLASSE) {
+            char *noTipoStr = strTipo(noraiz->tipo);
             if(debug)
-                printf("<<< Saindo do escopo: %s (Nó: %s, Tipo: %s)\n", escopoAtual, no->nome, noTipoStr);
+                printf("<<< Saindo do escopo: %s (Nó: %s, Tipo: %s)\n", escopoAtual, noraiz->nome, noTipoStr);
             free(noTipoStr); // Liberar memória
             escopoAtual = escopoAnterior;
         }
