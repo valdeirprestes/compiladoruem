@@ -25,9 +25,15 @@ string;
 
 
 ### Linguagem projetada pela equipe:
+Comentário
+```
+/* comentário
+	acabou */
+```
+
 Valores aceitos:  
 ```
-"string"
+"string" /* apenas uma linha */
 123
 123.00
 ```
@@ -43,6 +49,16 @@ int var1[];
 float var2[];
 char var3[]; 
 string var4[]; /* classe */
+```
+
+Atribuções:
+```
+int i =  x;
+i = x;
+int i[];
+i[1]  = x;
+i[i]  = j[x];
+
 ```
 
 Teste de comparação:
@@ -63,10 +79,9 @@ while( expressao ){
 }
 ```
 Estrutura condicionais
-```
-expressao ? var1 : var2; 
+``` 
 if{} else if  {} else {}
-switch(){ case default}
+switch(){ case x:  default}
 ```
 
 Suporte a classe (sem herança, polimorfismo e encapsulamento)
@@ -74,12 +89,12 @@ Suporte a classe (sem herança, polimorfismo e encapsulamento)
 class  var1 {
  	construtor(){ return;}
 	destrutor() {}
-(tipo) funcsome(){}
+(tipo)[] funcsome(){}
 }
 ```
 Suporte a funções
 ```
-(tipo) func(){ return;}
+(tipo)[] func(){ return;}
 ```
 
 Função principal
@@ -87,15 +102,10 @@ Função principal
 int main (){}
 ```
 
+
+
 ### Para compilar e executar existem duas  maneiras
-## Compilar manual
-   
-Para compilar o teste do analisador léxico são 3 comandos manuais:
-```
-bison -H bison.y
-flex lexico.lex
-gcc -g -o testelexico bison.tab.c lex.yy.c
-```
+
 
 ## Usando o make 
 Ou pelo uso de GNU Make, que faz estes três comandos.  
@@ -106,5 +116,15 @@ make
 
 Para executar use:
 ```
-./testelexico -e arquivo.teste -s saida.teste
+./compilador -e arquivo.teste -s saida.teste
+```
+
+Opções:
+```
+-e Arquivo entrada.
+-p Imprimi o arquivo de entrada.
+-d Imprimi variáveis e regras.
+-a Imprimi arvore AST.
+-t Tabela de símbolos.
+-s Arquivo se saida ( ainda a implementar).
 ```
