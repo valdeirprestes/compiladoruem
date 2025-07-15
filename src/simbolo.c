@@ -109,7 +109,19 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
         return;
     }
     char *escopoAnterior = NULL;
-    if((no->tipo == TIPO_DECLARACAO  || no->tipo == TIPO_FUNCAO || no->tipo == TIPO_CLASSE || no->tipo == TIPO_IDENTIFICADOR) && no->filhos){
+    
+    if(no->tipo == TIPO_DECLARACAO && no->nfilhos >= 2){
+        Nodo *nofilho = no->filhos[1];
+        if (nofilho->tipo == TIPO_IDENTIFICADOR  ) {
+            int isVetor = 0;
+            int isParametro = 0;
+            inserirSimbolo(nofilho->nome, escopoAtual, no->filhos[0]->tipo, isParametro, isVetor,NULL,nofilho->tipo_identificador, nofilho->linha, nofilho->coluna);
+            /*for(int i=1; i < nofilho->nfilhos; i++){
+                addFilhoaoNodo(nofilho, no->filhos[i]);
+            }*/
+        }
+    }
+    else if(( no->tipo == TIPO_FUNCAO || no->tipo == TIPO_CLASSE ) && no->filhos){
         //no= no->filhos[0]; 
         if (no->tipo == TIPO_FUNCAO || no->tipo == TIPO_CLASSE ) {
             escopoAnterior = escopoAtual;
@@ -120,12 +132,12 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
             free(noTipoStr);
         }
 
-        
         if (no->tipo == TIPO_IDENTIFICADOR && no->filhos[0] ) {
             int isVetor = 0;
             int isParametro = 0;
             inserirSimbolo(no->nome, escopoAtual, no->tipo, isParametro, isVetor,NULL,no->tipo_identificador, no->linha, no->coluna);
         }
+        
         else if (no->tipo == TIPO_FUNCAO || no->tipo == TIPO_METODOCLASSE) {
             inserirSimbolo(no->nome, escopoAnterior, no->tipo, 0, 0, NULL, no->tipo_identificador,no->linha, no->coluna);
             for (int i = 0; i < no->nfilhos; i++) {
@@ -145,6 +157,11 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
         // Classes
         else if (no->tipo == TIPO_CLASSE) {
             inserirSimbolo(no->nome, escopoAnterior, TIPO_CLASSE, 0, 0,NULL, no->tipo_identificador,no->linha, no->coluna);
+        }
+        else if (no->tipo == TIPO_IDENTIFICADOR && no->filhos[0] ) {
+            int isVetor = 0;
+            int isParametro = 0;
+            inserirSimbolo(no->nome, escopoAtual, no->tipo, isParametro, isVetor,NULL,no->tipo_identificador, no->linha, no->coluna);
         }
 
         

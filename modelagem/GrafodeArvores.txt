@@ -35,6 +35,11 @@ Indetificador +
 
 i[x] = expressao
 
-Indetificador +  
+Indetificador_vetor +               -> neste contexto á sabe a tipagem.
 	      |-> indice +
-		       |-> (operador)
+	      |-> (operador)
+
+
+int () {
+
+Declaracao+

@@ -155,7 +155,7 @@ codigo:
   }
  |funcao  {
     meudebug("Codigo linha 120");
-    $$ = criarNodoDeclaracao($1, linha, coluna);
+    $$ = $1;
   }
  | declaracao t_pontovirgula{ 
   $$ = $1;
@@ -297,7 +297,7 @@ declaracao:
   }
   |acesso_vetor t_igual expressao  {
       meudebug("Declaracao: acesso_vetor t_igual expressao");
-      printf("acesso_vetor %s expressao %s ", $1->nome, $3->nome );
+      //printf("acesso_vetor %s expressao %s ", $1->nome, $3->nome );
       $$ = criarExpOperador( $2, $1, $3, linha, coluna );
   }
   |acesso_vetor t_igual acesso_vetor {
@@ -321,7 +321,10 @@ declaracao:
  funcao:
   tipo t_identificador t_abriparentes parametros t_fechaparentes corpofuncao {
       meudebug("Funcao linha 147");
-      $$ = criarNodoFuncao($2, $1, $4, $6 ,linha, coluna);
+      Nodo *declaracao = criarNodoDeclaracao($1, linha, coluna);
+      addFilhoaoNodo(declaracao, criarNodoFuncao($2, $1, $4, $6 ,linha, coluna));
+      $$ = declaracao;
+
   };
   |tipo t_abrivetor t_fechavetor t_identificador t_abriparentes parametros t_fechaparentes corpofuncao {
       meudebug("Funcao linha 147");
@@ -589,7 +592,7 @@ expressao:
   {
     meudebug(" Expressao: t_num");
     Tipo tipo = TIPO_INTEIRO;
-    printf("tnum = %s\n", $1);
+    /*printf("tnum = %s\n", $1);*/
     Nodo *n = criarNodo($1, tipo, linha, coluna);
     $$ = n;
   }

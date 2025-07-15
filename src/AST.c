@@ -275,9 +275,9 @@ void printNodoFilhos(Nodo *n, int nivel, int niveis[NIVEIS][1])
 			case TIPO_DECIMAL:
 				printf("-> %.2f (%s)\n", n->token.dval, strTipo(n->tipo));
 				break;
-			case TIPO_INTEIRO:
+			/*case TIPO_INTEIRO:
 				printf("-> %d (%s)\n", n->token.ival, strTipo(n->tipo));
-				break;
+				break;*/
 			case TIPO_STRING:
 				printf("-> %s (%s)\n", n->token.sval, strTipo(n->tipo));
 				break;
@@ -346,7 +346,7 @@ Nodo *criarExpOperador( char *operador, Nodo *expr1, Nodo *expr2, int linha, int
 {
 	Tipo tipo;
 	char nome[20];
-	printf("{%s}\n", operador);
+	
 	if(expr1 == expr2 ) return NULL; /*evitar loop infinitos*/
 	if(!operador || !expl || !exp2 || linha < 1 || coluna <1) return NULL;
 
