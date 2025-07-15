@@ -25,4 +25,6 @@ compilador: $(FONTELEXICO) $(FONTEPARSER) $(SRC) $(OBJAST)
 	$(CC) -o compilador $(FONTELEXICO) $(FONTEPARSER) $(OBJAST)
 clean:
 	rm -vf $(BIN) $(FONTELEXICO) $(FONTEparser)  $(FONTEPARSER) $(FONTEHEADERS) *.output *.o
+#teste: $(BIN)
+#	bash -c "for ARQ in $(ls exemplos/sintatico*| grep sintatico[0-9]*.tes*); do echo $ARQ; ./compilador -e $ARQ; done"
 

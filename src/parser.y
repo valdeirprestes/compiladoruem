@@ -78,7 +78,7 @@
 %token <texto> t_and_logico // Para &&
 %token <texto> t_or_logico  // Para ||
 %token <texto> t_not_logico // Para ! (se não for t_exclamacao)
-%token t_global
+
 
 %token error 
 
@@ -90,6 +90,10 @@
 %left t_mais t_menos // +, -
 %left t_asteristico t_barra // *, /
 
+
+%left t_identificador
+%left t_abrivetor
+%left t_fechavetor
 // Adicione operadores lógicos se necessário. Ex:
 // %left t_and_logico
 // %left t_or_logico
@@ -98,7 +102,7 @@
 %nonassoc t_else
 
 
-%type <nodo> inicio  funcao classe tipofunc tipo
+%type <nodo> inicio  classe tipo funcao
 %type <nodo> codigos codigo
 %type <nodo> expressao  
 %type <nodo> chamada_funcao chamada_metodo corpofuncao 
@@ -145,71 +149,20 @@ codigos:
   }
   ;
 codigo:
-  funcao { 
-    meudebug("Codigo linha 116");
-    $$ = criarNodoDeclaracao($1, linha, coluna);
-    }
-  | classe {
+  classe {
     meudebug("Codigo linha 120");
     $$ = criarNodoDeclaracao($1, linha, coluna);
-    }
-  | t_global declaracao t_pontovirgula{
+  }
+ |funcao  {
     meudebug("Codigo linha 120");
-    $$ = $2; //criarNodoDeclaracao($2, linha, coluna);
-    }
-  ;
-
-funcao:
-	tipofunc t_identificador t_abriparentes parametros t_fechaparentes corpofuncao {
-      meudebug("Funcao linha 147");
-      $$ = criarNodoFuncao($2, $1, $4, $6 ,linha, coluna);
+    $$ = criarNodoDeclaracao($1, linha, coluna);
   }
-  | t_identificador error {
-    meudebug("Funcao linha 151");
-    //--yyerrstatus;
-    yyerror(&yylloc, "Erro de sintaxe: esperava tipagem da funcao");
-    yyclearin;
-  }
-  | t_abrivetor error {
-    meudebug("Funcao linha 157");
-    //--yyerrstatus;
-    yyerror(&yylloc, "Erro de sintaxe: esperava tipagem da funcao");
-    //yyerrok;
-    yyclearin;
-  }
-  
-  | tipofunc t_identificador parametros error t_fechachave {
-    meudebug("Funcao linha 170");
-    yyerror(&yylloc, "Erro de sintaxe: esperava \'(\' na declaração anterior ");
-    //yyerrok;
-    yyclearin;
-  }
-  | tipofunc t_identificador t_abriparentes t_identificador error  {
-    meudebug("Funcao linha 176");
-    yyerror(&yylloc, "Erro de sintaxe: esperava tipo do parametro ");
-    //yyerrok;
-    yyclearin;
-  }
-  | tipofunc t_identificador t_abriparentes parametros t_abrichave error t_fechaparentes  {
-    meudebug("Funcao linha 179");
-    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \')\' ");
-    //yyerrok;
-    yyclearin;
-  }
-  | tipofunc t_identificador t_abriparentes parametros t_abrichave error t_fechachave  {
-    meudebug("Funcao linha 185");
-    yyerror(&yylloc, "Erro de sintaxe: declaracao incompleta, um \'}\' inesperado");
-    //yyerrok;
-    yyclearin;
-  }
+ | declaracao t_pontovirgula{ 
+  $$ = $1;
+ }
  ;
-tipofunc:
-  tipo {
-    meudebug("TipoFunc linha 139");
-    $$ = $1; 
-  }
-  |tipo t_abrivetor t_fechavetor { meudebug("TipoFunc linha 141"); $$ = $1;}
-  ;
+  
+
  
 parametros:
   %empty { $$ = NULL;}
@@ -316,43 +269,64 @@ comandos:
 
 declaracao: 
   tipo t_identificador {
-      meudebug("Declaracao: tipo t_identificador linha 225");
-      Nodo *n = criarNodoIdentificador($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
-      $$ = criarNodoDeclaracao(n, linha, coluna);
-      
-
+      meudebug("Declaracao: tipo t_identificador");
+      Nodo *declaracao = criarNodo("DECLARACAO", TIPO_DECLARACAO, linha, coluna);
+      Nodo *id = criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
+      addFilhoaoNodo(declaracao, $1);
+      addFilhoaoNodo(declaracao, id);
+      $$ = declaracao;
   }
-  |tipo t_identificador t_igual expressao {
-      meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
-      Nodo *n = criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
-      addFilhoaoNodo($1, $4);
-      $$ = criarExpOperador( $3, n, $1, linha, coluna );
-      //$$ = criarNodoDeclaracao(n, linha, coluna);
-      
-  }
-  | t_identificador t_igual expressao {
-      meudebug("Declaracao: t_identificador t_igual expressao linha 229");
-      Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
-      $$ = criarExpOperador( $2, n, $3, linha, coluna );
+  |tipo t_identificador t_igual expressao  {
+      meudebug("Declaracao: tipo t_identificador t_igual expressao");
+      Nodo *declaracao = criarNodo("DECLARACAO", TIPO_DECLARACAO, linha, coluna);
+      Nodo *id = criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
+      addFilhoaoNodo(declaracao, $1);
+      addFilhoaoNodo(declaracao, id);
+      addFilhoaoNodo(id, $4);
+      $$ = declaracao;
   }
   |tipo  t_identificador t_abrivetor t_fechavetor {
-      meudebug("Declaracao linha 236");
-      $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
+      meudebug("Declaracao: tipo  t_identificador t_abrivetor t_fechavetor");
+      Nodo *declaracao = criarNodo("DECLARACAO", TIPO_DECLARACAO, linha, coluna);
+      Nodo *vetor = criarNodo($2, TIPO_VETOR, linha, coluna);
+      Nodo *id = criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
+      addFilhoaoNodo(declaracao, vetor);
+      addFilhoaoNodo(declaracao, id);
+      addFilhoaoNodo(vetor, $1);
+      $$ = declaracao;
   }
-  |acesso_vetor t_igual expressao {
-      meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
-      $$ = criarExpOperador( $2, $1, $1, linha, coluna );
+  |acesso_vetor t_igual expressao  {
+      meudebug("Declaracao: acesso_vetor t_igual expressao");
+      printf("acesso_vetor %s expressao %s ", $1->nome, $3->nome );
+      $$ = criarExpOperador( $2, $1, $3, linha, coluna );
   }
   |acesso_vetor t_igual acesso_vetor {
-    meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
+    meudebug("Declaracao: acesso_vetor t_igual acesso_vetor");
     $$ = criarExpOperador( $2, $1, $3, linha, coluna );
   }
-  |t_identificador t_igual acesso_vetor {
-      meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
-      Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
-      $$ = criarExpOperador( $2, n, $3, linha, coluna );
+  | t_identificador t_igual expressao {
+      meudebug("Declaracao: t_identificador t_igual expressao");
+      Nodo *id = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+      addFilhoaoNodo(id, $3);
+      $$ = id;
   }
-  ;
+  | t_identificador t_igual acesso_vetor {
+      meudebug("Declaracao: t_identificador t_igual acesso_vetor");
+      Nodo *id = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+      addFilhoaoNodo(id, $3);
+      $$ = id;
+  }
+ ;
+
+ funcao:
+  tipo t_identificador t_abriparentes parametros t_fechaparentes corpofuncao {
+      meudebug("Funcao linha 147");
+      $$ = criarNodoFuncao($2, $1, $4, $6 ,linha, coluna);
+  };
+  |tipo t_abrivetor t_fechavetor t_identificador t_abriparentes parametros t_fechaparentes corpofuncao {
+      meudebug("Funcao linha 147");
+      $$ = criarNodoFuncao($4, $1, $6, $8 ,linha, coluna);
+  };
   
 comando:
   comandoif {
@@ -577,46 +551,51 @@ operador_aritmetico_relacional:
 ;
 expressao:
   expressao t_mais expressao {
-    meudebug("Condicao linha 521");
+    meudebug("Expressap: expressao t_mais expressao");
     $$ = criarExpOperador( $2, $1, $3, linha, coluna );
   }; 
   | expressao t_menos expressao {
-    meudebug("Condicao linha 521");
+    meudebug("Expressap: expressao t_menos expressao");
     $$ = criarExpOperador( $2, $1, $3, linha, coluna );
   }
   | expressao t_asteristico expressao {
-    meudebug("Condicao linha 521");
+    meudebug("Expressap: expressao t_asteristico expressao");
     $$ = criarExpOperador( $2, $1, $3, linha, coluna );
   }
   | expressao t_barra expressao {
-    meudebug("Condicao linha 521");
+    meudebug("Expressap: expressao t_barra expressao");
     $$ = criarExpOperador( $2, $1, $3, linha, coluna );
   }
-  | t_abriparentes expressao t_fechaparentes { $$ = $2;  }
+  | t_abriparentes expressao t_fechaparentes { 
+      meudebug("Expressap: t_abriparentes expressao t_fechaparentes");
+      $$ = $2;  
+    }
   |t_identificador 
   {
-    meudebug(" Expressao linha 566");
+    meudebug(" Expressao: t_identificador");
     Tipo tipo = TIPO_IDENTIFICADOR;
     Nodo *n = criarNodo($1, tipo, linha, coluna);
     $$ = n;
   }
   | t_decimal
   {
+    meudebug(" Expressao: t_decimal");
     Tipo tipo = TIPO_DECIMAL;
-    meudebug("Expressao linha 574");
     Nodo *n = criarNodo(
       $1, tipo, linha, coluna);
     $$ = n;
   } 
   | t_num 
   {
+    meudebug(" Expressao: t_num");
     Tipo tipo = TIPO_INTEIRO;
+    printf("tnum = %s\n", $1);
     Nodo *n = criarNodo($1, tipo, linha, coluna);
     $$ = n;
   }
   | t_string
   {
-    meudebug("linha 479");
+    meudebug(" Expressao: t_string");
     Tipo tipo = TIPO_STRING;
     Nodo *n = criarNodo(
       $1, tipo, linha, coluna);
@@ -625,18 +604,21 @@ expressao:
   | chamada_funcao { $$ = $1; };
   | chamada_metodo { $$ = $1;} ;
   | t_abriparentes  t_fechaparentes error {
-    meudebug("Expressao linha 650");
+    meudebug(" Expressao: t_decimal t_abriparentes  t_fechaparentes error");
     yyerror(&yylloc, "Erro de sintaxe: faltou um variavel ou expressao ");
     //yyerrok;
     yyclearin;
   }
   ;
 acesso_vetor:
-  t_identificador t_abrivetor expressao t_abrivetor
+  t_identificador t_abrivetor expressao t_fechavetor
   {
-    meudebug(" Expressao linha 566");
-    Nodo *vetor = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
-    $$ = criarNodoComFilho($1, TIPO_IDENTIFICADOR, linha, coluna,vetor);
+    meudebug(" Acesso_vetor: t_identificador t_abrivetor expressao t_fechavetor ");
+    Nodo *vetor = criarNodo($1, TIPO_IDENTIFICADORVETOR, linha, coluna);
+    Nodo *indice= criarNodo($1, TIPO_INDICE_VETOR, linha, coluna);
+    addFilhoaoNodo(vetor, indice);
+    addFilhoaoNodo(indice, $3);
+    $$ = vetor;
   }
 
 condicao:

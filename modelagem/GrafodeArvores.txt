@@ -1,0 +1,40 @@
+
+int i = expressao (já vem com Nodo Atribuição)
+
+Declaracao +
+	   |-> tipo	
+	   |->indetificador +  
+		            |-> (operador)
+
+
+
+
+
+
+
+
+int i[] = expressao (já vem com Nodo Atribuição)
+
+Declaracao +
+	   |-> vetor+	
+	   |	    |-> tipo (importa para semantica)
+	   |->Indetificador +  
+      		            |-> (operador)+
+					  |-> 
+
+
+
+
+
+i = expressao
+
+Indetificador +  
+	      |-> (operador)
+
+
+
+i[x] = expressao
+
+Indetificador +  
+	      |-> indice +
+		       |-> (operador)

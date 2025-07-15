@@ -15,7 +15,7 @@ Nodo *criarNodo(char *nome, Tipo tipo, int linha, int coluna)
 		printf("Nao eh possivel criar o nodo porque o nome eh invalido\n");
 		exit(-1);
 	}
-	n->nome = nome;
+	n->nome =nome;
 	n->tipo = tipo;
 	n->linha = linha;
 	n->coluna = coluna;
@@ -252,6 +252,12 @@ char *strTipo(Tipo tipo){
 	case TIPO_DECLARACAO:
 		strncpy(nome,"TIPO_DECLARACAO", TAM);
 		break;
+	case TIPO_IDENTIFICADORVETOR:
+		strncpy(nome,"TIPO_IDENTIFICADORVETOR", TAM);
+		break;
+	case TIPO_INDICE_VETOR:
+		strncpy(nome,"TIPO_INDICE_VETOR", TAM);
+		break;
 	default:
 		strncpy(nome,"DESCONHECIDO", TAM);
 		break;
@@ -340,11 +346,17 @@ Nodo *criarExpOperador( char *operador, Nodo *expr1, Nodo *expr2, int linha, int
 {
 	Tipo tipo;
 	char nome[20];
+	printf("{%s}\n", operador);
+	if(expr1 == expr2 ) return NULL; /*evitar loop infinitos*/
 	if(!operador || !expl || !exp2 || linha < 1 || coluna <1) return NULL;
 
 	if (strcmp(operador, "=" ) == 0){ //t_igual
 		strncpy(nome, "Atribuicao",10);
 		tipo = TIPO_ATRIBUICAO;
+		Nodo *n = criarNodo( nome, tipo , linha, coluna);
+    	addFilhoaoNodo(expr1,n);
+    	addFilhoaoNodo(n, expr2);
+    	return expr1;
 	}else if (strcmp(operador, "+" ) == 0){ //t_mais
 		strncpy(nome, "Soma",10);
 		tipo = TIPO_SOMA;

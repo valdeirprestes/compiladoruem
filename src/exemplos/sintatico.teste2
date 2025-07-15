@@ -1,2 +1,5 @@
-global int i;
+int i;
+ v[0] = 5;
+i = v[0];
+v[0] = v[1];
 int main(){int x;}

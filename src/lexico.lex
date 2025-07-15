@@ -21,6 +21,7 @@
   	extern long linha; /* guarda a linha do token atual  -> para erros*/
   	extern long coluna;/*guarda a coluna do token atual  -> para erros*/
 	extern int debug;
+	
 	long column = 1;
 	long linhacomentario = 0;
 	char *meustring = NULL;
@@ -59,7 +60,8 @@ novalinha [\n]
 variavel [a-zA-Z][a-zA-Z0-9]*
 aberturacomentario [/][*]
 fechamentocomentario [*][/]
-varincorreta [0-9]+[\.]*[a-zA-z]
+/*varincorreta [0-9]+[\.]*[a-zA-z]*/
+varincorreta [0-9]+[a-zA-Z]+[a-zA-Z0-9]
 
 /*subscanner*/
 %x comentario 
@@ -129,12 +131,11 @@ switch { SETLOC(yytext);yylval->texto= strdup(yytext); return t_switch;}
 case { SETLOC(yytext);yylval->texto= strdup(yytext); return t_case;}
 default { SETLOC(yytext);yylval->texto= strdup(yytext); return t_default;}
 break {SETLOC(yytext);yylval->texto= strdup(yytext); return t_break;}
-global {SETLOC(yytext);yylval->texto= strdup(yytext); return t_global;}
 
 
 {numero} {SETLOC(yytext); yylval->texto= strdup(yytext);  return t_num;}
 {decimal} { SETLOC(yytext);yylval->texto= strdup(yytext);  return t_decimal;}
-{varincorreta} {SETLOC(yytext); fprintf(stderr, "<< Linha %d: variavel incorreta ou separe numero e string >>\n", linha); exit(-1); }
+{varincorreta} {SETLOC(yytext); fprintf(stderr, "<< Erro lexico: Linha %d: \'%s\'variavel incorreta ou separe numero e string >>\n", yytext, linha); exit(-1); }
 {variavel} {SETLOC(yytext);yylval->texto=strdup(yytext);return t_identificador;} 
 {novalinha} {SETLOC(yytext); /* não retornar token, apenas incrementa a variável de controle*/}
 {espaco} {SETLOC(yytext);} /* Não faz nada, apenas consome*/
@@ -142,7 +143,7 @@ global {SETLOC(yytext);yylval->texto= strdup(yytext); return t_global;}
 
 . { SETLOC(yytext);
 	printErrorsrc(source, linha, coluna);
-	printf("\'%c\' (linha %d coluna %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha, coluna); 
+	printf("Erro lexico: \'%c\' (linha %d coluna %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha, coluna); 
 	exit(-1);
 	}
 %%
@@ -207,14 +208,39 @@ void meudebug( char *texto){
 	}
 }
 
+void help(char *programa){
+	puts("Ajuda");
+	printf("%s -e FONTE -c -a -t \n", programa);
+	puts("-e Defini o arquivo fonte");
+	puts("-c Imprimi o arquivo fonte");
+	puts("-a Imprimi a arvore AST");
+	puts("-t Imprimi a tabela de simbolos");
+	puts("-h Esta mensagem de ajuda! e para o programa");
+	exit(0);
+}
+void imprimirFonte(char *fonte, int nlinhas){
+	for(int i=0; i< 100; i++) printf("-");
+	puts("");	
+	for(int i=0; i < nlinhas; i++)
+		printf("%4d %s", i+1, source[i]);
+	printf("\n");
+	for(int i=0; i< 100; i++) printf("-");
+	printf("\nArquivo acima: %s\n",fonte);
+	for(int i=0; i< 100; i++) printf("-");
+	puts("");
 
+}
 
 int main(int argc, char *arqv[]){
 	int nlinhas;
-	int ifile;
+	int ifile=-1;
+	int ifonte = -1;  /*Imprimir arquivo*/
 	extern int imprimir_simbolos;
 	for(int i = 1; i < argc ; i++){
-		if( strcmp(arqv[i], "-e") == 0 && i<argc){
+		if( strcmp(arqv[i], "-h") == 0 && i<argc){
+			help(arqv[0]);
+		}
+		else if( strcmp(arqv[i], "-e") == 0 && i<argc-1){
 			ifile = i+1;
 			yyin = fopen(arqv[ifile],"r");
 			if(!yyin){
@@ -230,29 +256,21 @@ int main(int argc, char *arqv[]){
 			
 		}else if(strcmp(arqv[i],"-s") == 0 && i<argc){
 			yyout = fopen(arqv[i+1],"w");
-		}else if (strcmp(arqv[i], "-a") == 0){
+		}else if (strcmp(arqv[i], "-a") == 0){ /*imprimir AST*/
 			imprimir_ast = 1;
-		}else if (strcmp(arqv[i], "-d") == 0){
+		}else if (strcmp(arqv[i], "-d") == 0){ /* Debug*/
 			debug = 1;
 		}
-		else if (strcmp(arqv[i], "-t") == 0){
+		else if (strcmp(arqv[i], "-t") == 0){ /* Tabela de simbolos */
 			imprimir_simbolos = 1;
 		}
-		else if (strcmp(arqv[i], "-p") == 0){
-			//printf("foram %d linhas", nlinhas);
-			for(int i=0; i< 100; i++) printf("-");
-			puts("");	
-			for(int i=0; i < nlinhas; i++)
-				printf("%4d %s", i+1, source[i]);
-			printf("\n");
-		    for(int i=0; i< 100; i++) printf("-");
-			printf("\nArquivo acima: %s\n",arqv[ifile]);
-			for(int i=0; i< 100; i++) printf("-");
-			puts("");
+		else if (strcmp(arqv[i], "-c") == 0){ /* Codigo fonte*/
+			ifonte =1;
 		}
 
 	}
-
+	if(ifile< 0) help(arqv[0]);
+	if(ifonte>0) imprimirFonte(arqv[ifile], nlinhas);
 	yyparse();
 	if( imprimir_simbolos && tabelaSimbolos )
 	{
