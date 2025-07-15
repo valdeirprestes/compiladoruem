@@ -1,5 +1,2 @@
-int i;
- v[0] = 5;
-i = v[0];
-v[0] = v[1];
+
 int main(int a, int b){int x;}
