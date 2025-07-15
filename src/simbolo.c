@@ -85,11 +85,11 @@ void imprimirTabelaSimbolos() {
 
     Simbolo *atual = tabelaSimbolos;
     if(atual !=NULL)
-    printf("%-15s %20s %25s %-5s %-5s %15s %8s\n", "Nome","Escopo","Tipo", "Parm", "Vetor", "Classe", "tipo_id");
+    printf("%20s %-20s %-30s %-5s %5s %5s %8s\n", "Nome","Escopo","Tipo", "Parm", "Vetor", "Classe", "tipo_id");
     printf("----------------------------------------------------------------------------------------------------\n");
     while (atual != NULL) {
         char *tipoSimboloStr = strTipo(atual->tipo); // Usando strTipo
-        printf("%-15s %20s %25s %-5s %-5s %15s %8s\n",
+        printf("%-20s %-20s %-30s %-5s %5s %5s %8s\n",
             atual->nome,
             atual->escopo,
             tipoSimboloStr,
@@ -116,20 +116,27 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
     }
     char *escopoAnterior = NULL;
     
-    if(no->tipo == TIPO_DECLARACAO && no->nfilhos >= 2){
+    if((no->tipo == TIPO_DECLARACAO || no->tipo == TIPO_PARAMETRO )&& no->nfilhos >= 2){
         Nodo *nofilho = no->filhos[1];
         if (nofilho->tipo == TIPO_IDENTIFICADOR || 
             nofilho->tipo == TIPO_IDENTIFICADORVETOR || 
-            no->tipo == TIPO_FUNCAO ||
-            no->tipo == TIPO_CLASSE ) {
-            int isVetor = 0;
-            int isParametro = 0;
+            nofilho->tipo == TIPO_FUNCAO ||
+            nofilho->tipo == TIPO_CLASSE ) {
+            int isVetor = (no->filhos[0]->tipo == TIPO_VETOR )? 1 :0;
+            int isParametro = (no->tipo == TIPO_PARAMETRO)? 1: 0;
             inserirSimbolo(nofilho->nome, escopoAtual, no->filhos[0]->tipo, isParametro, isVetor,NULL,nofilho->tipo_identificador, nofilho->linha, nofilho->coluna);
             /*for(int i=1; i < nofilho->nfilhos; i++){
                 addFilhoaoNodo(nofilho, no->filhos[i]);
             }*/
         }
-    }/*
+    }
+    else if ( no->tipo == TIPO_FUNCAO){
+        escopoAnterior = escopoAtual;
+        escopoAtual = no->nome;
+    }
+    if(no->tipo ==TIPO_PARAMETROS);
+    if(no->tipo == TIPO_BLOCO);
+    /*  
     else if(( no->tipo == TIPO_FUNCAO ||
             no->tipo == TIPO_CLASSE ) && no->filhos){
         
@@ -179,7 +186,7 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
 
     }*/
     // --- Percorrer os filhos (recursão) ---
-    for (int i = 0; i < no->nfilhos; i++) {
+    for (int i = 0; i < no->nfilhos; i++) 
         gerarTabelaSimbolosDaAST(no->filhos[i]);
     // --- Lógica de Saída de Escopo ---
     if ( (no->tipo == TIPO_FUNCAO || no->tipo == TIPO_CLASSE || no->tipo == TIPO_METODOCLASSE ) && escopoAnterior ) {
@@ -189,5 +196,5 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
         free(noTipoStr); // Liberar memória
         escopoAtual = escopoAnterior;
     }
-    }
+    
 }

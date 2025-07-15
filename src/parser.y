@@ -168,13 +168,11 @@ parametros:
   %empty { $$ = NULL;}
 	|parametro  {
       meudebug("Parametros linha 196");
-      Nodo *p =criarNodoDeclaracao($1,  linha, coluna);
-      $$ = criarNodoComFilho("Parametros", TIPO_PARAMETROS, linha, coluna, p);
+      $$ = criarNodoComFilho("Parametros", TIPO_PARAMETROS, linha, coluna, $1);
   }
 | parametros t_virgula parametro {
       meudebug("Parametros linha 200");
-      Nodo *p =criarNodoDeclaracao($3,  linha, coluna);
-      $$= addRecursivoNodo("Parametros", TIPO_PARAMETROS, linha, coluna, $1, p);
+      $$= addRecursivoNodo("Parametros", TIPO_PARAMETROS, linha, coluna, $1, $3);
   }
   | parametros error t_virgula {
     meudebug("Parametros linha 204");
@@ -186,13 +184,20 @@ parametros:
 parametro:
   tipo t_identificador {
     meudebug("Parametro linha 162");
-    //$$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna,$1);
-    $$ = criarNodoIdentificador($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
+    Nodo *p =criarNodoParametro($1,  linha, coluna);
+    Nodo* id= criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
+    addFilhoaoNodo(p,id);
+    $$ = p;
   }
   |tipo  t_identificador t_abrivetor t_fechavetor
   {
     meudebug("Parametro linha 167");
-    $$ = criarNodoComFilho($4, TIPO_IDENTIFICADOR, linha, coluna, $1);
+    Nodo* vetor= criarNodo("Vetor", TIPO_VETOR, linha, coluna);
+    Nodo *p =criarNodoParametro(vetor,  linha, coluna);
+    Nodo* id= criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
+    addFilhoaoNodo(vetor,$1);
+    addFilhoaoNodo(p,id);
+    $$ = p;
   }
   ;
 tipo:

@@ -32,7 +32,7 @@ Nodo *criarNodoDeclaracao(Nodo *idcomfilhotipo, int linha, int coluna){
 }
 
 Nodo *criarNodoParametro(Nodo *idcomfilhotipo, int linha, int coluna){
-	Nodo *n= criarNodo("Declaracao", TIPO_DECLARACAO, linha, coluna);
+	Nodo *n= criarNodo("Parametro", TIPO_PARAMETRO, linha, coluna);
 	addFilhoaoNodo(n, idcomfilhotipo);
 	return n;
 }

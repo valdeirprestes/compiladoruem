@@ -1,2 +1,8 @@
-int main(int arg1, int arg2){ }
-int valor(){}
+class Calculo{
+    int x;
+    int y[];
+    int conta(){}
+}
+
+Calculo c;
+Calculo c;
