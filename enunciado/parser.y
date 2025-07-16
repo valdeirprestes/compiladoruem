@@ -9,7 +9,7 @@
 
 
   int yylex (YYSTYPE *lval, YYLTYPE *lloc);
-  void yyerror ( YYLTYPE *locp, char const *s);
+  void yyerror ( YYLTYPE *locp, char  *s);
   YYLTYPE yylloc;
 	YYSTYPE yylval;
   extern FILE *yyout;
@@ -67,7 +67,7 @@
 %token <texto> t_for t_while t_if t_else t_switch t_case t_default t_break t_abrichave t_fechachave t_abriparentes t_fechaparentes
 %token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao  t_ponto
 /* Tokens classe e função */
-%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_this t_identificadorclasse
+%token <texto> t_class t_rutor t_destrutor t_func t_return t_variavel t_this t_identificadorclasse
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha 

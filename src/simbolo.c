@@ -2,13 +2,19 @@
 #include "parser.tab.h"
 Simbolo *tabelaSimbolos = NULL;
 char *escopoAtual = "global";
+Nodo *nodoAnterior = NULL;
+Nodo *nodoEscopo = NULL;
+Nodo *funcaonodo =NULL;
+Nodo *classenodo = NULL;
 extern int debug;
+extern int errossemanticos;
 extern char **source;
 void printErrorsrc(char **source, int linha, int coluna);
+extern int asprintf (char **__restrict __ptr,
+		      char *__restrict __fmt, ...);
 
 
-
-Simbolo* buscarSimboloPorNome(const char *nome, const char *escopo) {
+Simbolo* buscarSimboloPorNome( char *nome,  char *escopo) {
     Simbolo *atual = tabelaSimbolos;
     if(!nome) return NULL;
     while (atual != NULL) {
@@ -19,8 +25,14 @@ Simbolo* buscarSimboloPorNome(const char *nome, const char *escopo) {
     }
     return NULL;
 }
+Simbolo* buscarSimboloGeral( char *nome){
+    Simbolo *s = buscarSimboloPorNome( nome, escopoAtual);
+    if(s != NULL) return s;
+    s = buscarSimboloPorNome(nome, "global");
+    return s;
+}
 
-void inserirSimbolo(const char *nome, const char *escopo, Tipo tipo, int isParametro, int isVetor, char *tipo_classe, Tipo tipo_id, Tipo tipo_vetor, int linha, int coluna) {
+void inserirSimbolo( char *nome,  char *escopo, Tipo tipo, int isParametro, int isVetor, char *tipo_classe, Tipo tipo_id, Tipo tipo_vetor, int linha, int coluna) {
     Simbolo *simboloExistente = buscarSimboloPorNome(nome, escopo);
     if(!nome){
         return;
@@ -101,7 +113,7 @@ void imprimirTabelaSimbolos() {
             tipoSimboloIdStr,
             tipoSimboloVetorStr,
             atual->parametro ? "Sim" : "Não",
-            atual->tipo_classe? "Sim":"Não"
+            atual->tipo_classe == NULL? "  -------  ":atual->tipo_classe
         );
         free(tipoSimboloStr); 
         atual = atual->proximo;
@@ -115,12 +127,11 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
     Acho indetificador -> valida declaracao e faz operacao
     Acho operacao -> bloco de codigo
     */
-
+    char *strclasse  = NULL;
     if (no == NULL) {
         return;
     }
     char *escopoAnterior = NULL;
-    
     if((no->tipo == TIPO_DECLARACAO || no->tipo == TIPO_PARAMETRO )&& no->nfilhos >= 2){
         Nodo *nofilho = no->filhos[1];
         if (nofilho->tipo == TIPO_ID || 
@@ -130,15 +141,24 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
             int isVetor = (no->filhos[0]->tipo == TIPO_VETOR )? 1 :0;
             int isParametro = (no->tipo == TIPO_PARAMETRO)? 1: 0;
             Tipo tipo_vetor = (isVetor == 0) ? TIPO_NADA: no->filhos[0]->filhos[0]->tipo;
-            inserirSimbolo(nofilho->nome, escopoAtual, nofilho->tipo, isParametro, isVetor,NULL,nofilho->tipo_id,nofilho->tipo_vetor, nofilho->linha, nofilho->coluna);
+            strclasse = (nofilho->tipo == TIPO_CLASSE)? strdup(nofilho->nome):NULL;
+            inserirSimbolo(nofilho->nome, escopoAtual, nofilho->tipo, isParametro, isVetor,strclasse,nofilho->tipo_id,nofilho->tipo_vetor, nofilho->linha, nofilho->coluna);
             /*for(int i=1; i < nofilho->nfilhos; i++){
                 addFilhoaoNodo(nofilho, no->filhos[i]);
             }*/
         }
     }
     else if ( no->tipo == TIPO_FUNCAO ||  no->tipo == TIPO_CLASSE || no->tipo == TIPO_METODOCLASSE){
+        nodoAnterior = no;
+        verificarDeclaracao(no);
         escopoAnterior = escopoAtual;
         escopoAtual = no->nome;
+        if(no->tipo == TIPO_FUNCAO) funcaonodo = no;
+        if(no->tipo == TIPO_CLASSE) classenodo = no;
+    }
+    if(no->tipo == TIPO_ID) {
+        nodoAnterior = no;
+        verificarDeclaracao(no);
     }
     if(no->tipo ==TIPO_PARAMETROS);
     if(no->tipo == TIPO_BLOCO);
@@ -153,6 +173,13 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
             printf("<<< Saindo do escopo: %s (Nó: %s, Tipo: %s)\n", escopoAtual, no->nome, noTipoStr);
         free(noTipoStr); // Liberar memória
         escopoAtual = escopoAnterior;
+        nodoAnterior = NULL;
+        if(no->tipo == TIPO_FUNCAO) funcaonodo = NULL;
+        if(no->tipo == TIPO_CLASSE) classenodo = NULL;
+    }
+    else if(no->tipo == TIPO_ATRIBUICAO){
+        if(no->filhos[0])
+            verificarAtribuicao(no->filhos[0]);
     }
     else if(no->tipo == TIPO_SOMA){
         verificarSoma(no);
@@ -168,41 +195,73 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
     }
 }
 
+
+
+
+Tipo retornaTipo(Nodo *no){
+        Simbolo *Simbol = buscarSimboloPorNome(no->nome, escopoAtual);
+        if(Simbol == NULL){
+           if(no->tipo = TIPO_INTEIRO)
+                return TIPO_INT;
+           if(no->tipo = TIPO_DECIMAL)
+                return TIPO_FLOAT;
+           if(no->tipo = TIPO_STRING)
+                return  TIPO_VETOR;
+        }
+        if(Simbol->tipo_id == TIPO_VETOR){
+            return  Simbol->tipo_vetor;
+        }
+        else
+            return Simbol->tipo_id;
+        return TIPO_NADA;
+}
+
 int tiposCompatíveis(Nodo *esq, Nodo *dir) {
-    Tipo tesq;
-    Tipo tdir;
-    if(esq->tipo_id == TIPO_NADA){
-        Simbolo *esqSimbol = buscarSimboloPorNome(esq->nome, escopoAtual);
-        if(esqSimbol == NULL){
-            return -1;
-        }
-        if(esqSimbol->tipo_id == TIPO_VETOR){
-            tesq  = esqSimbol->tipo_vetor;
-        }
-        else
-            tesq = esqSimbol->tipo_id;
-
-    }
-    if(dir->tipo_id == TIPO_NADA){
-        Simbolo *dirSimbol = buscarSimboloPorNome(dir->nome, escopoAtual);
-        if(dirSimbol == NULL){
-            return -1;
-        }
-        if(dirSimbol->tipo_id == TIPO_VETOR){
-            tdir  = dirSimbol->tipo_vetor;
-        }
-        else
-            tdir = dirSimbol->tipo_id;
-
+    Tipo tesq = retornaTipo(esq);
+    Tipo tdir = retornaTipo(dir);
+    if(tesq == TIPO_NADA || tdir == TIPO_NADA) return 0;
+    if(tesq == TIPO_VETOR || tdir == TIPO_VETOR ){
+        Simbolo *s1 = buscarSimboloPorNome(esq->nome, escopoAtual);
+        Simbolo *s2 = buscarSimboloPorNome(esq->nome, escopoAtual);
+        return s1->tipo_vetor == s2->vetor;
     }
     return tdir == tesq;
 }
+
+void verificarAtribuicao(Nodo *nodo) 
+{
+    if ( nodoAnterior != NULL && !tiposCompatíveis(nodo, nodoAnterior)) {
+        errossemanticos +=1;
+        printErrorsrc(source, nodo->linha, nodo->coluna);
+        printf("Erro semantico: atribuição incompativel na linha %ld coluna %ld\n", nodo->linha, nodo->coluna);
+    }
+}
+
+void verificarDeclaracao(Nodo *nodo) {
+    Simbolo *s = buscarSimboloGeral(nodo->nome);
+    if (s == NULL) {
+        errossemanticos +=1;
+        printErrorsrc(source, nodo->linha, nodo->coluna);
+        printf("Erro semantico: %s não foi declarada - linha %ld coluna %ld\n", nodo->nome,  nodo->linha, nodo->coluna);
+    }
+}
+
+void verificarDeclaracaoLocal(Nodo *nodo, char *escopo) {
+    Simbolo *s = buscarSimboloPorNome(nodo->nome, escopo);
+    if (s == NULL) {
+        errossemanticos +=1;
+        printErrorsrc(source, nodo->linha, nodo->coluna);
+        printf("Erro semantico: variavel não declarada linha %ld coluna %ld\n", nodo->linha, nodo->coluna);
+    }
+}
+
 
 void verificarSoma(Nodo *nodo) {
     Nodo *esq = nodo->filhos[0];
     Nodo *dir = nodo->filhos[1];
 
     if (!tiposCompatíveis(esq, dir)) {
+        errossemanticos +=1;
         printErrorsrc(source, esq->linha, esq->coluna);
         printf("Erro semantico: soma com tipos incompatíveis na linha %ld coluna %ld\n", esq->linha, esq->coluna);
     }
@@ -213,6 +272,7 @@ void verificarSubtracao(Nodo *nodo) {
     Nodo *dir = nodo->filhos[1];
 
     if (!tiposCompatíveis(esq, dir)) {
+        errossemanticos +=1;
         printErrorsrc(source, esq->linha, esq->coluna);
         printf("Erro semantico: subtração com tipos incompatíveis na linha %ld coluna %ld\n", esq->linha, esq->coluna);
     }
@@ -223,6 +283,7 @@ void verificarMultiplicacao(Nodo *nodo) {
     Nodo *dir = nodo->filhos[1];
 
     if (!tiposCompatíveis(esq, dir)) {
+        errossemanticos +=1;
         printErrorsrc(source, esq->linha, esq->coluna);
         printf("Erro semantico: multiplicação com tipos incompatíveis na linha %ld coluna %ld\n", esq->linha, esq->coluna);
     }
@@ -233,6 +294,7 @@ void verificarDivisao(Nodo *nodo) {
     Nodo *dir = nodo->filhos[1];
 
     if (!tiposCompatíveis(esq, dir)) {
+        errossemanticos +=1;
         printErrorsrc(source, esq->linha, esq->coluna);
         printf("Erro semantico: divisão com tipos incompatíveis na linha %ld coluna %ld\n", nodo->linha, esq->coluna);
     }

@@ -17,6 +17,7 @@ int main() {
     while(i){
         break;
     }
+	int num;
     switch ( num ){
         case 1:{
             acao(1);

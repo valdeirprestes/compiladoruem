@@ -2,7 +2,7 @@
 #define ABSTRACTSINTATICTREE
 #define MAXNODOS 20
 #define NIVEIS 1000
-#define ESPACOARVORE 10
+#define ESPACOARVORE 5
 #define TAM 1000
 #define FRACASSO -1
 #define SUCESSO 1
@@ -102,5 +102,5 @@ Nodo *criarNodoFuncao(char *nome, Nodo *tipofuncao, Nodo* parametrosfunc, Nodo* 
 Nodo *addRecursivoNodo(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodo1, Nodo *nodo2);
 Nodo *criarExpOperador( char *operador, Nodo *expr1, Nodo *expr2, int linha, int coluna );
 char* retornaPadraoToken(char *token);
-char* substituirStringPadrao(const char* stringOriginal, const char* stringPadrao, const char* stringSubstituicao);
+char* substituirStringPadrao( char* stringOriginal,  char* stringPadrao,  char* stringSubstituicao);
 #endif

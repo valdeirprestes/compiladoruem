@@ -1,4 +1,5 @@
 int main(){
+    z = 10;
     return "minhastring";
     int valor = 1;
     int valor2;

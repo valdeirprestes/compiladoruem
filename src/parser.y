@@ -21,6 +21,7 @@
   long linha=1; /* guarda a linha do token atual  -> para erros*/
   long coluna=1;/*guarda a coluna do token atual  -> para erros*/
   int errossintatico = 0;
+  int errossemanticos = 0;
   long imprimir_ast =0;
   int imprimir_simbolos;
   Nodo *raiz;
@@ -70,7 +71,7 @@
 %token <texto> t_for t_while t_if t_else t_switch t_case t_default t_break t_abrichave t_fechachave t_abriparentes t_fechaparentes
 %token <texto> t_pontovirgula t_virgula t_doispontos t_interrogacao  t_ponto
 /* Tokens classe e função */
-%token <texto> t_class t_construtor t_destrutor t_func t_return t_variavel t_this t_identificadorclasse
+%token <texto> t_class t_rutor t_destrutor t_func t_return t_variavel t_this t_identificadorclasse
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha 
@@ -261,10 +262,14 @@ declaracao:
       meudebug("Declaracao: tipo t_identificador t_igual expressao");
       Nodo *declaracao = criarNodo("DECLARACAO", TIPO_DECLARACAO, linha, coluna);
       Nodo *id = criarNodo($2, TIPO_ID, linha, coluna);
+      
+		  Nodo *atribuicao = criarNodo( "Atribuicao", TIPO_ATRIBUICAO , linha, coluna);
+      addFilhoaoNodo(atribuicao, $4);
+
       if(id) id->tipo_id = $1->tipo;
       addFilhoaoNodo(declaracao, $1);
       addFilhoaoNodo(declaracao, id);
-      addFilhoaoNodo(id, $4);
+      addFilhoaoNodo(id, atribuicao);
       $$ = declaracao;
   }
   |tipo  t_identificador t_abrivetor t_fechavetor {
@@ -283,6 +288,10 @@ declaracao:
       meudebug("Declaracao: acesso_vetor t_igual expressao");
       //printf("acesso_vetor %s expressao %s ", $1->nome, $3->nome );
       $$ = criarExpOperador( $2, $1, $3, linha, coluna );
+      //Nodo *atribuicao = criarNodo( "Atribuicao", TIPO_ATRIBUICAO , linha, coluna);
+      //if(3) addFilhoaoNodo(atribuicao, $3);
+      //if($1) addFilhoaoNodo($1, atribuicao);
+
   }
   |acesso_vetor t_igual acesso_vetor {
     meudebug("Declaracao: acesso_vetor t_igual acesso_vetor");
@@ -291,14 +300,15 @@ declaracao:
   | t_identificador t_igual expressao {
       meudebug("Declaracao: t_identificador t_igual expressao");
       Nodo *id = criarNodo($1, TIPO_ID, linha, coluna);
-      addFilhoaoNodo(id, $3);
-      $$ = id;
+      //addFilhoaoNodo(id, $3);
+      $$ = $$ = criarExpOperador( $2, id, $3, linha, coluna );
   }
   | t_identificador t_igual acesso_vetor {
       meudebug("Declaracao: t_identificador t_igual acesso_vetor");
       Nodo *id = criarNodo($1, TIPO_ID, linha, coluna);
-      addFilhoaoNodo(id, $3);
-      $$ = id;
+      //addFilhoaoNodo(id, $3);
+      //$$ = id;
+      $$ = $$ = criarExpOperador( $2, id, $3, linha, coluna );
   }
  ;
 
@@ -616,7 +626,7 @@ expressao:
   | t_decimal
   {
     meudebug(" Expressao: t_decimal");
-    Tipo tipo = TIPO_FLOAT;
+    Tipo tipo = TIPO_DECIMAL;
     Nodo *n = criarNodo(
       $1, tipo, linha, coluna);
     $$ = n;
@@ -624,7 +634,7 @@ expressao:
   | t_num 
   {
     meudebug(" Expressao: t_num");
-    Tipo tipo = TIPO_INT;
+    Tipo tipo = TIPO_INTEIRO;
     /*printf("tnum = %s\n", $1);*/
     Nodo *n = criarNodo($1, tipo, linha, coluna);
     $$ = n;
@@ -632,7 +642,7 @@ expressao:
   | t_string
   {
     meudebug(" Expressao: t_string");
-    Tipo tipo = TIPO_VETOR;
+    Tipo tipo = TIPO_STRING;
     Nodo *n = criarNodo(
       $1, tipo, linha, coluna);
     n->tipo_vetor = TIPO_CHAR;
@@ -674,7 +684,7 @@ condicao:
 classe:
   t_class t_identificador t_abrichave corpoclasse t_fechachave { 
     meudebug("linha 731");
-    Nodo *tipo = criarNodo("Modelo", TIPO_CLASSE , linha, coluna);
+    Nodo *tipo = criarNodo("Modelo", TIPO_BLOCO , linha, coluna);
     Nodo *declara = criarNodoDeclaracao(tipo, linha, coluna);
     Nodo *id = criarNodo($2, TIPO_CLASSE , linha, coluna);
     if(id) id->tipo_id = TIPO_CLASSE;

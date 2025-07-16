@@ -87,7 +87,7 @@ switch(){ case x:  default}
 Suporte a classe (sem herança, polimorfismo e encapsulamento)
 ```
 class  var1 {
- 	construtor(){ return;}
+ 	rutor(){ return;}
 	destrutor() {}
 (tipo)[] funcsome(){}
 }

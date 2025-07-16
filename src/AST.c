@@ -15,7 +15,7 @@ Nodo *criarNodo(char *nome, Tipo tipo, int linha, int coluna)
 		printf("Nao eh possivel criar o nodo porque o nome eh invalido\n");
 		exit(-1);
 	}
-	n->nome =nome;
+	n->nome =strdup(nome);
 	n->tipo = tipo;
 	n->linha = linha;
 	n->coluna = coluna;
@@ -292,7 +292,7 @@ void printNodoFilhos(Nodo *n, int nivel, int niveis[NIVEIS][1])
 				printf("-> %d (%s)\n", n->token.ival, strTipo(n->tipo));
 				break;*/
 			case TIPO_STRING:
-				printf("-> %s (%s)\n", n->token.sval, strTipo(n->tipo));
+				printf("-> %s (%s)\n", n->nome, strTipo(n->tipo));
 				break;
 			/*case tipo_id:
 				printf("-> %s (%s -> %s )\n", n->token.sval,  strTipo(n->tipo), strTipo(n->tipo_id));
@@ -357,14 +357,14 @@ Nodo *addRecursivoNodo(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodo1
 
 Nodo *criarExpOperador( char *operador, Nodo *expr1, Nodo *expr2, int linha, int coluna )
 {
-	Tipo tipo;
+	Tipo tipo = TIPO_NADA;
 	char nome[TAMSTRING+1];
 	
 	if(expr1 == expr2 ) return NULL; /*evitar loop infinitos*/
 	if(!operador || expr1 ==NULL || expr2 ==NULL || linha < 1 || coluna <1) return NULL;
 
 	if (strcmp(operador, "=" ) == 0){ //t_igual
-		strncpy(nome, "Atribuicao",10);
+		strcpy(nome, "Atribuicao");
 		tipo = TIPO_ATRIBUICAO;
 		Nodo *n = criarNodo( nome, tipo , linha, coluna);
     	addFilhoaoNodo(expr1,n);
@@ -498,8 +498,8 @@ char* retornaPadraoToken(char *token) {
         return strdup("class");
     } else if (strcmp(token, "t_this") == 0) {
         return strdup("this");
-    } else if (strcmp(token, "t_construtor") == 0) {
-        return strdup("construtor");
+    } else if (strcmp(token, "t_rutor") == 0) {
+        return strdup("rutor");
     } else if (strcmp(token, "t_destrutor") == 0) {
         return strdup("destrutor");
     } else if (strcmp(token, "t_for") == 0) {
@@ -523,7 +523,7 @@ char* retornaPadraoToken(char *token) {
 
 
 
-char* substituirStringPadrao(const char* stringOriginal, const char* stringPadrao, const char* stringSubstituicao) {
+char* substituirStringPadrao( char* stringOriginal,  char* stringPadrao,  char* stringSubstituicao) {
     if (!stringOriginal || !stringPadrao || !stringSubstituicao) {
         return NULL; 
 	}
@@ -539,7 +539,7 @@ char* substituirStringPadrao(const char* stringOriginal, const char* stringPadra
 
     char* resultado = NULL;
     char* temp = NULL; 
-    const char* p = stringOriginal; 
+     char* p = stringOriginal; 
     size_t deslocamento = 0; 
 
     size_t capacidadeResultado = lenOriginal + 1; 

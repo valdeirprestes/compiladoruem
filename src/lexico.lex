@@ -23,14 +23,14 @@
   	extern long coluna;/*guarda a coluna do token atual  -> para erros*/
 	extern int debug;
 	extern int asprintf (char **__restrict __ptr,
-		     const char *__restrict __fmt, ...);
+		      char *__restrict __fmt, ...);
 	
 	long column = 1;
 	long linhacomentario = 0;
 	char *meustring = NULL;
 	void printErrorsrc(char **src, int linha, int coluna);
 	int tam(char *s);
-	void yycolumn_update(const char *text) {
+	void yycolumn_update( char *text) {
     	for (int i = 0; text[i] != '\0'; ++i) {
         	if (text[i] == '\n') {
             	//yylineno++;
@@ -126,7 +126,7 @@ else { SETLOC(yytext);yylval->texto= strdup(yytext); return t_else;}
 return { SETLOC(yytext);yylval->texto= strdup(yytext); return t_return;}
 class {SETLOC(yytext); yylval->texto= strdup(yytext); return t_class;}
 this {SETLOC(yytext); yylval->texto= strdup(yytext); return t_this;}
-construtor {SETLOC(yytext); yylval->texto= strdup(yytext); return t_construtor;}
+rutor {SETLOC(yytext); yylval->texto= strdup(yytext); return t_rutor;}
 destrutor {SETLOC(yytext); yylval->texto= strdup(yytext); return t_destrutor;}
 for { SETLOC(yytext);yylval->texto= strdup(yytext); return t_for;}
 while { SETLOC(yytext);yylval->texto= strdup(yytext); return t_while;}
@@ -176,6 +176,7 @@ char **alocaSource(FILE *fp, int *nlinhas){
 
 void printErrorsrc(char **src, int minhalinha, int minhacoluna)
 {
+
 	if(!src){
 		printf("Não pode acessar o src");
 		exit(-1);
@@ -184,6 +185,7 @@ void printErrorsrc(char **src, int minhalinha, int minhacoluna)
 		printf("Tem algo errado, por que foi solicitada impressão da linha %d coluna %d\n", minhalinha, minhacoluna);
 		return;
 	}
+	puts("");
 	printf("%4d %s\n", minhalinha, src[minhalinha-1]);
 	for( int i=0; i <minhacoluna+4; i++) printf(" ");
 	printf("^");
@@ -198,7 +200,7 @@ int tam(char *s)
 	while (s[i] !='\0') i++;
 	return i;
 }
-int segundavirgula(const char *texto) {
+int segundavirgula( char *texto) {
     int count = 0;
     int i = 0;
 
