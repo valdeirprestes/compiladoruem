@@ -135,6 +135,13 @@ case { SETLOC(yytext);yylval->texto= strdup(yytext); return t_case;}
 default { SETLOC(yytext);yylval->texto= strdup(yytext); return t_default;}
 break {SETLOC(yytext);yylval->texto= strdup(yytext); return t_break;}
 
+read {SETLOC(yytext);yylval->texto= strdup(yytext); return t_read;}
+readln {SETLOC(yytext);yylval->texto= strdup(yytext); return t_readln;}
+write {SETLOC(yytext);yylval->texto= strdup(yytext); return t_write;}
+writeln {SETLOC(yytext);yylval->texto= strdup(yytext); return t_writeln;}
+open {SETLOC(yytext);yylval->texto= strdup(yytext); return t_open;}
+close {SETLOC(yytext);yylval->texto= strdup(yytext); return t_close;}
+file {SETLOC(yytext);yylval->texto= strdup(yytext); return t_file;}
 
 {numero} {SETLOC(yytext); yylval->texto= strdup(yytext);  return t_num;}
 {decimal} { SETLOC(yytext);yylval->texto= strdup(yytext);  return t_decimal;}
@@ -214,8 +221,7 @@ int segundavirgula(const char *texto) {
 	if(locp == NULL)
 		printf("->>>  %s - linha %d coluna %d\n", s, linha, coluna);
 	int endereco = segundavirgula(s);
-	if((strncmp("syntax error, unexpected",s,24) == 0) && endereco > 0){
-		if(debug)puts(s);
+	if((strncmp("syntax error, unexpected",s,24) == 0) && endereco > 0 && debug ==0 ){
 		char tmp[1000];
 		endereco += 12 ; //+11 de ' expecting '
 		strncpy(tmp,&s[endereco], 1000 );

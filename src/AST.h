@@ -6,6 +6,7 @@
 #define TAM 1000
 #define FRACASSO -1
 #define SUCESSO 1
+#define TAMSTRING 20
 
 
 
@@ -41,6 +42,7 @@ typedef enum _Tipo{
 	TIPO_TESTEBOLEAN,
 	TIPO_PARAMETROS,
 	TIPO_ARGUMENTOS,
+	TIPO_ARGUMENTO,
 	TIPO_SOMA,
 	TIPO_DIVISAO,
 	TIPO_MULTIPLICACAO,
@@ -57,7 +59,8 @@ typedef enum _Tipo{
 	TIPO_OP_AND,
 	TIPO_DECLARACAO,
 	TIPO_PARAMETRO,
-	TIPO_NADA
+	TIPO_NADA,
+	TIPO_FILE
 } Tipo;
 
 typedef union token{

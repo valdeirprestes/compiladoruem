@@ -128,145 +128,151 @@ char *strTipo(Tipo tipo){
 	switch (tipo)
 	{
 	case TIPO_REGRA:
-		strncpy(nome,"", TAM);
+		strcpy(nome,"");
 		break;
 	case TIPO_INT:
-		strncpy(nome,"TIPO_INT", TAM);
+		strcpy(nome,"TIPO_INT");
 		break;
 	case TIPO_FLOAT:
-		strncpy(nome,"TIPO_FLOAT", TAM);
+		strcpy(nome,"TIPO_FLOAT");
 		break;
 	case TIPO_CHAR:
-		strncpy(nome,"TIPO_CHAR", TAM);
+		strcpy(nome,"TIPO_CHAR");
 		break;
 	case TIPO_FOR:
-		strncpy(nome,"TIPO_FOR", TAM);
+		strcpy(nome,"TIPO_FOR");
 		break;
 	case TIPO_WHILE:
-		strncpy(nome,"TIPO_WHILE", TAM);
+		strcpy(nome,"TIPO_WHILE");
 		break;
 	case TIPO_IF:
-		strncpy(nome,"TIPO_IF", TAM);
+		strcpy(nome,"TIPO_IF");
 		break;
 	case TIPO_IFELSE:
-		strncpy(nome,"IFTIPO_ELSE", TAM);
+		strcpy(nome,"IFTIPO_ELSE");
 		break;
 	case TIPO_SWICTH:
-		strncpy(nome,"TIPO_SWICTH", TAM);
+		strcpy(nome,"TIPO_SWICTH");
 		break;
 	case TIPO_BREAK:
-		strncpy(nome,"TIPO_BREAK", TAM);
+		strcpy(nome,"TIPO_BREAK");
 		break;
 	case TIPO_RETURN:
-		strncpy(nome,"TIPO_RETURN", TAM);
+		strcpy(nome,"TIPO_RETURN");
 		break;
 	case TIPO_FUNCAO:
-		strncpy(nome,"TIPO_FUNCAO", TAM);
+		strcpy(nome,"TIPO_FUNCAO");
 		break;
 	case TIPO_CLASSE:
-		strncpy(nome,"TIPO_CLASSE", TAM);
+		strcpy(nome,"TIPO_CLASSE");
 		break;
 	case TIPO_ID:
-		strncpy(nome,"TIPO_ID", TAM);
+		strcpy(nome,"TIPO_ID");
 		break;
 	case TIPO_IDCLASSE:
-		strncpy(nome,"TIPO_IDCLASSE", TAM);
+		strcpy(nome,"TIPO_IDCLASSE");
 		break;
 	case TIPO_INTEIRO:
-		strncpy(nome,"TIPO_INTEIRO", TAM);
+		strcpy(nome,"TIPO_INTEIRO");
 		break;
 	case TIPO_STRING:
-		strncpy(nome,"TIPO_STRING", TAM);
+		strcpy(nome,"TIPO_STRING");
 		break;
 	case TIPO_DECIMAL:
-		strncpy(nome,"TIPO_DECIMAL", TAM);
+		strcpy(nome,"TIPO_DECIMAL");
 		break;
 	case TIPO_CHAMADA_FUNCAO:
-		strncpy(nome,"TIPO_CHAMADA_FUNCAO", TAM);
+		strcpy(nome,"TIPO_CHAMADA_FUNCAO");
 		break;
 	case TIPO_CHAMADA_METODO:
-		strncpy(nome,"TIPO_CHAMADA_METODO", TAM);
+		strcpy(nome,"TIPO_CHAMADA_METODO");
 		break;
 	case TIPO_VETOR:
-		strncpy(nome,"TIPO_VETOR", TAM);
+		strcpy(nome,"TIPO_VETOR");
 		break;
 	case TIPO_BLOCO:
-		strncpy(nome,"TIPO_BLOCO", TAM);
+		strcpy(nome,"TIPO_BLOCO");
 		break;
 	case TIPO_OPERACAO:
-		strncpy(nome,"TIPO_OPERACAO", TAM);
+		strcpy(nome,"TIPO_OPERACAO");
 		break;
 	case TIPO_TESTEBOLEAN:
-		strncpy(nome,"TIPO_BOLEAN", TAM);
+		strcpy(nome,"TIPO_BOLEAN");
 		break;
 	case TIPO_ARGUMENTOS:
-		strncpy(nome,"TIPO_ARGUMENTOS", TAM);
+		strcpy(nome,"TIPO_ARGUMENTOS");
+		break;
+	case TIPO_ARGUMENTO:
+		strcpy(nome,"TIPO_ARGUMENTO");
 		break;
 	case TIPO_PARAMETROS:
-		strncpy(nome,"TIPO_PARAMETROS", TAM);
+		strcpy(nome,"TIPO_PARAMETROS");
 		break;
 	case TIPO_PARAMETRO:
-		strncpy(nome,"TIPO_PARAMETRO", TAM);
+		strcpy(nome,"TIPO_PARAMETRO");
 		break;
 	case TIPO_SOMA:
-		strncpy(nome,"TIPO_SOMA", TAM);
+		strcpy(nome,"TIPO_SOMA");
 		break;
 	case TIPO_DIVISAO:
-		strncpy(nome,"TIPO_DIVISAO", TAM);
+		strcpy(nome,"TIPO_DIVISAO");
 		break;
 	case TIPO_MULTIPLICACAO:
-		strncpy(nome,"TIPO_MULTIPLICACAO", TAM);
+		strcpy(nome,"TIPO_MULTIPLICACAO");
 		break;
 	case TIPO_SUBTRACAO:
-		strncpy(nome,"TIPO_SUBTRACAO", TAM);
+		strcpy(nome,"TIPO_SUBTRACAO");
 		break;
 	case TIPO_ATRIBUICAO:
-		strncpy(nome,"TIPO_ATRIBUICAO", TAM);
+		strcpy(nome,"TIPO_ATRIBUICAO");
 		break;
 	case TIPO_TESTE_IGUAL:
-		strncpy(nome,"TIPO_TESTE_IGUAL", TAM);
+		strcpy(nome,"TIPO_TESTE_IGUAL");
 		break;
 	case TIPO_TESTE_DIFERENTE:
-		strncpy(nome,"TIPO_TESTE_DIFERENTE", TAM);
+		strcpy(nome,"TIPO_TESTE_DIFERENTE");
 		break;
 	case TIPO_TESTE_MAIOR:
-		strncpy(nome,"TIPO_TESTE_MAIOR", TAM);
+		strcpy(nome,"TIPO_TESTE_MAIOR");
 		break;
 	case TIPO_TESTE_MAIORIGUAL:
-		strncpy(nome,"TIPO_TESTE_MAIORIGUAL", TAM);
+		strcpy(nome,"TIPO_TESTE_MAIORIGUAL");
 		break;
 	case TIPO_TESTE_MENOR:
-		strncpy(nome,"TIPO_TESTE_MENOR", TAM);
+		strcpy(nome,"TIPO_TESTE_MENOR");
 		break;
 	case TIPO_TESTE_MENOR_IGUAL:
-		strncpy(nome,"TIPO_TESTE_MENOR_IGUAL", TAM);
+		strcpy(nome,"TIPO_TESTE_MENOR_IGUAL");
 		break;
 	case TIPO_OP_OU:
-		strncpy(nome,"TIPO_OP_OU", TAM);
+		strcpy(nome,"TIPO_OP_OU");
 		break;
 	case TIPO_OP_AND:
-		strncpy(nome,"TIPO_OP_AND", TAM);
+		strcpy(nome,"TIPO_OP_AND");
 		break;
 	case TIPO_OP_NEGACAO:
-		strncpy(nome,"TIPO_OP_NEGACAO", TAM);
+		strcpy(nome,"TIPO_OP_NEGACAO");
 		break;
 	case TIPO_DECLARACAO:
-		strncpy(nome,"TIPO_DECLARACAO", TAM);
+		strcpy(nome,"TIPO_DECLARACAO");
 		break;
 	case TIPO_ID_VETOR:
-		strncpy(nome,"TIPO_ID_VETOR", TAM);
+		strcpy(nome,"TIPO_ID_VETOR");
 		break;
 	case TIPO_INDICE_VETOR:
-		strncpy(nome,"TIPO_INDICE_VETOR", TAM);
+		strcpy(nome,"TIPO_INDICE_VETOR");
 		break;
 	case TIPO_METODOCLASSE:
-		strncpy(nome,"TIPO_METODOCLASSE", TAM);
+		strcpy(nome,"TIPO_METODOCLASSE");
 		break;
 	case TIPO_NADA:
-		strncpy(nome,"", TAM);
+		strcpy(nome,"");
+		break;
+	case TIPO_FILE:
+		strcpy(nome,"TIPO_FILE");
 		break;
 	default:
-		strncpy(nome,"DESCONHECIDO", TAM);
+		strcpy(nome,"DESCONHECIDO");
 		break;
 	}
 	return strdup(nome);
@@ -352,10 +358,10 @@ Nodo *addRecursivoNodo(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodo1
 Nodo *criarExpOperador( char *operador, Nodo *expr1, Nodo *expr2, int linha, int coluna )
 {
 	Tipo tipo;
-	char nome[20];
+	char nome[TAMSTRING+1];
 	
 	if(expr1 == expr2 ) return NULL; /*evitar loop infinitos*/
-	if(!operador || !expl || !exp2 || linha < 1 || coluna <1) return NULL;
+	if(!operador || expr1 ==NULL || expr2 ==NULL || linha < 1 || coluna <1) return NULL;
 
 	if (strcmp(operador, "=" ) == 0){ //t_igual
 		strncpy(nome, "Atribuicao",10);

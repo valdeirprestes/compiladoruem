@@ -80,7 +80,7 @@
 %token <texto> t_not_logico // Para ! (se não for t_exclamacao)
 
 
-
+%token <texto> t_read t_readln t_write t_writeln t_open t_close t_file 
 
 
 %token error 
@@ -237,8 +237,18 @@ comandos:
     }
 ;
 
-declaracao: 
-  tipo t_identificador {
+declaracao:
+  t_file t_identificador {
+      meudebug("Declaracao: tipo t_identificador");
+      Nodo *declaracao = criarNodo("DECLARACAO", TIPO_DECLARACAO, linha, coluna);
+      Nodo *id = criarNodo($2, TIPO_ID, linha, coluna);
+      Nodo *tipofile = criarNodo($1, TIPO_FILE, linha, coluna);
+      if(id) id->tipo_id = TIPO_FILE;
+      addFilhoaoNodo(declaracao, tipofile);
+      addFilhoaoNodo(declaracao, id);
+      $$ = declaracao;
+  }
+  |tipo t_identificador {
       meudebug("Declaracao: tipo t_identificador");
       Nodo *declaracao = criarNodo("DECLARACAO", TIPO_DECLARACAO, linha, coluna);
       Nodo *id = criarNodo($2, TIPO_ID, linha, coluna);
@@ -327,7 +337,7 @@ comando:
   }
   | t_return expressao t_pontovirgula {  
       meudebug("Comando linha 254");
-      $$ = criarNodoComFilho("Expressao", TIPO_RETURN , linha, coluna, $2);
+      $$ = criarNodoComFilho("Return", TIPO_RETURN , linha, coluna, $2);
   }
   | t_break t_pontovirgula {
       meudebug("Comando linha 258");
@@ -413,11 +423,11 @@ argumentos:
   %empty { $$ = NULL;}
   | argumento {
       meudebug("Argumentos linha 393");
-      $$ = criarNodoComFilho("Argumentos", TIPO_ID, linha, coluna, $1);
+      $$ = criarNodoComFilho("Argumentos", TIPO_ARGUMENTOS, linha, coluna, $1);
   }
   | argumentos t_virgula argumento {
       meudebug("Argumentos linha 338");
-      $$ = addRecursivoNodo("Argumentos", TIPO_ID,  linha,  coluna, $1, $3);
+      $$ = addRecursivoNodo("Argumentos", TIPO_ARGUMENTOS,  linha,  coluna, $1, $3);
   }
   ;
 argumento:
@@ -487,7 +497,64 @@ chamada_funcao:
     addFilhoaoNodo(n, $3);
     $$ = n;
   }
-  | t_identificador t_abriparentes argumentos  error { printf("ERRO em chamada_funcao");}
+  |t_open t_abriparentes expressao t_virgula expressao t_fechaparentes 
+  {
+     meudebug("Chamada_funcao open linha 464");
+     Nodo *n = criarNodo($1 , TIPO_CHAMADA_FUNCAO, linha, coluna);
+     Nodo *arg1= criarNodoComFilho("Argumento", TIPO_ARGUMENTO, linha, coluna, $3);
+     Nodo *arg2= criarNodoComFilho("Argumento", TIPO_ARGUMENTO, linha, coluna, $5);
+     Nodo *args = criarNodoComFilho("Argumentos", TIPO_ARGUMENTOS, linha, coluna, arg1);
+     addFilhoaoNodo(args, arg2);
+     addFilhoaoNodo(n, args);
+     $$ = n; 
+  }
+  |t_close t_abriparentes expressao t_fechaparentes {
+     meudebug("Chamada_funcao close linha 464");
+     Nodo *n = criarNodo($1 , TIPO_CHAMADA_FUNCAO, linha, coluna);
+     Nodo *arg1= criarNodoComFilho("Argumento", TIPO_ARGUMENTO, linha, coluna, $3);
+     Nodo *args = criarNodoComFilho("Argumentos", TIPO_ARGUMENTOS, linha, coluna, arg1);
+     addFilhoaoNodo(n, args);
+     $$ = n; 
+
+  }
+  |t_read t_abriparentes expressao  t_fechaparentes {
+     meudebug("Chamada_funcao close linha 464");
+     Nodo *n = criarNodo($1 , TIPO_CHAMADA_FUNCAO, linha, coluna);
+     Nodo *arg1= criarNodoComFilho("Argumento", TIPO_ARGUMENTO, linha, coluna, $3);
+     Nodo *args = criarNodoComFilho("Argumentos", TIPO_ARGUMENTOS, linha, coluna, arg1);
+     addFilhoaoNodo(n, args);
+     $$ = n; 
+  }
+  |t_readln t_abriparentes expressao  t_fechaparentes {
+     meudebug("Chamada_funcao close linha 464");
+     Nodo *n = criarNodo($1 , TIPO_CHAMADA_FUNCAO, linha, coluna);
+     Nodo *arg1= criarNodoComFilho("Argumento", TIPO_ARGUMENTO, linha, coluna, $3);
+     Nodo *args = criarNodoComFilho("Argumentos", TIPO_ARGUMENTOS, linha, coluna, arg1);
+     addFilhoaoNodo(n, args);
+     $$ = n; 
+  }
+  |t_write t_abriparentes expressao t_virgula expressao t_fechaparentes 
+  {
+     meudebug("Chamada_funcao open linha 464");
+     Nodo *n = criarNodo($1 , TIPO_CHAMADA_FUNCAO, linha, coluna);
+     Nodo *arg1= criarNodoComFilho("Argumento", TIPO_ARGUMENTO, linha, coluna, $3);
+     Nodo *arg2= criarNodoComFilho("Argumento", TIPO_ARGUMENTO, linha, coluna, $5);
+     Nodo *args = criarNodoComFilho("Argumentos", TIPO_ARGUMENTOS, linha, coluna, arg1);
+     addFilhoaoNodo(args, arg2);
+     addFilhoaoNodo(n, args);
+     $$ = n;
+  }
+  |t_writeln t_abriparentes expressao t_virgula expressao t_fechaparentes 
+  {
+    meudebug("Chamada_funcao open linha 464");
+     Nodo *n = criarNodo($1 , TIPO_CHAMADA_FUNCAO, linha, coluna);
+     Nodo *arg1= criarNodoComFilho("Argumento", TIPO_ARGUMENTO, linha, coluna, $3);
+     Nodo *arg2= criarNodoComFilho("Argumento", TIPO_ARGUMENTO, linha, coluna, $5);
+     Nodo *args = criarNodoComFilho("Argumentos", TIPO_ARGUMENTOS, linha, coluna, arg1);
+     addFilhoaoNodo(args, arg2);
+     addFilhoaoNodo(n, args);
+     $$ = n;
+  }
   ;
 chamada_metodo:
   t_identificadorclasse t_abriparentes argumentos t_fechaparentes { 
@@ -549,7 +616,7 @@ expressao:
   | t_decimal
   {
     meudebug(" Expressao: t_decimal");
-    Tipo tipo = TIPO_DECIMAL;
+    Tipo tipo = TIPO_FLOAT;
     Nodo *n = criarNodo(
       $1, tipo, linha, coluna);
     $$ = n;
@@ -557,7 +624,7 @@ expressao:
   | t_num 
   {
     meudebug(" Expressao: t_num");
-    Tipo tipo = TIPO_INTEIRO;
+    Tipo tipo = TIPO_INT;
     /*printf("tnum = %s\n", $1);*/
     Nodo *n = criarNodo($1, tipo, linha, coluna);
     $$ = n;
@@ -565,9 +632,10 @@ expressao:
   | t_string
   {
     meudebug(" Expressao: t_string");
-    Tipo tipo = TIPO_STRING;
+    Tipo tipo = TIPO_VETOR;
     Nodo *n = criarNodo(
       $1, tipo, linha, coluna);
+    n->tipo_vetor = TIPO_CHAR;
     $$ = n;
   }
   | chamada_funcao { $$ = $1; };
@@ -577,11 +645,10 @@ acesso_vetor:
   t_identificador t_abrivetor expressao t_fechavetor
   {
     meudebug(" Acesso_vetor: t_identificador t_abrivetor expressao t_fechavetor ");
-    Nodo *vetor = criarNodo($1, TIPO_ID_VETOR, linha, coluna);
-    Nodo *indice= criarNodo($1, TIPO_INDICE_VETOR, linha, coluna);
-    addFilhoaoNodo(vetor, indice);
-    addFilhoaoNodo(indice, $3);
-    $$ = vetor;
+    //Nodo *vetor = criarNodo("Vetor", TIPO_ID_VETOR, linha, coluna);
+    Nodo *id= criarNodo($1, TIPO_ID, linha, coluna);
+    addFilhoaoNodo(id, $3);
+    $$ = id;
   }
 
 condicao:

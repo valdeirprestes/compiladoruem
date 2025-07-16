@@ -186,7 +186,6 @@ int tiposCompatíveis(Nodo *esq, Nodo *dir) {
     if(dir->tipo_id == TIPO_NADA){
         Simbolo *dirSimbol = buscarSimboloPorNome(dir->nome, escopoAtual);
         if(dirSimbol == NULL){
-            printErrorsrc(source, dir->linha, dir->coluna);
             return -1;
         }
         if(dirSimbol->tipo_id == TIPO_VETOR){
