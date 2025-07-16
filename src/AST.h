@@ -23,10 +23,10 @@ typedef enum _Tipo{
 	TIPO_RETURN,
 	TIPO_FUNCAO,
 	TIPO_CLASSE,
-	TIPO_IDENTIFICADOR,
-	TIPO_IDENTIFICADORVETOR,
+	TIPO_ID,
+	TIPO_ID_VETOR,
 	TIPO_INDICE_VETOR,
-	TIPO_IDENTIFICADORCLASSE,
+	TIPO_IDCLASSE,
 	TIPO_METODOCLASSE,
 	TIPO_CASE,
 	TIPO_DEFAULT,
@@ -56,7 +56,8 @@ typedef enum _Tipo{
 	TIPO_OP_OU,
 	TIPO_OP_AND,
 	TIPO_DECLARACAO,
-	TIPO_PARAMETRO
+	TIPO_PARAMETRO,
+	TIPO_NADA
 } Tipo;
 
 typedef union token{
@@ -71,7 +72,8 @@ typedef struct Nodo{
 	char *nome;
 	Token token;
 	Tipo tipo;
-	Tipo tipo_identificador;
+	Tipo tipo_id;
+	Tipo tipo_vetor;
 	int nfilhos;
 	int uso;
 	long linha;

@@ -43,3 +43,11 @@ Indetificador_vetor +               -> neste contexto á sabe a tipagem.
 int () {
 
 Declaracao+
+
+
+Classe
+
+Declaracao+
+          |-> Classe (TIPOCLASSE)
+          | NomeClasse (Indetificador)+
+		                              |-> Declaracao+[...]

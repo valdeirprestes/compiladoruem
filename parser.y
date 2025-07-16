@@ -233,20 +233,20 @@ parametros:
 parametro:
   tipo t_identificador {
     meudebug("Parametro linha 162");
-    //$$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna,$1);
-    $$ = criarNodoIdentificador($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
+    //$$ = criarNodoComFilho($2, TIPO_ID, linha, coluna,$1);
+    $$ = criarNodoIdentificador($2, TIPO_ID, linha, coluna, $1);
   }
   |tipo  t_identificador t_abrivetor t_fechavetor
   {
     meudebug("Parametro linha 167");
-    $$ = criarNodoComFilho($4, TIPO_IDENTIFICADOR, linha, coluna, $1);
+    $$ = criarNodoComFilho($4, TIPO_ID, linha, coluna, $1);
   }
   ;
 tipo:
   t_int { meudebug("Tipo linha 172"); $$ = criarNodo($1, TIPO_INT, linha, coluna); }
   | t_float {meudebug("Tipo linha 173"); $$ = criarNodo($1, TIPO_FLOAT, linha, coluna); }
   | t_char  {meudebug("Tipo linha 174"); $$ = criarNodo($1, TIPO_CHAR, linha, coluna);}
-  | t_identificador {meudebug("Tipo linha 175"); $$ = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna); }
+  | t_identificador {meudebug("Tipo linha 175"); $$ = criarNodo($1, TIPO_ID, linha, coluna); }
   ;
   
 corpofuncao:
@@ -317,14 +317,14 @@ comandos:
 declaracao: 
   tipo t_identificador {
       meudebug("Declaracao: tipo t_identificador linha 225");
-      Nodo *n = criarNodoIdentificador($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
+      Nodo *n = criarNodoIdentificador($2, TIPO_ID, linha, coluna, $1);
       $$ = criarNodoDeclaracao(n, linha, coluna);
       
 
   }
   |tipo t_identificador t_igual expressao {
       meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
-      Nodo *n = criarNodo($2, TIPO_IDENTIFICADOR, linha, coluna);
+      Nodo *n = criarNodo($2, TIPO_ID, linha, coluna);
       addFilhoaoNodo($1, $4);
       $$ = criarExpOperador( $3, n, $1, linha, coluna );
       //$$ = criarNodoDeclaracao(n, linha, coluna);
@@ -332,12 +332,12 @@ declaracao:
   }
   | t_identificador t_igual expressao {
       meudebug("Declaracao: t_identificador t_igual expressao linha 229");
-      Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+      Nodo *n = criarNodo($1, TIPO_ID, linha, coluna);
       $$ = criarExpOperador( $2, n, $3, linha, coluna );
   }
   |tipo  t_identificador t_abrivetor t_fechavetor {
       meudebug("Declaracao linha 236");
-      $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna, $1);
+      $$ = criarNodoComFilho($2, TIPO_ID, linha, coluna, $1);
   }
   |acesso_vetor t_igual expressao {
       meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
@@ -349,7 +349,7 @@ declaracao:
   }
   |t_identificador t_igual acesso_vetor {
       meudebug("Declaracao: tipo t_identificador t_igual expressao linha 229");
-      Nodo *n = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
+      Nodo *n = criarNodo($1, TIPO_ID, linha, coluna);
       $$ = criarExpOperador( $2, n, $3, linha, coluna );
   }
   ;
@@ -453,11 +453,11 @@ argumentos:
   %empty { $$ = NULL;}
   | argumento {
       meudebug("Argumentos linha 393");
-      $$ = criarNodoComFilho("Argumentos", TIPO_IDENTIFICADOR, linha, coluna, $1);
+      $$ = criarNodoComFilho("Argumentos", TIPO_ID, linha, coluna, $1);
   }
   | argumentos t_virgula argumento {
       meudebug("Argumentos linha 338");
-      $$ = addRecursivoNodo("Argumentos", TIPO_IDENTIFICADOR,  linha,  coluna, $1, $3);
+      $$ = addRecursivoNodo("Argumentos", TIPO_ID,  linha,  coluna, $1, $3);
   }
   ;
 argumento:
@@ -488,11 +488,11 @@ parte1for:
   %empty {meudebug("Parte1For linha 392"); $$ = NULL;}
   | t_identificador t_igual expressao { 
     meudebug("Parte1For linha 394");
-    $$ = criarNodoComFilho($1, TIPO_IDENTIFICADOR, linha, coluna, $3);
+    $$ = criarNodoComFilho($1, TIPO_ID, linha, coluna, $3);
   } 
   | tipo t_identificador t_igual expressao { 
     meudebug("Parte1For linha 394");
-    $$ = criarNodoComFilho($2, TIPO_IDENTIFICADOR, linha, coluna, $4);
+    $$ = criarNodoComFilho($2, TIPO_ID, linha, coluna, $4);
     addFilhoaoNodo($4, $1);
   } 
   ;
@@ -596,7 +596,7 @@ expressao:
   |t_identificador 
   {
     meudebug(" Expressao linha 566");
-    Tipo tipo = TIPO_IDENTIFICADOR;
+    Tipo tipo = TIPO_ID;
     Nodo *n = criarNodo($1, tipo, linha, coluna);
     $$ = n;
   }
@@ -635,8 +635,8 @@ acesso_vetor:
   t_identificador t_abrivetor expressao t_abrivetor
   {
     meudebug(" Expressao linha 566");
-    Nodo *vetor = criarNodo($1, TIPO_IDENTIFICADOR, linha, coluna);
-    $$ = criarNodoComFilho($1, TIPO_IDENTIFICADOR, linha, coluna,vetor);
+    Nodo *vetor = criarNodo($1, TIPO_ID, linha, coluna);
+    $$ = criarNodoComFilho($1, TIPO_ID, linha, coluna,vetor);
   }
 
 condicao:
@@ -676,7 +676,7 @@ corpoclasse:
       nodo = $1;
     else
       nodo = criarNodo("CorpoClasse", TIPO_BLOCO, linha, coluna);  
-    Nodo *n = criarNodo($3, TIPO_IDENTIFICADORCLASSE, linha, coluna);
+    Nodo *n = criarNodo($3, TIPO_IDCLASSE, linha, coluna);
     addFilhoaoNodo(nodo, n);
     $$ = nodo;
   }
@@ -688,7 +688,7 @@ corpoclasse:
     else
       nodo = criarNodo("CorpoClasse", TIPO_BLOCO, linha, coluna);
 
-    Nodo *n = criarNodo($3, TIPO_IDENTIFICADORCLASSE, linha, coluna);
+    Nodo *n = criarNodo($3, TIPO_IDCLASSE, linha, coluna);
     Nodo *n2 = criarNodo("Vetor", TIPO_VETOR, linha, coluna);
     addFilhoaoNodo(nodo, n);
     addFilhoaoNodo(n, n2);

@@ -18,7 +18,7 @@ Simbolo* buscarSimbolo(const char *nome, const char *escopo) {
     return NULL;
 }
 
-void inserirSimbolo(const char *nome, const char *escopo, Tipo tipo, int isParametro, int isVetor, char *tipo_classe, Tipo tipo_identificador, int linha, int coluna) {
+void inserirSimbolo(const char *nome, const char *escopo, Tipo tipo, int isParametro, int isVetor, char *tipo_classe, Tipo tipo_id, Tipo tipo_vetor, int linha, int coluna) {
     Simbolo *simboloExistente = buscarSimbolo(nome, escopo);
     if(!nome){
         return;
@@ -44,7 +44,8 @@ void inserirSimbolo(const char *nome, const char *escopo, Tipo tipo, int isParam
     novoSimbolo->linha = linha;
     novoSimbolo->coluna = coluna;
     novoSimbolo->proximo = NULL;
-    novoSimbolo->tipo_tipo_identificador = tipo_identificador;
+    novoSimbolo->tipo_id = tipo_id;
+    novoSimbolo->tipo_vetor = tipo_vetor;
 
     if (tabelaSimbolos == NULL) {
         tabelaSimbolos = novoSimbolo;
@@ -85,18 +86,20 @@ void imprimirTabelaSimbolos() {
 
     Simbolo *atual = tabelaSimbolos;
     if(atual !=NULL)
-    printf("%20s %-20s %-30s %-5s %5s %5s %8s\n", "Nome","Escopo","Tipo", "Parm", "Vetor", "Classe", "tipo_id");
+    printf("%-10.10s %-10.10s %-26.26s %-15.15s %15.15s %4.4s %6.6s\n", "Nome","Escopo","Tipo", "tipo_id", "Vetor", "Parm",  "Classe");
     printf("----------------------------------------------------------------------------------------------------\n");
     while (atual != NULL) {
         char *tipoSimboloStr = strTipo(atual->tipo); // Usando strTipo
-        printf("%-20s %-20s %-30s %-5s %5s %5s %8s\n",
+        char *tipoSimboloIdStr = strTipo(atual->tipo_id); // Usando strTipo
+        char *tipoSimboloVetorStr = strTipo(atual->tipo_vetor); // Usando strTipo
+        printf("%-10.10s %-10.10s %-26.26s %-15.15s %15.15s %4.4s %6.6s\n",
             atual->nome,
             atual->escopo,
             tipoSimboloStr,
+            tipoSimboloIdStr,
+            tipoSimboloVetorStr,
             atual->parametro ? "Sim" : "Não",
-            atual->vetor ? "Sim" : "Não",
-            atual->tipo_classe? "Sim":"Não",
-            atual->tipo_tipo_identificador != TIPO_REGRA? strTipo(atual->tipo_tipo_identificador):""
+            atual->tipo_classe? "Sim":"Não"
         );
         free(tipoSimboloStr); 
         atual = atual->proximo;
@@ -118,19 +121,20 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
     
     if((no->tipo == TIPO_DECLARACAO || no->tipo == TIPO_PARAMETRO )&& no->nfilhos >= 2){
         Nodo *nofilho = no->filhos[1];
-        if (nofilho->tipo == TIPO_IDENTIFICADOR || 
-            nofilho->tipo == TIPO_IDENTIFICADORVETOR || 
+        if (nofilho->tipo == TIPO_ID || 
+            nofilho->tipo == TIPO_ID_VETOR || 
             nofilho->tipo == TIPO_FUNCAO ||
             nofilho->tipo == TIPO_CLASSE ) {
             int isVetor = (no->filhos[0]->tipo == TIPO_VETOR )? 1 :0;
             int isParametro = (no->tipo == TIPO_PARAMETRO)? 1: 0;
-            inserirSimbolo(nofilho->nome, escopoAtual, no->filhos[0]->tipo, isParametro, isVetor,NULL,nofilho->tipo_identificador, nofilho->linha, nofilho->coluna);
+            Tipo tipo_vetor = (isVetor == 0) ? TIPO_NADA: no->filhos[0]->filhos[0]->tipo;
+            inserirSimbolo(nofilho->nome, escopoAtual, nofilho->tipo, isParametro, isVetor,NULL,nofilho->tipo_id,nofilho->tipo_vetor, nofilho->linha, nofilho->coluna);
             /*for(int i=1; i < nofilho->nfilhos; i++){
                 addFilhoaoNodo(nofilho, no->filhos[i]);
             }*/
         }
     }
-    else if ( no->tipo == TIPO_FUNCAO){
+    else if ( no->tipo == TIPO_FUNCAO ||  no->tipo == TIPO_CLASSE || no->tipo == TIPO_METODOCLASSE){
         escopoAnterior = escopoAtual;
         escopoAtual = no->nome;
     }
@@ -149,23 +153,23 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
             free(noTipoStr);
         }
         
-        if (no->tipo == TIPO_IDENTIFICADOR && no->filhos[0] ) {
+        if (no->tipo == tipo_id && no->filhos[0] ) {
             int isVetor = 0;
             int isParametro = 0;
-            inserirSimbolo(no->nome, escopoAtual, no->tipo, isParametro, isVetor,NULL,no->tipo_identificador, no->linha, no->coluna);
+            inserirSimbolo(no->nome, escopoAtual, no->tipo, isParametro, isVetor,NULL,no->tipo_id, no->linha, no->coluna);
         }
         
         
         else if (no->tipo == TIPO_FUNCAO || no->tipo == TIPO_METODOCLASSE) {
-            inserirSimbolo(no->nome, escopoAnterior, no->tipo, 0, 0, NULL, no->tipo_identificador,no->linha, no->coluna);
+            inserirSimbolo(no->nome, escopoAnterior, no->tipo, 0, 0, NULL, no->tipo_id,no->linha, no->coluna);
             for (int i = 0; i < no->nfilhos; i++) {
                 Nodo *filho = no->filhos[i];
                 if (filho->tipo == TIPO_PARAMETROS) {
                     for (int j = 0; j < filho->nfilhos; j++) {
                         Nodo *paramNode = filho->filhos[j];
-                        if (paramNode->tipo == TIPO_IDENTIFICADOR && paramNode->tipo_identificador != TIPO_REGRA) {
+                        if (paramNode->tipo == tipo_id && paramNode->tipo_id != TIPO_REGRA) {
                             int isVetorParam = 0; 
-                            inserirSimbolo(paramNode->token.sval, escopoAtual, paramNode->tipo_identificador, 1,  isVetorParam, NULL, paramNode->tipo_identificador, paramNode->linha, paramNode->coluna);
+                            inserirSimbolo(paramNode->token.sval, escopoAtual, paramNode->tipo_id, 1,  isVetorParam, NULL, paramNode->tipo_id, paramNode->linha, paramNode->coluna);
                         }
                     }
                     break;
@@ -174,12 +178,12 @@ void gerarTabelaSimbolosDaAST(Nodo *no) {
         }
         
         else if (no->tipo == TIPO_CLASSE) {
-            inserirSimbolo(no->nome, escopoAnterior, TIPO_CLASSE, 0, 0,NULL, no->tipo_identificador,no->linha, no->coluna);
+            inserirSimbolo(no->nome, escopoAnterior, TIPO_CLASSE, 0, 0,NULL, no->tipo_id,no->linha, no->coluna);
         }
-        else if (no->tipo == TIPO_IDENTIFICADOR && no->filhos[0] ) {
+        else if (no->tipo == tipo_id && no->filhos[0] ) {
             int isVetor = 0;
             int isParametro = 0;
-            inserirSimbolo(no->nome, escopoAtual, no->tipo, isParametro, isVetor,NULL,no->tipo_identificador, no->linha, no->coluna);
+            inserirSimbolo(no->nome, escopoAtual, no->tipo, isParametro, isVetor,NULL,no->tipo_id, no->linha, no->coluna);
         }
 
         

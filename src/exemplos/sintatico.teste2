@@ -1,2 +1,2 @@
 
-int main(int a, int b){int y;}
+int main(int a, int b){int y; char c; flot f;}

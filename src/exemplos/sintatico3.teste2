@@ -5,4 +5,8 @@ class Calculo{
 }
 
 Calculo c;
-Calculo c;
+Calculo a;
+
+int main(){
+ Calculo b;
+}

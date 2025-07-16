@@ -21,7 +21,8 @@ Nodo *criarNodo(char *nome, Tipo tipo, int linha, int coluna)
 	n->coluna = coluna;
 	n->nfilhos = 0;
 	n->filhos = NULL;
-	n->tipo_identificador = TIPO_REGRA;
+	n->tipo_id = TIPO_REGRA;
+	n->tipo_vetor =  TIPO_NADA;
 	return n;
 }
 
@@ -42,7 +43,7 @@ Nodo *criarNodoIdentificador(char *nome, Tipo tipo, int linha, int coluna, Nodo 
 {
 	Nodo *nodo = criarNodo(nome, tipo, linha, coluna);
 	if(!nodo || !nodotipo) return NULL;
-	nodo->tipo_identificador = nodotipo->tipo;
+	nodo->tipo_id = nodotipo->tipo;
 	addFilhoaoNodo(nodo, nodotipo);
 	return nodo;
 }
@@ -127,7 +128,7 @@ char *strTipo(Tipo tipo){
 	switch (tipo)
 	{
 	case TIPO_REGRA:
-		strncpy(nome,"TIPO_REGRA", TAM);
+		strncpy(nome,"", TAM);
 		break;
 	case TIPO_INT:
 		strncpy(nome,"TIPO_INT", TAM);
@@ -165,11 +166,11 @@ char *strTipo(Tipo tipo){
 	case TIPO_CLASSE:
 		strncpy(nome,"TIPO_CLASSE", TAM);
 		break;
-	case TIPO_IDENTIFICADOR:
-		strncpy(nome,"TIPO_IDENTIFICADOR", TAM);
+	case TIPO_ID:
+		strncpy(nome,"TIPO_ID", TAM);
 		break;
-	case TIPO_IDENTIFICADORCLASSE:
-		strncpy(nome,"TIPO_IDENTIFICADORCLASSE", TAM);
+	case TIPO_IDCLASSE:
+		strncpy(nome,"TIPO_IDCLASSE", TAM);
 		break;
 	case TIPO_INTEIRO:
 		strncpy(nome,"TIPO_INTEIRO", TAM);
@@ -252,11 +253,17 @@ char *strTipo(Tipo tipo){
 	case TIPO_DECLARACAO:
 		strncpy(nome,"TIPO_DECLARACAO", TAM);
 		break;
-	case TIPO_IDENTIFICADORVETOR:
-		strncpy(nome,"TIPO_IDENTIFICADORVETOR", TAM);
+	case TIPO_ID_VETOR:
+		strncpy(nome,"TIPO_ID_VETOR", TAM);
 		break;
 	case TIPO_INDICE_VETOR:
 		strncpy(nome,"TIPO_INDICE_VETOR", TAM);
+		break;
+	case TIPO_METODOCLASSE:
+		strncpy(nome,"TIPO_METODOCLASSE", TAM);
+		break;
+	case TIPO_NADA:
+		strncpy(nome,"", TAM);
 		break;
 	default:
 		strncpy(nome,"DESCONHECIDO", TAM);
@@ -281,8 +288,8 @@ void printNodoFilhos(Nodo *n, int nivel, int niveis[NIVEIS][1])
 			case TIPO_STRING:
 				printf("-> %s (%s)\n", n->token.sval, strTipo(n->tipo));
 				break;
-			/*case TIPO_IDENTIFICADOR:
-				printf("-> %s (%s -> %s )\n", n->token.sval,  strTipo(n->tipo), strTipo(n->tipo_identificador));
+			/*case tipo_id:
+				printf("-> %s (%s -> %s )\n", n->token.sval,  strTipo(n->tipo), strTipo(n->tipo_id));
 				break;*/
 			default: /*depuração*/
 				printf("-> %s (%s)\n", n->nome, strTipo(n->tipo));
@@ -320,7 +327,7 @@ char *stringNivel(int nivel, int niveis[NIVEIS][1])
 Nodo *criarNodoFuncao(char *nome, Nodo *tipofuncao, Nodo* parametrosfunc, Nodo* corpofuncao, int linha, int coluna){
 	Nodo *nodo = criarNodo(nome, TIPO_FUNCAO, linha, coluna);
 	if(tipofuncao)
-		nodo->tipo_identificador = tipofuncao->tipo;
+		nodo->tipo_id = tipofuncao->tipo;
     addFilhoaoNodo(nodo, tipofuncao);
     addFilhoaoNodo(nodo, parametrosfunc);
     addFilhoaoNodo(nodo, corpofuncao);
