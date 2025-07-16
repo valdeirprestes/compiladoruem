@@ -6,10 +6,11 @@ int main(){
 int minhafuc(){
     int valor;
     int valor2;
-    int valor3;
+    char valor3;
     valor = valor + valor2;
-    valor = valor - valor2;
+    valor = valor - valor3;
     valor = valor * valor2;
-    valor = valor / valor2;
+    valor = valor3 / valor2;
+    valor3 = valor;
     return "minhastring";
 }

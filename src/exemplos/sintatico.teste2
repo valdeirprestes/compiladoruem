@@ -1,2 +1,13 @@
 
-int main(int a, int b){int y; char c; flot f;}
+int main(int a, int b){
+    int y; char c; flot f;
+    file fp;
+    file saida;
+    fp = open( "arquivo.txt", "w");
+    saida = open( "arquivo2.txt", "w");
+    char g = read(fp);
+    write(saida, g);
+    int caracteres = readln(fp);
+    writeln(saida, caracteres);
+    close(fp);
+}

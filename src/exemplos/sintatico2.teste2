@@ -1,5 +1,15 @@
+int soma(int i, int j) {return i + j;}
+int subtrai(int i, int j) {return i - j;}
+int dividi(int i, int j) {return i / j;}
+int multiplica(int i, int j) {return i * j;}
+
 int main(int arg1, int arg2[]) {
     int i;
     i = 5;
     int x = i + 5;
+    printf("soma %d", soma(i,x));
+    printf("subtrai %d", subtrai(i,x));
+    printf("dividi %d", dividi(i,x));
+    printf("multiplica %d", multiplica(i,x));
 }
+

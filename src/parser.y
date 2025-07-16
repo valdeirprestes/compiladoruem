@@ -80,6 +80,9 @@
 %token <texto> t_not_logico // Para ! (se não for t_exclamacao)
 
 
+
+
+
 %token error 
 
 %right t_igual // Atribuição: x = y = z
@@ -124,17 +127,11 @@ inicio:
   codigos {
     meudebug("Inicio linha 96"); 
     raiz = $1;
-    if(imprimir_ast)
+    /*if(imprimir_ast)
       printNodo(raiz);
     if(imprimir_simbolos)
-      gerarTabelaSimbolosDaAST(raiz);
+      gerarTabelaSimbolosDaAST(raiz);*/
     $$ = raiz;
-  }
-  | error  {
-    meudebug("blococodigo linha 125");
-    yyerror(&yylloc, "Erro de sintaxe: o codigo acabou inesperadamente");
-    //yyerrok;
-    yyclearin;
   }
   ;
 codigos:
@@ -174,12 +171,6 @@ parametros:
       meudebug("Parametros linha 200");
       $$= addRecursivoNodo("Parametros", TIPO_PARAMETROS, linha, coluna, $1, $3);
   }
-  | parametros error t_virgula {
-    meudebug("Parametros linha 204");
-    yyerror(&yylloc, "Erro de sintaxe: esperava tipo \';\' ");
-    //yyerrok;
-    yyclearin;
-  }
   ;
 parametro:
   tipo t_identificador {
@@ -187,6 +178,7 @@ parametro:
     Nodo *p =criarNodoParametro($1,  linha, coluna);
     Nodo* id= criarNodo($2, TIPO_ID, linha, coluna);
     addFilhoaoNodo(p,id);
+    if(id) id->tipo_id = $1->tipo;
     $$ = p;
   }
   |tipo  t_identificador t_abrivetor t_fechavetor
@@ -197,6 +189,8 @@ parametro:
     Nodo* id= criarNodo($2, TIPO_ID, linha, coluna);
     addFilhoaoNodo(vetor,$1);
     addFilhoaoNodo(p,id);
+    if(id) id->tipo_id = TIPO_VETOR;
+    if(id) id->tipo_vetor = $1->tipo;
     $$ = p;
   }
   ;
@@ -212,18 +206,6 @@ corpofuncao:
    meudebug("CorpoFuncao linha 180");
    $$ = $2;
   }
-  |t_abrichave declaracoes_comandos t_pontovirgula  error t_fechachave {
-    meudebug("CorpoFuncao linha 234");
-    yyerror(&yylloc, "Erro de sintaxe: caractere \'}\' inesperado ");
-    //yyerrok;
-    yyclearin;
-  }
-  |t_abrichave declaracoes_comandos  error t_fechachave {
-    meudebug("CorpoFuncao linha 252");
-    yyerror(&yylloc, "Erro de sintaxe: faltou um \'{\' ou teve um tem \'}\' excedente");
-    //yyerrok;
-    yyclearin;
-  }
   ;
 declaracoes_comandos:
   %empty { 
@@ -238,23 +220,6 @@ declaracoes_comandos:
       meudebug("Declaracoes_comandos comando linha 215");
       $$ = addRecursivoNodo("Bloco", TIPO_BLOCO, linha, coluna, $1, $2);
   }
-  |declaracoes_comandos  error t_pontovirgula {
-    meudebug("Declaracoes_comandos error t_pontovirgula linha 272");
-    yyerror(&yylloc, "Erro de sintaxe:  faltou declaracao, pois veio um \';\' inesperado");
-    yyclearin;
-  }
-  |declaracoes_comandos  t_while error {
-    meudebug("Declaracoes_comandos t_while error linha 277");
-    yyerror(&yylloc, "Erro de sintaxe:  while mal declarado");
-    yyclearin;
-    //yyerrok;
-   }
-   |declaracoes_comandos  t_for error {
-    meudebug("Declaracoes_comandos t_for error linha 283");
-    yyerror(&yylloc, "Erro de sintaxe:  for mal declarado");
-    yyclearin;
-    //yyerrok;
-   }
 ;
 
 
@@ -487,10 +452,7 @@ parte1for:
   
 parte2for:
   condicao { meudebug("Parte2For condicao linha 179"); $$ = $1;}
-  |error t_identificador{
-    meudebug("Parte2For error t_identificador linha 179");
-    yyerror(&yylloc, "Erro de sintaxe: esperava um variavel \')\' ");
-  };
+  ;
 
 parte3for:
   declaracao{meudebug("parte3For declaracao linha 179"); $$ = $1;}
@@ -543,12 +505,6 @@ whilecomando:
     addFilhoaoNodo(n, $5);
     $$ = n;
   }
-  | t_while error t_fechaparentes {
-    meudebug("Funcao linha 179");
-    yyerror(&yylloc, "Erro de sintaxe: faltou definir corretamente a condicao da while ");
-    yyclearin;
-    //yyerrok;
-  };
   ;
 blocowhile:
   t_pontovirgula { $$ = NULL;}
@@ -616,12 +572,6 @@ expressao:
   }
   | chamada_funcao { $$ = $1; };
   | chamada_metodo { $$ = $1;} ;
-  | t_abriparentes  t_fechaparentes error {
-    meudebug(" Expressao: t_decimal t_abriparentes  t_fechaparentes error");
-    yyerror(&yylloc, "Erro de sintaxe: faltou um variavel ou expressao ");
-    //yyerrok;
-    yyclearin;
-  }
   ;
 acesso_vetor:
   t_identificador t_abrivetor expressao t_fechavetor

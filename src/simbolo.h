@@ -39,4 +39,9 @@ Simbolo* buscarSimboloPorNome(const char *nome, const char *escopoAtual);
 void imprimirTabelaSimbolos();
 void liberarTabelaSimbolos();
 void gerarTabelaSimbolosDaAST(Nodo *no);
+int tiposCompatíveis(Nodo *esq, Nodo *dir);
+void verificarSoma(Nodo *nodo);
+void verificarSubtracao(Nodo *nodo);
+void verificarMultiplicacao(Nodo *nodo);
+void verificarDivisao(Nodo *nodo);
 #endif

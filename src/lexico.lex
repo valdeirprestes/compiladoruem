@@ -2,6 +2,7 @@
 %option yylineno
 %option bison-bridge
 %{
+	#include <stdio.h>
 	#include <string.h>
 	#include "AST.h"
     #include "parser.tab.h"
@@ -21,6 +22,8 @@
   	extern long linha; /* guarda a linha do token atual  -> para erros*/
   	extern long coluna;/*guarda a coluna do token atual  -> para erros*/
 	extern int debug;
+	extern int asprintf (char **__restrict __ptr,
+		     const char *__restrict __fmt, ...);
 	
 	long column = 1;
 	long linhacomentario = 0;
@@ -188,18 +191,54 @@ int tam(char *s)
 	while (s[i] !='\0') i++;
 	return i;
 }
+int segundavirgula(const char *texto) {
+    int count = 0;
+    int i = 0;
 
-  void yyerror ( YYLTYPE *locp, char const *s){
+    while (texto[i] != '\0') {
+        if (texto[i] == ',') {
+            count++;
+            if (count == 2) {
+                return i; // Retorna índice da segunda vírgula
+            }
+        }
+        i++;
+    }
+    return -1; // Não encontrou duas vírgulas
+}
+
+  void yyerror ( YYLTYPE *locp, char  *s){
 	extern long linha;
 	extern long coluna;
+	char *message;
 	if(locp == NULL)
 		printf("->>>  %s - linha %d coluna %d\n", s, linha, coluna);
-	//printf("locp->first_line %d  locp->first_column %d \n" , locp->first_line, locp->first_column);
-	//printErrorsrc(source, linha, coluna); 
+	int endereco = segundavirgula(s);
+	if((strncmp("syntax error, unexpected",s,24) == 0) && endereco > 0){
+		if(debug)puts(s);
+		char tmp[1000];
+		endereco += 12 ; //+11 de ' expecting '
+		strncpy(tmp,&s[endereco], 1000 );
+		char *padrao = substituirStringPadrao(tmp," or ", ";");
+		char *token = strtok(padrao, ";");
+		int cont=0;
+		message = "Erro de sintaxe: esperava um ";
+		char *stmp = message;
+		while(token != NULL){
+			if(cont == 0)
+				asprintf(&message, "%s %s", stmp, retornaPadraoToken(token));
+			else
+				asprintf(&message, "%s ou %s ", stmp, retornaPadraoToken(token));
+			token = strtok(NULL, ";");
+			cont++;
+			stmp = message;
+		
+		}
+	}else
+		message = s;
+
 	printErrorsrc(source, utoken_linha, utoken_coluna);
-	
-	//printf("->>> %s - linha %d coluna %d\n", s, linha,coluna);
-	printf("->>> %s - linha %d coluna %d\n", s, utoken_linha, utoken_coluna);
+	printf("->>> %s - linha %d coluna %d\n", message, utoken_linha, utoken_coluna);
 }
 
 void meudebug( char *texto){
@@ -211,11 +250,11 @@ void meudebug( char *texto){
 void help(char *programa){
 	puts("Ajuda");
 	printf("%s -e FONTE -c -a -t \n", programa);
-	puts("-e Defini o arquivo fonte");
-	puts("-c Imprimi o arquivo fonte");
-	puts("-a Imprimi a arvore AST");
-	puts("-t Imprimi a tabela de simbolos");
-	puts("-h Esta mensagem de ajuda! e para o programa");
+	puts("-e  Defini o arquivo fonte");
+	puts("-c  Imprimi o arquivo fonte");
+	puts("-a  Imprimi a arvore AST");
+	puts("-t  Imprimi a tabela de simbolos");
+	puts("-h  Esta mensagem de ajuda e para o programa!");
 	exit(0);
 }
 void imprimirFonte(char *fonte, int nlinhas){
@@ -269,9 +308,17 @@ int main(int argc, char *arqv[]){
 		}
 
 	}
+	YYSTYPE lval; 
+	YYLTYPE lloc;
+	//while (  yylex(&lval , &lloc) != 0);
+	//fseek(yyin, 0, SEEK_SET);
 	if(ifile< 0) help(arqv[0]);
 	if(ifonte>0) imprimirFonte(arqv[ifile], nlinhas);
 	yyparse();
+	if(raiz  != NULL)
+      gerarTabelaSimbolosDaAST(raiz);
+	if(imprimir_ast)
+      printNodo(raiz);
 	if( imprimir_simbolos && tabelaSimbolos )
 	{
 		imprimirTabelaSimbolos();

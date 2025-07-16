@@ -21,7 +21,7 @@ Nodo *criarNodo(char *nome, Tipo tipo, int linha, int coluna)
 	n->coluna = coluna;
 	n->nfilhos = 0;
 	n->filhos = NULL;
-	n->tipo_id = TIPO_REGRA;
+	n->tipo_id = TIPO_NADA;
 	n->tipo_vetor =  TIPO_NADA;
 	return n;
 }
@@ -417,3 +417,167 @@ Nodo *criarExpOperador( char *operador, Nodo *expr1, Nodo *expr2, int linha, int
 
 
 
+char* retornaPadraoToken(char *token) {
+    if (token == NULL) {
+        return NULL;
+    }
+
+    // Usamos uma série de if-else if para mapear os nomes dos tokens aos seus padrões.
+    // Lembre-se de que a string retornada é alocada dinamicamente.
+    if (strcmp(token, "t_igual_a") == 0) {
+        return strdup("==");
+    } else if (strcmp(token, "t_diferente_de") == 0) {
+        return strdup("!=");
+    } else if (strcmp(token, "t_menor_ou_igual") == 0) {
+        return strdup("<=");
+    } else if (strcmp(token, "t_maior_ou_igual") == 0) {
+        return strdup(">=");
+    } else if (strcmp(token, "t_and_logico") == 0) {
+        return strdup("&&");
+    } else if (strcmp(token, "t_or_logico") == 0) {
+        return strdup("||");
+    } else if (strcmp(token, "t_not_logico") == 0) {
+        return strdup("!");
+    } else if (strcmp(token, "t_virgula") == 0) {
+        return strdup(",");
+    } else if (strcmp(token, "t_pontovirgula") == 0) {
+        return strdup(";");
+    } else if (strcmp(token, "t_igual") == 0) {
+        return strdup("=");
+    } else if (strcmp(token, "t_maior") == 0) {
+        return strdup(">");
+    } else if (strcmp(token, "t_menor") == 0) {
+        return strdup("<");
+    } else if (strcmp(token, "t_mais") == 0) {
+        return strdup("+");
+    } else if (strcmp(token, "t_menos") == 0) {
+        return strdup("-");
+    } else if (strcmp(token, "t_asteristico") == 0) {
+        return strdup("*");
+    } else if (strcmp(token, "t_barra") == 0) {
+        return strdup("/");
+    } else if (strcmp(token, "t_abrivetor") == 0) {
+        return strdup("[");
+    } else if (strcmp(token, "t_fechavetor") == 0) {
+        return strdup("]");
+    } else if (strcmp(token, "t_abriparentes") == 0) {
+        return strdup("(");
+    } else if (strcmp(token, "t_fechaparentes") == 0) {
+        return strdup(")");
+    } else if (strcmp(token, "t_abrichave") == 0) {
+        return strdup("{");
+    } else if (strcmp(token, "t_fechachave") == 0) {
+        return strdup("}");
+    } else if (strcmp(token, "t_interrogacao") == 0) {
+        return strdup("?");
+    } else if (strcmp(token, "t_doispontos") == 0) {
+        return strdup(":");
+    } else if (strcmp(token, "t_ponto") == 0) {
+        return strdup(".");
+    } else if (strcmp(token, "t_identificadorclasse") == 0) {
+        return strdup("variavel de classe");
+    } else if (strcmp(token, "t_int") == 0) {
+        return strdup("int");
+    } else if (strcmp(token, "t_float") == 0) {
+        return strdup("float");
+    } else if (strcmp(token, "t_char") == 0) {
+        return strdup("char");
+    } else if (strcmp(token, "t_if") == 0) {
+        return strdup("if");
+    } else if (strcmp(token, "t_else") == 0) {
+        return strdup("else");
+    } else if (strcmp(token, "t_return") == 0) {
+        return strdup("return");
+    } else if (strcmp(token, "t_class") == 0) {
+        return strdup("class");
+    } else if (strcmp(token, "t_this") == 0) {
+        return strdup("this");
+    } else if (strcmp(token, "t_construtor") == 0) {
+        return strdup("construtor");
+    } else if (strcmp(token, "t_destrutor") == 0) {
+        return strdup("destrutor");
+    } else if (strcmp(token, "t_for") == 0) {
+        return strdup("for");
+    } else if (strcmp(token, "t_while") == 0) {
+        return strdup("while");
+    } else if (strcmp(token, "t_switch") == 0) {
+        return strdup("switch");
+    } else if (strcmp(token, "t_case") == 0) {
+        return strdup("case");
+	} else if (strcmp(token, "t_identificador") == 0) {
+        return strdup("variavel");
+    } else if (strcmp(token, "t_default") == 0) {
+        return strdup("default");
+    } else if (strcmp(token, "t_break") == 0) {
+        return strdup("break");
+    }
+    return NULL;
+}
+
+
+
+
+char* substituirStringPadrao(const char* stringOriginal, const char* stringPadrao, const char* stringSubstituicao) {
+    if (!stringOriginal || !stringPadrao || !stringSubstituicao) {
+        return NULL; 
+	}
+    
+    size_t lenOriginal = strlen(stringOriginal);
+    size_t lenPadrao = strlen(stringPadrao);
+    size_t lenSubstituicao = strlen(stringSubstituicao);
+
+    
+    if (lenPadrao == 0) {
+        return strdup(stringOriginal);
+    }
+
+    char* resultado = NULL;
+    char* temp = NULL; 
+    const char* p = stringOriginal; 
+    size_t deslocamento = 0; 
+
+    size_t capacidadeResultado = lenOriginal + 1; 
+    resultado = (char*)malloc(capacidadeResultado);
+    if (!resultado) return NULL;
+    resultado[0] = '\0'; 
+
+    while ((temp = strstr(p, stringPadrao)) != NULL) {
+        size_t parteAntesLen = temp - p;
+
+        size_t novoTamanhoNecessario = deslocamento + parteAntesLen + lenSubstituicao + 1;
+        if (novoTamanhoNecessario > capacidadeResultado) {
+            capacidadeResultado = novoTamanhoNecessario * 2; 
+            char* novoResultado = (char*)realloc(resultado, capacidadeResultado);
+            if (!novoResultado) {
+                free(resultado);
+                return NULL;
+            }
+            resultado = novoResultado;
+        }
+
+        strncat(resultado + deslocamento, p, parteAntesLen); 
+        deslocamento += parteAntesLen;
+        resultado[deslocamento] = '\0'; 
+
+        strcat(resultado + deslocamento, stringSubstituicao);
+        deslocamento += lenSubstituicao;
+
+        p = temp + lenPadrao;
+    }
+
+    size_t parteFinalLen = strlen(p);
+    if (parteFinalLen > 0) {
+        size_t novoTamanhoNecessario = deslocamento + parteFinalLen + 1;
+        if (novoTamanhoNecessario > capacidadeResultado) {
+            char* novoResultado = (char*)realloc(resultado, novoTamanhoNecessario); 
+            if (!novoResultado) {
+                free(resultado);
+                return NULL;
+            }
+            resultado = novoResultado;
+        }
+        strcat(resultado + deslocamento, p);
+    }
+
+    return resultado;
+}

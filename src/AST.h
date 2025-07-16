@@ -98,4 +98,6 @@ char *stringNivel(int nivel, int niveis[NIVEIS][1]);
 Nodo *criarNodoFuncao(char *nome, Nodo *tipofuncao, Nodo* parametrosfunc, Nodo* corpofuncao, int linha, int coluna);
 Nodo *addRecursivoNodo(char *nome, Tipo tipo, int linha, int coluna, Nodo *nodo1, Nodo *nodo2);
 Nodo *criarExpOperador( char *operador, Nodo *expr1, Nodo *expr2, int linha, int coluna );
+char* retornaPadraoToken(char *token);
+char* substituirStringPadrao(const char* stringOriginal, const char* stringPadrao, const char* stringSubstituicao);
 #endif

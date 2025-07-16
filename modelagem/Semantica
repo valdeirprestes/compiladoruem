@@ -1,0 +1,12 @@
+________________________________________ Tabela de Símbolos ________________________________________
+Nome            Escopo          Tipo             Parm    Vetor          Classe         tipo_id
+----------------------------------------------------------------------------------------------------
+Calculo         global          TIPO_CLASSE      Não     Não            Não             N/D
+x               Calculo         TIPO_INT         Não     Não            Não             N/D
+y               Calculo         TIPO_VETOR       Não      Sim            Não             N/D
+conta           Calculo         TIPO_INT         Não     Não            Não             N/D
+c               global          TIPO_IDENTIFICAD Não     Não            Não             N/D
+a               global          TIPO_IDENTIFICAD Não     Não            Não             N/D
+main            global          TIPO_INT         Não     Não            Não        TIPO_INT
+b               main            TIPO_IDENTIFICAD Não     Não            Não             N/D
+----------------------------------------------------------------------------------------------------
